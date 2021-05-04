@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-source-list
+  namespace: clusterscanner
+data:
+  cluster0: https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/output-short.json
+  # further clusters are allowed
+  # protected: https://api.github.com/repos/SDA-SE/XXX/contents/output.json

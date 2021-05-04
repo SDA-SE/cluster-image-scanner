@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: orchestration-
+spec:
+  ttlStrategy:
+    secondsAfterSuccess: 3600
+    secondsAfterFailure: 86400
+  artifactRepositoryRef:
+    configMap: artifact-repositories
+    key: default-v1
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: scanId
+        value: "20210428_114811" # fetch from wait log after first run of argo-main.yml in notifier
+  templates:
+    - name: main
+      steps:
+      - - name: notify-teams
+          template: notify-teams
+
+    - name: notify-teams
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      container:
+        image: registry.hub.docker.com/wurstbrot/clusterscanner-notifier:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "{{ workflow.parameters.scanId }}"
+        imagePullPolicy: Always
+        env:
+          - name: SLACK_CLI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: slacktoken
+                key: SLACK_CLI_TOKEN
+          - name: smtp
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp
+          - name: smtp-auth
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth
+          - name: smtp-auth-user
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth-user
+          - name:  smtp-auth-password
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth-password
+          - name: ENFORCE_SLACK_CHANNEL
+            value: "#security-notifications-test"

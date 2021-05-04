@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: defectdojo-test
+  namespace: clusterscanner
+data:
+  DD_BRANCHES_TO_KEEP: '*'
+  DD_REPORT_PATH: "/tmp/dependency-check-results/dependency-check-report.xml"
+  DD_LEAD: "4"
+  DD_USER: "clusterscanner"
+  DD_URL: "https://defectdojo-test.tools.sda-se.io/"
+  DD_IMPORT_TYPE: 'import'
+  DD_IS_MARKED_AS_ACTIVE: 'true'
+  DD_IS_MARKED_AS_INACTIVE: 'false'
+  DD_DEDUPLICATION_ON_ENGAGEMENT: 'true'
+  DD_SOURCE_CODE_MANAGEMENT_URI: 'https://github.com/sda-se'
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: defectdojo-test
+  namespace: clusterscanner
+spec:
+  encryptedData:
+    DD_TOKEN: AgBgtkSkNFzSUTL02pB8W4CrDzufYYrsj6RpUZ0XECEv6wK0ReGXmMpxJyN3KJ6YOeRG72emnAbGQypHaoVXS1RXVUyqqTHGjBKAd/a9Owr0ybZMzAJ2EJ3YBJ3KdMSzSMd7FYJy9U//sN022/IRLtbnJ84OVFyHvjDXykva3+LCbFEGKDNajL9lHt/e7bxUL+d2zVQaqCT+evXq6BXxLi9O/MWh2/yAmKPsDVR5FQ69APD3Wn+K7gc8T9kMQ0NvzEpBPAL8fsSzOxedUcBCeojDxAXBYjZ0rzfvVcWE0xMp91hdMK7pdjqD6hB4AuBjprBwaE0oBAg7pTU5GP8HarNkyKlA72XibNgFJDWIAj3kOp6seiyW956P6RS6z07a8zef9kKoObnJxIh4fHjjmYN00URYNgEIWUHmdPxneGQzbmY1ZBm5Y/Ev4J+3XVWzhhz9kFZ+Gd6ZfN8MHYptauAtj8gTkll4WPeqKTDwfVwONXIeyi6EwTUTcf0lAGo+SOHK1XME+BIZ8LcAqAxtQ6PQeNbuuaOJ2avrbpAYTRzkaDlX0cqU9bQ2pPvqyNF9aD1C7jznYS20K7lF9mfmAi9xZNFW1myZcsA60DuTamHWvW1UhzrgWJN4A87ef7ldTzL1hMV3iVD0cNENqsc/Vfn/NMx5daNwUgmijGfhCgzDJc5F4xSe2mZNoewm0BsUcJPcj1iS96A//mAnyFk4h8DF7mnKmP3jMvuMNRQfu7oMyNBYtTovNfK/
+  template:
+    metadata:
+      creationTimestamp: null
+      name: defectdojo-test
+      namespace: clusterscanner

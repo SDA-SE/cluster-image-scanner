@@ -1,0 +1,235 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: orchestration-
+spec:
+  onExit: notify-teams
+  ttlStrategy:
+    secondsAfterSuccess: 3600
+    secondsAfterFailure: 86400
+  artifactRepositoryRef:
+    configMap: artifact-repositories
+    key: default-v1
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: scanId
+        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}_{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+  templates:
+    - name: main
+      steps:
+        - - name: fetch-image-list
+            template: fetch-image-list
+        - - name: printimagelist
+            template: printimagelist
+            arguments:
+              artifacts:
+                - name: mergedjson
+                  from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
+        - - name: run-subflow
+            template: subflow
+            arguments:
+              parameters:
+                - name: REGISTRY_SECRET
+                  value: "registry-sda-default"
+                - name: DEPENDENCY_SCAN_CM
+                  value: dependency-check-db
+                - name: DEFECTDOJO_CM
+                  value: defectdojo-test
+                - name: DEFECTDOJO_SECRETS
+                  value: defectdojo-test
+                - name: image
+                  value: "{{ item.image }}"
+                - name: image_id
+                  value: "{{ item.image_id }}"
+                - name: slack
+                  value: "{{ item.slack }}"
+                - name: email
+                  value: "{{ item.email }}"
+                - name: skip
+                  value: "{{ item.skip }}"
+                - name: team
+                  value: "{{ item.team }}"
+                - name: namespace
+                  value: "{{ item.namespace }}"
+                - name: container_running_as
+                  value: "{{ item.container_running_as }}"
+                - name: environment
+                  value: "{{ item.environment }}"
+                - name: scm_source_branch
+                  value: "{{ item.scm_source_branch }}"
+            withParam: '{{steps.printimagelist.outputs.result}}'
+            when: "{{ item.skip }} != true"
+        #      parallelism: 10
+
+    - name: printimagelist
+      inputs:
+        artifacts:
+          - name: mergedjson
+            path: /tmp/merged.json
+            mode: 0444
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        imagePullPolicy: Always
+        command: [/bin/bash]
+        workingDir: /clusterscanner
+        source: |
+          cat /tmp/merged.json | jq -M .
+
+    - name: fetch-image-list
+      outputs:
+        artifacts:
+          - name: image-lists
+            path: /clusterscanner/out
+            archive:
+              none: {}
+          - name: image-list-merged
+            path: /clusterscanner/out/merged/merged.json
+            archive:
+              none: {}
+      volumes:
+        - name: image-source-list
+          configMap:
+            name: image-source-list
+        - name: github
+          secret:
+            secretName: github
+        - name: tmp
+          emptyDir: {}
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: github
+            mountPath: /clusterscanner/github/github_private_key.pem
+            subPath: github_private_key.pem
+          - name: image-source-list
+            mountPath: /clusterscanner/image-source-list
+          - name: tmp
+            mountPath: /clusterscanner/out
+        env:
+          - name: GITHUB_KEY_FILE_PATH
+            value: /clusterscanner/github/github_private_key.pem
+        envFrom:
+          - secretRef:
+              name: "github"
+        command: [/bin/bash]
+        workingDir: /clusterscanner
+        source: |
+          set -e
+          source auth.bash # > /dev/null 2>&1
+          sp_authorize #> /dev/null 2>&1
+          i=1
+          for repo in $(cat /clusterscanner/image-source-list/*); do
+            echo "$i: $repo"
+            sp_getfile $repo /clusterscanner/out/$i.json #> /dev/null 2>&1#
+            if [ $(grep 'image' /clusterscanner/out/$i.json | wc -l) -eq 0 ]; then
+              echo "Could not get repo $repo or the repos doesn't include images"
+              exit 1
+            fi
+            ((i=i+1))
+          done
+          mkdir -p /clusterscanner/out/merged
+          jq -s 'flatten' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
+          sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
+          echo "done"
+          exit 0
+
+    - name: subflow
+      inputs:
+        parameters:
+          - name: REGISTRY_SECRET
+          - name: DEPENDENCY_SCAN_CM
+          - name: DEFECTDOJO_CM
+          - name: DEFECTDOJO_SECRETS
+          - name: image
+          - name: image_id
+          - name: skip
+          - name: environment
+          - name: namespace
+          - name: scm_source_branch
+          - name: team
+          - name: slack
+          - name: email
+          - name: container_running_as
+      resource:
+        action: create
+        manifest: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Workflow
+          metadata:
+            generateName: scanjob-{{ inputs.parameters.environment }}-{{ inputs.parameters.namespace }}-{{ inputs.parameters.team }}-
+          spec:
+            arguments:
+              parameters:
+                - name: REGISTRY_SECRET
+                  value: {{ inputs.parameters.REGISTRY_SECRET }}
+                - name: DEPENDENCY_SCAN_CM
+                  value: {{ inputs.parameters.DEPENDENCY_SCAN_CM }}
+                - name: DEFECTDOJO_CM
+                  value: {{ inputs.parameters.DEFECTDOJO_CM }}
+                - name: DEFECTDOJO_SECRETS
+                  value: {{ inputs.parameters.DEFECTDOJO_SECRETS }}
+                - name: SCAN_ID
+                  value: "{{ workflow.parameters.scanId }}"
+                - name: team
+                  value: {{ inputs.parameters.team }}
+                - name: environment
+                  value: {{ inputs.parameters.environment }}
+                - name: namespace
+                  value: {{ inputs.parameters.namespace }}
+                - name: scm_source_branch
+                  value: {{ inputs.parameters.scm_source_branch }}
+                - name: image
+                  value: {{ inputs.parameters.image }}
+                - name: image_id
+                  value: {{ inputs.parameters.image_id }}
+                - name: email
+                  value: "{{ inputs.parameters.email }}"
+                - name: slack
+                  value: "{{ inputs.parameters.slack }}"
+            workflowTemplateRef:
+              name: scan-image-job
+        successCondition: status.phase == Succeeded
+        failureCondition: status.phase in (Failed, Error)
+
+    - name: notify-teams
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      container:
+        image: quay.io/sdase/clusterscanner-notifier:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "{{ workflow.parameters.scanId }}"
+        imagePullPolicy: Always
+        env:
+          - name: SLACK_CLI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: slacktoken
+                key: SLACK_CLI_TOKEN
+          - name: smtp
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp
+          - name: smtp-auth
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth
+          - name: smtp-auth-user
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth-user
+          - name:  smtp-auth-password
+            valueFrom:
+              secretKeyRef:
+                name: email
+                key: smtp-auth-password
+          - name: ENFORCE_SLACK_CHANNEL
+            value: "#security-notifications-test"

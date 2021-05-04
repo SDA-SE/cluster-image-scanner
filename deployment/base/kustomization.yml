@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  app.kubernetes.io/name: clusterscanner
+
+generatorOptions:
+  labels:
+    app.kubernetes.io/name: clusterscanner
+
+resources:
+  - defectdojo.yml
+  - depcheck.yml
+  - pvc.yml
+  - rbac.yml
+  - scanjob.yml
+  - slack.yml
+  - repolist.yml
+  - email.yml

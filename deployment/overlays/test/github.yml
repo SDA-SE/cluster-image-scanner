@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github
+  namespace: clusterscanner
+data:
+  GITHUB_APP_ID: ''
+  GITHUB_APP_LOGIN: ''
+  GITHUB_INSTALLATION_ID: ''
+  github_private_key.pem: ''
