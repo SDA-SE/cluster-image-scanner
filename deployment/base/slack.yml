@@ -4,5 +4,5 @@ kind: Secret
 metadata:
   name: slacktoken
   namespace: clusterscanner
-data:
+stringData:
   SLACK_CLI_TOKEN: SLACK_CLI_TOKEN_SECRET
