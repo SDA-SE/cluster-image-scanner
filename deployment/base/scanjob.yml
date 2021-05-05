@@ -333,12 +333,12 @@ spec:
         cat /tmp/results/**/*.csv >> /tmp/findings.csv
         DATE=$(date +%m/%d/%Y)
         echo "Will change IMAGE"
-        sed -i "s/###IMAGE###/{{ workflow.parameters.image }}/" /tmp/findings.csv
+        sed -i "s/###IMAGE###/{{ workflow.parameters.image }}/g" /tmp/findings.csv
         echo "Will change CLUSTER"
-        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/" /tmp/findings.csv
+        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
         echo "Will change NAMESPACE"
-        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/" /tmp/findings.csv
-        sed -i "s-###DATE###-$DATE-" /tmp/findings.csv
+        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+        sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
 
   - name: results-generic-dd-upload
     inputs:
@@ -433,8 +433,8 @@ spec:
         JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
 
         JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
-        echo $JSON_DD_DEPENDENCY_CHECK
-        if [ $(cat /tmp/isFinding-dependency-check) == "true" ]; then
+        isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
+        if [ "$isFinding" == "true" ]; then
           DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
           JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
           if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
@@ -442,11 +442,14 @@ spec:
             echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
             JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
           else
+            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
             echo "Warning: /tmp/findings-dependency-check.json is empty"
           fi
         elif [ "xX{{ inputs.parameters.dd-dependency-check-exitcode }}" != "xX0" ]; then
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\"}")
+          echo "Exit code != 0"
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
         else
+          echo "else"
           JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\"}, \"findings\": []")
         fi
         JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
@@ -454,13 +457,15 @@ spec:
 
         echo "Starting Generic"
         JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
-        if [ $(cat /tmp/isFinding-generic) == "true" ]; then
+        isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
+        if [ "$isFinding" == "true" ]; then
           DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
           JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
           if [ $(cat /tmp/findings-generic.json  | wc -c) -gt 5 ]; then
             echo $JSON_DD_GENERIC> /tmp/generic.json
             JSON_DD_GENERIC=$(jq '.findings += input'  /tmp/generic.json /tmp/findings-generic.json)
           else
+            JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
             echo "Warning: /tmp/finding-generic  is empty"
           fi
         elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
@@ -479,5 +484,7 @@ spec:
         else
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
         fi
+
+        echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
         echo "${JSON_RESULT}"
         echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
