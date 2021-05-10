@@ -12,6 +12,6 @@ metadata:
     sda.se/federation-scopes: public
 spec:
   type: service
-  owner: team-security
+  owner: security-journey
   system: cluster-scanner
   lifecycle: production
