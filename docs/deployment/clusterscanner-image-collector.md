@@ -20,19 +20,4 @@ cluster,namespace,image,imageID,
 gitops-devops-tools,argocd,argoproj/argocd:v1.10.0,docker-pullable://argoproj/argocd@sha256:2l1ca3u12msd1231ad0ec2e22910a47f5c56417a40d0
 [...]
 ```
-In addition, a JSON in the following format is generated:
-```json
-{
-"environment": "development-cluster-A",
-    "namespaces": [
-        {
-            "namespace": "argocd",
-            "images": [
-                { "image": "argoproj/argocd:v1.0.0", "imageID": "docker-pullable://argoproj/argocd@sha256:aaaaaaaaa56a7ec41f59ba305b1f8158ada2c7eaee7a87d29fad8d88da650fec" },
-                { "image": "redis:1.0.0", "imageID": "docker-pullable://redis@sha256:aaaaaaaaaaaa4b15e3cf4de74077f650c911cb26ec0981e0772df35a1a5cb19798" },
-            ]
-        },
-        {
-            "namespace": "argocd",
-[...]
-```
+In addition, a JSON is generated.

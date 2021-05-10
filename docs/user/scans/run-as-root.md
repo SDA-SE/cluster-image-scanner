@@ -1,3 +1,5 @@
+# Scan Run As Root
+
 The Root Account scan checks if the user root is found during a scan of the container images. The root user is the administrator account that can be used to exploit any rights. 
 
 # Relevance
