@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f6327aae-bad1-4d9c-bd29-23b99d168e66" name="Default Changelist" comment="" />
+    <list default="true" id="f6327aae-bad1-4d9c-bd29-23b99d168e66" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../deployment/base/scanjob.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../deployment/base/scanjob.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,6 +36,7 @@
       <option name="presentableId" value="Default" />
       <updated>1619588904190</updated>
       <workItem from="1619588906892" duration="6000" />
+      <workItem from="1620199223426" duration="4000" />
     </task>
     <servers />
   </component>
