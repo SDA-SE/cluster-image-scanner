@@ -42,5 +42,5 @@ roleRef:
   name: argo-workflow
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: clusterscanner
   namespace: clusterscanner
