@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ../test
   - ./defectdojo-secret.yml
+  - rbac.yml
 
 generatorOptions:
   labels:
@@ -15,7 +16,7 @@ patches:
 - patch: |-
     - op: replace
       path: /data/DD_URL
-      value: "https://defectdojo-test.tools.sda-se.io/"
+      value: "http://192.168.178.26:8081/"
   target:
     kind: ConfigMap
     name: defectdojo
@@ -24,7 +25,7 @@ patches:
 - patch: |-
     - op: replace
       path: /data/DD_URL
-      value: "https://defectdojo-test.tools.sda-se.io/"
+      value: "http://192.168.178.26:8081/"
   target:
     kind: ConfigMap
     name: defectdojo-test
