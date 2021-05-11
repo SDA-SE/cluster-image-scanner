@@ -1,13 +1,7 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: clusterscanner
-  namespace: clusterscanner
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: argo-default-workflow
+  name: argo-clusterscanner-workflow
   namespace: clusterscanner
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -21,7 +15,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: argo-default-workflow
+  name: argo-default2-workflow
   namespace: clusterscanner
 roleRef:
   apiGroup: rbac.authorization.k8s.io
