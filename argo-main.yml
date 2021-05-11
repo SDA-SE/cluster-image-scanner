@@ -117,6 +117,7 @@ spec:
         command: [/bin/bash]
         workingDir: /clusterscanner
         source: |
+          env
           set -e
           source auth.bash # > /dev/null 2>&1
           sp_authorize #> /dev/null 2>&1
