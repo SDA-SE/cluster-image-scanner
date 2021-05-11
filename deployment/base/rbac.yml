@@ -44,3 +44,9 @@ subjects:
 - kind: ServiceAccount
   name: clusterscanner
   namespace: clusterscanner
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clusterscanner
+  namespace: clusterscanner
