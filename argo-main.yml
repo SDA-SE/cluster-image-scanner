@@ -94,7 +94,7 @@ spec:
             name: image-source-list
         - name: github
           secret:
-            secretName: github-sda
+            secretName: github
         - name: tmp
           emptyDir: {}
       script:
@@ -113,7 +113,7 @@ spec:
             value: /clusterscanner/github/github_private_key.pem
         envFrom:
           - secretRef:
-              name: "github-sda"
+              name: "github"
         command: [/bin/bash]
         workingDir: /clusterscanner
         source: |
