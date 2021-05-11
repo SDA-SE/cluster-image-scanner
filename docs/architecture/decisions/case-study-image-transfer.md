@@ -5,7 +5,7 @@ In order to scan many images with many scanners we need a way to download the im
 This case study has the following goals:
 - Transfer many images from Job-Orchestrator to specific scanners
 - A scanner should only 'see' the image his job is about
-- A scanner can not change the image because other scanners may work with the image either.
+- A scanner can not change the image because other scanners may work with the image later on.
 - One scanner gets a folder to provide scanning results for following processes, scanning results may be up to 100MB
 - The result-folder can only be accessed by one single scanner and the Job-Orchestrator
 
@@ -120,7 +120,7 @@ The following tests were applied to the containers
 
 ### Success :white_check_mark: 
 
-All tests run as expected and therefore we can use this approach to transfer data between images and while follow the principle of least privileges.
+All tests run as expected and therefore we can use this approach to transfer data between images while following the principle of least privileges.
 
 #### Other possible approaches:
 

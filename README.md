@@ -10,7 +10,6 @@ It is recommended to run the Cluster Scanner in production environments.
 
 As a developer, the Cluster Scanner works out of the box.
 As a system operator, I just have to add the Cluster Scanner in my deployment configuration, for example Argo CD. The benefit is to get feedback on what is in production and not what should be in production. For example, due to waiting for approval or due to a failing build.
-
 # Overview
 In order to achieve an understanding of the cluster scanning process, this page uses a chart and detailed documentation to describe which factors are involved and in which way.
 1. The Image Collector, as the name suggests, collects the different images.
