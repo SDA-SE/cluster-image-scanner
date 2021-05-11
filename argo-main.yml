@@ -4,6 +4,7 @@ metadata:
   generateName: orchestration-
 spec:
   onExit: notify-teams
+  serviceAccountName: clusterscanner
   ttlStrategy:
     secondsAfterSuccess: 3600
     secondsAfterFailure: 86400
