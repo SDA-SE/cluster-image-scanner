@@ -70,6 +70,7 @@ kubectl apply -f  /tmp/config.yaml -n clusterscanner
 
 if [ "$IS_MINIKUBE" == "true" ]; then
   kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "clusterscanner-pull-registry"}]}' || true
+  kubectl patch serviceaccount clusterscanner -p '{"imagePullSecrets": [{"name": "clusterscanner-pull-registry"}]}' -n clusterscanner
 fi
 # to fetch argoworfklow images
 wget -O /tmp/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
