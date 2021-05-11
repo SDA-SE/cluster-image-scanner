@@ -67,9 +67,12 @@ type: kubernetes.io/secret
 EOL
 sed -i "s#AUTH#$AUTH#g" /tmp/config.yaml
 kubectl apply -f  /tmp/config.yaml -n clusterscanner
+kubectl apply -f  serviceaccount.yml -n clusterscanner
 
 if [ "$IS_MINIKUBE" == "true" ]; then
   kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "clusterscanner-pull-registry"}]}' || true
+  kubectl patch serviceaccount clusterscanner -p '{"imagePullSecrets": [{"name": "clusterscanner-pull-registry"}]}' -n clusterscanner
+
 fi
 # to fetch argoworfklow images
 wget -O /tmp/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -83,6 +86,7 @@ if [ "$IS_MINIKUBE" == "true" ]; then
     kubectl patch serviceaccount $i -p '{"imagePullSecrets": [{"name": "clusterscanner-pull-registry"}]}' -n argocd
   done
 fi
+
 while [ $(kubectl get pods -n argocd  | grep "1/1" | wc -l) -ne 5 ]; do
   echo "waiting for 5 ready pods in argocd"
   kubectl get pods -n argocd
