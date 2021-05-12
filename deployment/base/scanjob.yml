@@ -341,7 +341,7 @@ spec:
         sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
         sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
         sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
-        sed -i "s-###DATE###-$DATE-g" /tmp/result.csv
+        sed -i "s-###DATE###-$DATE-g" /tmp/result.json
 
   - name: results-generic-dd-upload
     inputs:
