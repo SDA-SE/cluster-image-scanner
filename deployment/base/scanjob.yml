@@ -328,17 +328,20 @@ spec:
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
         done
         echo "${JSON_RESULT}" > /tmp/result.json
-        touch /tmp/findings.csv
         echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
         cat /tmp/results/**/*.csv >> /tmp/findings.csv
         DATE=$(date +%m/%d/%Y)
-        echo "Will change IMAGE"
-        sed -i "s/###IMAGE###/{{ workflow.parameters.image }}/g" /tmp/findings.csv
+        echo "Will change IMAGE {{ workflow.parameters.image }}"
+        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
+        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
         echo "Will change CLUSTER"
         sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
+        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
         echo "Will change NAMESPACE"
         sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
         sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
+        sed -i "s-###DATE###-$DATE-g" /tmp/result.csv
 
   - name: results-generic-dd-upload
     inputs:
