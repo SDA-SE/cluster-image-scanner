@@ -99,7 +99,7 @@ Cons:
 
 ![MultiPV](images/multi_pv.png)
 
-### Final Dissicion
+### Final Decision
 One PV.
 
 ## Image-Delivery Considerations
