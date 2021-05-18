@@ -13,7 +13,7 @@ To reach that goal, an option is a persistent volume with the access-mode: ReadW
 
 Market research leads us to the usage of an external NFS as PV. NFS implementations are ReadWriteMany by design and can also be bought as managed-service in cloud environments.
 
-<img src="images/file_transfer.png" alt="File Transfer" width="600px"/>
+![File Transfer](images/file_transfer.png)
 
 To build a small prototype we developed the plain-yamls to add the NFS as PV to our Kubernetes cluster.
 
