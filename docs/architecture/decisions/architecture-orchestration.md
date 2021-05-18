@@ -66,6 +66,7 @@ In the end, we decided to go for Approach A: Central Job-Orchestrator for the fo
 - it can be archived with less effort and therefor faster
 - it also drives us towards the Kafka-Approach and if needed we can develop later into Approach B
 
+As an engine, [ArgoWorkflow](https://argoproj.github.io/projects/argo/) is used.
 
 ## File-Transfer Considerations
 
