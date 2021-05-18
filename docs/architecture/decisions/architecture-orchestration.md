@@ -32,7 +32,7 @@ Cons:
 - Orchestrator needs a ServiceAccount with verbs: create, delete, get for resource: jobs in own namespace
 - Implementing Kubernetes as a Queue
 
-<img src="images/orchestrate_containers.png" alt="Orchestrate Containers" width="600px"/>
+![image](images/orchestrate_containers.png)
 
 ### Approach B: Kafka Job Queue
 This Approach is about building a Job-Generator that will be started by a CronJob that would evaluate what work have to be done on what image, by a general 
@@ -57,7 +57,7 @@ Cons:
 - Provide and maintain an appropriate Kafka-Deployment
 - Customize and maintain external scanner images to stay alive and work off the Kafka-queue
 
-<img src="images/initial_startup.png" alt="Initial Startup" width="600px"/>
+![Inital Startup](images/initial_startup.png)
 
 ### Final Dissicion
 
@@ -85,7 +85,7 @@ Pros:
 Cons:
 - When the volume gets full, every job will fail
 
-<img src="images/one_pv.png" alt="One single PV" width="600px"/>
+![OnePV](images/one_pv.png)
 
 ### Approach B: Multiple PVs
 This Approach is about transferring images to scanners with one PV that can be written by the Job-Orchestrator and red by all scanners. And separate PVs for all scanner-types to deliver scanning results back to the Job-Orchestrator.
@@ -97,12 +97,10 @@ Cons:
 - When one volume gets full, every job of that kind will fail
 - One PV for each scanner leads to increasing PVs overtime when the number of scanners increase
 
-<img src="images/multi_pv.png" alt="Multiple PVs" width="600px"/>
+![MultiPV](images/multi_pv.png)
 
 ### Final Dissicion
-
-TBD
-
+One PV.
 
 ## Image-Delivery Considerations
 
