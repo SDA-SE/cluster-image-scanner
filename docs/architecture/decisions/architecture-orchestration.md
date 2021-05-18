@@ -144,6 +144,6 @@ Cons:
 - Puts load onto the internet gateway
 - Registry secrets must be shared to scanning containers
 
-### Final Dissicion
+### Final Decision
 
 TBD
