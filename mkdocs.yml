@@ -1,10 +1,13 @@
-site_name: Cluster Scanner
+site_name: ClusterScanner
 
 # These files are relative to the /docs repository
 # Learn more on https://www.mkdocs.org/user-guide/writing-your-docs/
 nav:
   - Home: index.md
   - Configuration for Teams: user/configuration/README.md
+  - Deployment:
+    - Orchestrator: deployment/add-clusterscanner.md
+    - Collector: deployment/clusterscanner-image-collector.md
   - Scans:
       - Overview: user/scans/README.md
       - Distroless: user/scans/distroless.md
@@ -12,10 +15,6 @@ nav:
       - Known Vulnerabilities: user/scans/known-vulnerabilities.md
       - Malware: user/scans/malware.md
       - Root-User: user/scans/run-as-root.md
-
-
-# Why not include your deployment docs?
-#  - Deployment: deployment.md
 
 plugins:
   - techdocs-core
