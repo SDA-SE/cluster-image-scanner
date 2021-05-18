@@ -18,7 +18,3 @@ An overview is depicted in the following figure:
 * These files are kept in a separate directory and from there they are passed to the scanner.
 * This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
 * The vulnerability management tool then collects the results and makes them available to the developers via a communication channel like Slack.
-
-
-The documentation is in a transition phase to techdocs.
-See also https://sda-se.atlassian.net/wiki/spaces/DG/pages/1322057921/Cluster+Scan+Overview
