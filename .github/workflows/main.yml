@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 10
     env:
       ENTITY_KIND: Component
-      ENTITY_NAME: ClusterScanner
+      ENTITY_COMPONENT: ClusterScanner
     strategy:
       matrix:
         site:
@@ -27,10 +27,10 @@ jobs:
       - name: build
         run: techdocs-cli generate --no-docker --verbose
         working-directory: ${{ matrix.site.directory }}
-
       - name: publish
         if: github.ref == 'refs/heads/master'
         run: techdocs-cli publish --publisher-type awsS3 --storage-name "$TECHDOCS_S3_BUCKET_NAME" --entity "$ENTITY"
+
         working-directory: ${{ matrix.site.directory }}
         env:
           TECHDOCS_S3_BUCKET_NAME: ${{ secrets.TECHDOCS_S3_BUCKET_NAME }}
