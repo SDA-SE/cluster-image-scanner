@@ -15,6 +15,12 @@ nav:
       - Known Vulnerabilities: user/scans/known-vulnerabilities.md
       - Malware: user/scans/malware.md
       - Root-User: user/scans/run-as-root.md
+  - Architecture:
+      - Overview: architecture/README.md
+      - ClusterScanner Image Fetcher: architecture/fetcher.md
+      - Descision Orchestration: architecture/descisions/architecture-orchestration.md
+      - Descision Image Transfer: architecture/descisions/case-study-image-transfer.md
+      - Threat Model: architecture/threat-model.md
 
 plugins:
   - techdocs-core
