@@ -18,8 +18,8 @@ nav:
   - Architecture:
       - Overview: architecture/README.md
       - ClusterScanner Image Fetcher: architecture/fetcher.md
-      - Descision Orchestration: architecture/descisions/architecture-orchestration.md
-      - Descision Image Transfer: architecture/descisions/case-study-image-transfer.md
+      - Decision Orchestration: architecture/decisions/architecture-orchestration.md
+      - Decisions Image Transfer: architecture/decisions/case-study-image-transfer.md
       - Threat Model: architecture/threat-model.md
 
 plugins:
