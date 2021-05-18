@@ -1,5 +1,5 @@
 # Cluster Scanner
-![Logo](assets/images/logo.png "Logo")
+![Logo](docs/images/logo.png "Logo")
 
 
 Discover vulnerabilities and container image misconfiguration in production environments.
