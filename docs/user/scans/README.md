@@ -3,7 +3,8 @@ The search for vulnerabilities has a very high priority in IT security. We use a
 Software and infrastructure are potential points of attack. Such attacks can lead to damages, financial losses due to failures or recourse claims from customers, and more. There are various forms of investigations that protect against such threats. Manual searches for these vulnerabilities and points of attack require a great deal of effort and tie up staff in the execution. Automated scanning reduces effort and minimizes errors such as forgotten tests. The different types of scanning used, their significance, and possible reactions to the results are listed below.
 
 # Types of Scans
-There are a number of different types of scans that can produce different findings. Each check is introduced by a short summary of the relevance and different response possibilities. 
+There are a number of different types of scans that can produce different findings. Each check is introduced by a short summary of the relevance and different response possibilities.
+
 - [Distroless](distroless.md)
 - [Image Lifetime](image-lifetime.md)
 - [Known Vulnerabilities](known-vulnerabilities.md)
