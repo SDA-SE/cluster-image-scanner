@@ -19,5 +19,5 @@ clusterscanner.sdase.org/skip: true # to skip all images in the namespace
 clusterscanner.sdase.org/skip: true # specially useful for development clusters with development and production components in one namespace
 
 app.kubernetes.io/name: 'consent-service'
-app.kubernetes.io/version: "feature/foobar"
+scm.sdase.org/source_branch: 'feature/foobar'
 ```
