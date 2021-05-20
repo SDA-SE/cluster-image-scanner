@@ -3,6 +3,7 @@ Target Audiance: Teams using the cluster scanner to get notified.
 
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
 As a team, annotations can be set in the following way to enable/disable scanning:
+
 ```
 # Notification configuration (namespace/object)
 contact.sdase.org/email: 'clusterscannertest@sda.se'
@@ -17,5 +18,6 @@ clusterscanner.sdase.org/skip: true # to skip all images in the namespace
 ## Skip scanning for all images in the pod
 clusterscanner.sdase.org/skip: true # specially useful for development clusters with development and production components in one namespace
 
-scm.sdase.org/branch: "feature/foobar"
+app.kubernetes.io/name: 'consent-service'
+app.kubernetes.io/version: "feature/foobar"
 ```
