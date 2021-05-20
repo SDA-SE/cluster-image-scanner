@@ -51,6 +51,8 @@ spec:
                   value: "{{ item.skip }}"
                 - name: team
                   value: "{{ item.team }}"
+                - name: appname
+                  value: "{{ item.app_kubernetes_io_name }}"
                 - name: namespace
                   value: "{{ item.namespace }}"
                 - name: container_running_as
@@ -150,6 +152,7 @@ spec:
           - name: namespace
           - name: scm_source_branch
           - name: team
+          - name: appname
           - name: slack
           - name: email
           - name: container_running_as
@@ -181,6 +184,8 @@ spec:
                   value: {{ inputs.parameters.namespace }}
                 - name: scm_source_branch
                   value: {{ inputs.parameters.scm_source_branch }}
+                - name: appname
+                  value: {{ inputs.parameters.appname }}
                 - name: image
                   value: {{ inputs.parameters.image }}
                 - name: image_id
