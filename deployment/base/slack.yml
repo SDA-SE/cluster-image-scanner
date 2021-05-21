@@ -5,4 +5,4 @@ metadata:
   name: slacktoken
   namespace: clusterscanner
 stringData:
-  SLACK_CLI_TOKEN: SLACK_CLI_TOKEN_SECRET
+  SLACK_CLI_TOKEN-SET-IN-OVERLAY: SLACK_CLI_TOKEN_SECRET
