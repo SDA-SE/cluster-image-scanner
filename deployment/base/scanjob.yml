@@ -114,6 +114,7 @@ spec:
       - name: registry-creds
         secret:
           secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+          defaultMode: 0440
     container:
       image: quay.io/sdase/clusterscanner-imagefetcher:2
       imagePullPolicy: Always
