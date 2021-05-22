@@ -103,7 +103,7 @@ spec:
         image: quay.io/sdase/clusterscanner-base:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: github
+          - name: github-sda
             mountPath: /clusterscanner/github/github_private_key.pem
             subPath: github_private_key.pem
           - name: image-source-list
