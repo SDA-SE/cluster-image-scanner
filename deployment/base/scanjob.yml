@@ -114,7 +114,6 @@ spec:
       - name: registry-creds
         secret:
           secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-          defaultMode: 0444
     container:
       image: quay.io/sdase/clusterscanner-imagefetcher:2
       imagePullPolicy: Always
@@ -129,8 +128,6 @@ spec:
       env:
         - name: IMAGE_BY_HASH
           value: "{{ workflow.parameters.image_id }}"
-        - name: REGISTRY_AUTH_FILE
-          value: "/run/containers/auth.json"
 
 
 
@@ -191,7 +188,8 @@ spec:
           mountPath: /clusterscanner/data
         - name: registry-creds
           mountPath: /run/containers
-          defaultMode: 0440
+          subPath: auth.json
+          defaultMode: 0444
       env:
       - name: IMAGE_BY_HASH
         value: "{{ workflow.parameters.image_id }}"
@@ -228,7 +226,8 @@ spec:
           mountPath: /clusterscanner/data
         - name: registry-creds
           mountPath: /run/containers
-          defaultMode: 0440
+          subPath: auth.json
+          defaultMode: 0444
       env:
       - name: IMAGE_BY_HASH
         value: "{{ workflow.parameters.image_id }}"
