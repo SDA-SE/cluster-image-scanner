@@ -15,6 +15,5 @@ resources:
   - pvc.yml
   - rbac.yml
   - scanjob.yml
-  - slack.yml
   - repolist.yml
   - email.yml

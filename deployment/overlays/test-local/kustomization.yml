@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../test
-  - ./defectdojo-secret.yml
+  - ./defectdojo.secret.yml
   - rbac.yml
 
 generatorOptions:
