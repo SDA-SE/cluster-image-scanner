@@ -187,7 +187,7 @@ spec:
         - name: scandata
           mountPath: /clusterscanner/data
         - name: registry-creds
-          mountPath: /run/containers
+          mountPath: /run/containers/auth.json
           subPath: auth.json
           defaultMode: 0444
       env:
@@ -225,7 +225,7 @@ spec:
         - name: scandata
           mountPath: /clusterscanner/data
         - name: registry-creds
-          mountPath: /run/containers
+          mountPath: /run/containers/auth.json
           subPath: auth.json
           defaultMode: 0444
       env:
