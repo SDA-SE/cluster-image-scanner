@@ -129,6 +129,8 @@ spec:
       env:
         - name: IMAGE_BY_HASH
           value: "{{ workflow.parameters.image_id }}"
+        - name: REGISTRY_AUTH_FILE
+          value: "/run/containers/auth.json"
 
 
 
