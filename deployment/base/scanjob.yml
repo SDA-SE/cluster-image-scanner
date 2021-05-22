@@ -284,6 +284,9 @@ spec:
     container:
       image: quay.io/sdase/defectdojo-client:3
       imagePullPolicy: Always
+      retryStrategy:
+        limit: 10
+        retryPolicy: "OnFailure"
       command: [/usr/bin/groovy]
       args:
         - "/code/defectdojo.groovy"
@@ -363,6 +366,9 @@ spec:
     container:
       image: quay.io/sdase/defectdojo-client:3
       imagePullPolicy: Always
+      retryStrategy:
+        limit: 10
+        retryPolicy: "OnFailure"
       command: [/usr/bin/groovy]
       args:
         - "/code/defectdojo.groovy"
