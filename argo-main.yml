@@ -63,7 +63,7 @@ spec:
                   value: "{{ item.scm_source_branch }}"
             withParam: '{{steps.printimagelist.outputs.result}}'
             when: "{{ item.skip }} != true"
-        #      parallelism: 10
+#              parallelism: 5
 
     - name: printimagelist
       inputs:
@@ -123,11 +123,12 @@ spec:
           source auth.bash # > /dev/null 2>&1
           sp_authorize #> /dev/null 2>&1
           i=1
-          for repo in $(cat /clusterscanner/image-source-list/*); do
-            echo "$i: $repo"
-            sp_getfile $repo /clusterscanner/out/$i.json #> /dev/null 2>&1#
+          for repofile in /clusterscanner/image-source-list/*; do
+            repourl=$(cat $repofile)
+            echo "$i: $repofile $repourl"
+            sp_getfile $repourl /clusterscanner/out/$i.json #> /dev/null 2>&1#
             if [ $(grep 'image' /clusterscanner/out/$i.json | wc -l) -eq 0 ]; then
-              echo "Could not get repo $repo or the repos doesn't include images"
+              echo "Could not get repo $repourl from ($repofile) or the repos doesn't include images"
               exit 1
             fi
             ((i=i+1))
