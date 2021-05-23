@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - ../test
   - ./defectdojo.secret.yml
+  - ./slack.yml
   - rbac.yml
 
 generatorOptions:
@@ -56,12 +57,6 @@ secretGenerator:
     type: Secret
     envs:
       - config-source/s3.env
-  - name: slacktoken
-    namespace: clusterscanner
-    behavior: replace
-    type: Secret
-    envs:
-      - config-source/slack.env
   - name: github
     namespace: clusterscanner
     behavior: replace
