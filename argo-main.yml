@@ -61,6 +61,16 @@ spec:
                   value: "{{ item.environment }}"
                 - name: scm_source_branch
                   value: "{{ item.scm_source_branch }}"
+                - name: is_scan_lifetime
+                  value: "{{ item.is_scan_lifetime }}"
+                - name: is_scan_distroless
+                  value: "{{ item.is_scan_distroless }}"
+                - name: is_scan_malware
+                  value: "{{ item.is_scan_malware }}"
+                - name: is_scan_dependency_check
+                  value: "{{ item.is_scan_dependency_check }}"
+                - name: is_scan_runasroot
+                  value: "{{ item.is_scan_runasroot }}"
             withParam: '{{steps.printimagelist.outputs.result}}'
             when: "{{ item.skip }} != true"
 #              parallelism: 5
@@ -157,6 +167,11 @@ spec:
           - name: slack
           - name: email
           - name: container_running_as
+          - name: is_scan_lifetime
+          - name: is_scan_distroless
+          - name: is_scan_malware
+          - name: is_scan_dependency_check
+          - name: is_scan_runasroot
       resource:
         action: create
         manifest: |
@@ -195,6 +210,16 @@ spec:
                   value: "{{ inputs.parameters.email }}"
                 - name: slack
                   value: "{{ inputs.parameters.slack }}"
+                - name: is_scan_lifetime
+                  value: "{{ inputs.parameters.is_scan_lifetime }}"
+                - name: is_scan_distroless
+                  value: "{{ inputs.parameters.is_scan_distroless }}"
+                - name: is_scan_malware
+                  value: "{{ inputs.parameters.is_scan_malware }}"
+                - name: is_scan_dependency_check
+                  value: "{{ inputs.parameters.is_scan_dependency_check }}"
+                - name: is_scan_runasroot
+                  value: "{{ inputs.parameters.is_scan_runasroot }}"
             workflowTemplateRef:
               name: scan-image-job
         successCondition: status.phase == Succeeded
