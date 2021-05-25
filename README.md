@@ -18,7 +18,10 @@ In order to achieve an understanding of the cluster scanning process, this page 
 4. This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
 5. The vulnerability management system then collects the results and makes them available to the developers via Slack.
 ## Table of Contents
-
 - [User documentation](docs/user)
 - [Architecture and Decisions](docs/architecture)
 - [Operator documentation](docs/deployment)
+
+# Legal Notice
+The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend to run extensive tests by experienced penetration testers on all your applications.
+The ClusterScanner is to be used only for testing purpose of your running applications/containers. You need a written aggreement of the organization of the _envirnoment under scan_ to scan components with the ClusterScanner.
