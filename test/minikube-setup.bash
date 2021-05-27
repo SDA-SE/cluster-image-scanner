@@ -129,7 +129,10 @@ sleep 2
 for i in $(ps -ef | grep port-forward | grep svc/argo-server | grep -v grep | awk '{print $2}'); do kill $i;done
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 
-echo "reverting secret changes"
-git checkout  $DEPLOYMENT_PATH/overlays/test-local/config-source
+argo submit ../argo-main.yml  -n clusterscanner
 
-echo "please visit https://localhost:2746/ and push a workflow"
+echo "reverting secret changes"
+git checkout  $DEPLOYMENT_PATH/overlays/test-local/config-source || true
+
+echo "please visit https://localhost:2746/"
+
