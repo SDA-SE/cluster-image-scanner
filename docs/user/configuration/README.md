@@ -27,4 +27,6 @@ clusterscanner.sdase.org/is-scan-distroless=true # or false
 clusterscanner.sdase.org/is-scan-dependency-check=true # or false
 clusterscanner.sdase.org/is-scan-runasroot=true # or false
 clusterscanner.sdase.org/is-scan-malware=false # scan to be implemented
+
+clusterscanner.sdase.org/max-lifetime='14' # max lifetime days for the lifetime scan
 ```
