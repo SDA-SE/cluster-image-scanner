@@ -109,7 +109,7 @@ spec:
           - name: imageList
             path: /clusterscanner/imageList.json
       script:
-        images: quay.io/sdase/clusterscanner-imagecollector:2
+        image: quay.io/sdase/clusterscanner-imagecollector:2
         imagePullPolicy: Always
         command: [/bin/bash]
         workingDir: /clusterscanner
