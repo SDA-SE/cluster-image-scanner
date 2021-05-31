@@ -15,7 +15,7 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "{{ workflow.parameters.scanId }}"
+        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
       - name: maxSubJobs
         value: 10
   templates:
