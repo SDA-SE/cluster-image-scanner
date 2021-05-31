@@ -148,12 +148,12 @@ spec:
             sed -i "s~###scan_lifetime_max_days###~$(echo ${DATA_JSON} | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
             cat /clusterscanner/template.yml
             kubectl create -n clusterscanner -f /clusterscanner/template.yml
-            while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail +2 | wc -l)" -gt {{ workflow.parameters.maxSubJobs }} ]]; do
+            while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail --lines=+2 | wc -l)" -gt {{ workflow.parameters.maxSubJobs }} ]]; do
               echo "There are 10 scans running already, waiting for some to finish"
               sleep 10
             done
           done
-          while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail +2 | wc -l)" -gt 0 ]]; do
+          while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail --lines=+2 | wc -l)" -gt 0 ]]; do
             echo "There are still scans running, waiting another 10 seconds"
             sleep 10
           done
