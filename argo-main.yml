@@ -15,7 +15,9 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}_{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+      - name: maxSubJobs
+        value: 10
   templates:
     - name: main
       steps:
@@ -114,12 +116,15 @@ spec:
         command: [/bin/bash]
         workingDir: /clusterscanner
         source: |
+          set -e
           cat /clusterscanner/imageList.json | jq -cMr '.[] | @base64' > /clusterscanner/imageListSeparated.json
           cat /clusterscanner/imageListSeparated.json | while read line
           do
             echo "YXBpVmVyc2lvbjogYXJnb3Byb2ouaW8vdjFhbHBoYTEKa2luZDogV29ya2Zsb3cKbWV0YWRhdGE6CiAgZ2VuZXJhdGVOYW1lOiBzY2Fuam9iLSMjI2Vudmlyb25tZW50IyMjLSMjI25hbWVzcGFjZSMjIy0jIyN0ZWFtIyMjLQogIGxhYmVsczoKICAgIGNsdXN0ZXJzY2FubmVyLnNkYS5zZS9zY2FuLWlkOiAiIyMjU0NBTl9JRCMjIyIKc3BlYzoKICBhcmd1bWVudHM6CiAgICBwYXJhbWV0ZXJzOgogICAgICAtIG5hbWU6IFJFR0lTVFJZX1NFQ1JFVAogICAgICAgIHZhbHVlOiAiIyMjUkVHSVNUUllfU0VDUkVUIyMjIgogICAgICAtIG5hbWU6IERFUEVOREVOQ1lfU0NBTl9DTQogICAgICAgIHZhbHVlOiAiIyMjREVQRU5ERU5DWV9TQ0FOX0NNIyMjIgogICAgICAtIG5hbWU6IERFRkVDVERPSk9fQ00KICAgICAgICB2YWx1ZTogIiMjI0RFRkVDVERPSk9fQ00jIyMiCiAgICAgIC0gbmFtZTogREVGRUNURE9KT19TRUNSRVRTCiAgICAgICAgdmFsdWU6ICIjIyNERUZFQ1RET0pPX1NFQ1JFVFMjIyMiCiAgICAgIC0gbmFtZTogU0NBTl9JRAogICAgICAgIHZhbHVlOiAiIyMjU0NBTl9JRCMjIyIKICAgICAgLSBuYW1lOiB0ZWFtCiAgICAgICAgdmFsdWU6ICIjIyN0ZWFtIyMjIgogICAgICAtIG5hbWU6IGVudmlyb25tZW50CiAgICAgICAgdmFsdWU6ICIjIyNlbnZpcm9ubWVudCMjIyIKICAgICAgLSBuYW1lOiBuYW1lc3BhY2UKICAgICAgICB2YWx1ZTogIiMjI25hbWVzcGFjZSMjIyIKICAgICAgLSBuYW1lOiBzY21fc291cmNlX2JyYW5jaAogICAgICAgIHZhbHVlOiAiIyMjc2NtX3NvdXJjZV9icmFuY2gjIyMiCiAgICAgIC0gbmFtZTogaW1hZ2UKICAgICAgICB2YWx1ZTogIiMjI2ltYWdlIyMjIgogICAgICAtIG5hbWU6IGltYWdlX2lkCiAgICAgICAgdmFsdWU6ICIjIyNpbWFnZV9pZCMjIyIKICAgICAgLSBuYW1lOiBzbGFjawogICAgICAgIHZhbHVlOiAiIyMjc2xhY2sjIyMiCiAgICAgIC0gbmFtZTogaXNfc2Nhbl9saWZldGltZQogICAgICAgIHZhbHVlOiAiIyMjaXNfc2Nhbl9saWZldGltZSMjIyIKICAgICAgLSBuYW1lOiBpc19zY2FuX2Rpc3Ryb2xlc3MKICAgICAgICB2YWx1ZTogIiMjI2lzX3NjYW5fZGlzdHJvbGVzcyMjIyIKICAgICAgLSBuYW1lOiBpc19zY2FuX21hbHdhcmUKICAgICAgICB2YWx1ZTogIiMjI2lzX3NjYW5fbWFsd2FyZSMjIyIKICAgICAgLSBuYW1lOiBpc19zY2FuX2RlcGVuZGVuY3lfY2hlY2sKICAgICAgICB2YWx1ZTogIiMjI2lzX3NjYW5fZGVwZW5kZW5jeV9jaGVjayMjIyIKICAgICAgLSBuYW1lOiBpc19zY2FuX3J1bmFzcm9vdAogICAgICAgIHZhbHVlOiAiIyMjaXNfc2Nhbl9ydW5hc3Jvb3QjIyMiCiAgICAgIC0gbmFtZTogc2Nhbl9saWZldGltZV9tYXhfZGF5cwogICAgICAgIHZhbHVlOiAiIyMjc2Nhbl9saWZldGltZV9tYXhfZGF5cyMjIyIKICB3b3JrZmxvd1RlbXBsYXRlUmVmOgogICAgbmFtZTogc2Nhbi1pbWFnZS1qb2IK" | base64 -d > /clusterscanner/template.yml
             DATA_JSON=$(echo $line | base64 -d | jq -cM .)
             if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
+              image=$(echo "${DATA_JSON}" | jq '.image')
+              echo "Skipping image ${image}"
               continue
             fi
             sed -i "s~###REGISTRY_SECRET###~{{ inputs.parameters.REGISTRY_SECRET }}~" /clusterscanner/template.yml
@@ -142,6 +147,10 @@ spec:
             sed -i "s~###scan_lifetime_max_days###~$(echo ${DATA_JSON} | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
             cat /clusterscanner/template.yml
             kubectl create -n clusterscanner -f /clusterscanner/template.yml
+            while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }} | wc -l)" -gt {{ workflow.parameters.maxSubJobs }} ]]; do
+              echo "There are still workflows running, waiting another 10 seconds"
+              sleep 10
+            done
           done
           while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }} | wc -l)" -gt 1 ]]; do
             echo "There are still workflows running, waiting another 10 seconds"
