@@ -15,81 +15,30 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}_{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+        value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+      - name: maxSubJobs
+        value: 10
   templates:
     - name: main
       steps:
         - - name: fetch-image-list
             template: fetch-image-list
-        - - name: printimagelist
-            template: printimagelist
-            arguments:
-              artifacts:
-                - name: mergedjson
-                  from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
         - - name: run-subflow
             template: subflow
             arguments:
+              artifacts:
+                - name: imageList
+                  from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
               parameters:
                 - name: REGISTRY_SECRET
-                  value: "registry-sda-default"
+                  value: registry-sda-default
                 - name: DEPENDENCY_SCAN_CM
                   value: dependency-check-db
                 - name: DEFECTDOJO_CM
                   value: defectdojo-test
                 - name: DEFECTDOJO_SECRETS
                   value: defectdojo-test
-                - name: image
-                  value: "{{ item.image }}"
-                - name: image_id
-                  value: "{{ item.image_id }}"
-                - name: slack
-                  value: "{{ item.slack }}"
-                - name: email
-                  value: "{{ item.email }}"
-                - name: skip
-                  value: "{{ item.skip }}"
-                - name: team
-                  value: "{{ item.team }}"
-                - name: appname
-                  value: "{{ item.app_kubernetes_io_name }}"
-                - name: namespace
-                  value: "{{ item.namespace }}"
-                - name: container_running_as
-                  value: "{{ item.container_running_as }}"
-                - name: environment
-                  value: "{{ item.environment }}"
-                - name: scm_source_branch
-                  value: "{{ item.scm_source_branch }}"
-                - name: is_scan_lifetime
-                  value: "{{ item.is_scan_lifetime }}"
-                - name: is_scan_distroless
-                  value: "{{ item.is_scan_distroless }}"
-                - name: is_scan_malware
-                  value: "{{ item.is_scan_malware }}"
-                - name: is_scan_dependency_check
-                  value: "{{ item.is_scan_dependency_check }}"
-                - name: is_scan_runasroot
-                  value: "{{ item.is_scan_runasroot }}"
-                - name: scan_lifetime_max_days
-                  value: "{{ item.scan_lifetime_max_days }}"
-            withParam: '{{steps.printimagelist.outputs.result}}'
-            when: "{{ item.skip }} != true"
-#              parallelism: 5
 
-    - name: printimagelist
-      inputs:
-        artifacts:
-          - name: mergedjson
-            path: /tmp/merged.json
-            mode: 0444
-      script:
-        image: quay.io/sdase/clusterscanner-base:2
-        imagePullPolicy: Always
-        command: [/bin/bash]
-        workingDir: /clusterscanner
-        source: |
-          cat /tmp/merged.json | jq -M .
 
     - name: fetch-image-list
       outputs:
@@ -158,77 +107,57 @@ spec:
           - name: DEPENDENCY_SCAN_CM
           - name: DEFECTDOJO_CM
           - name: DEFECTDOJO_SECRETS
-          - name: image
-          - name: image_id
-          - name: skip
-          - name: environment
-          - name: namespace
-          - name: scm_source_branch
-          - name: team
-          - name: appname
-          - name: slack
-          - name: email
-          - name: container_running_as
-          - name: is_scan_lifetime
-          - name: is_scan_distroless
-          - name: is_scan_malware
-          - name: is_scan_dependency_check
-          - name: is_scan_runasroot
-          - name: scan_lifetime_max_days
-      resource:
-        action: create
-        manifest: |
-          apiVersion: argoproj.io/v1alpha1
-          kind: Workflow
-          metadata:
-            generateName: scanjob-{{ inputs.parameters.environment }}-{{ inputs.parameters.namespace }}-{{ inputs.parameters.team }}-
-          spec:
-            arguments:
-              parameters:
-                - name: REGISTRY_SECRET
-                  value: {{ inputs.parameters.REGISTRY_SECRET }}
-                - name: DEPENDENCY_SCAN_CM
-                  value: {{ inputs.parameters.DEPENDENCY_SCAN_CM }}
-                - name: DEFECTDOJO_CM
-                  value: {{ inputs.parameters.DEFECTDOJO_CM }}
-                - name: DEFECTDOJO_SECRETS
-                  value: {{ inputs.parameters.DEFECTDOJO_SECRETS }}
-                - name: SCAN_ID
-                  value: "{{ workflow.parameters.scanId }}"
-                - name: team
-                  value: {{ inputs.parameters.team }}
-                - name: environment
-                  value: {{ inputs.parameters.environment }}
-                - name: namespace
-                  value: {{ inputs.parameters.namespace }}
-                - name: scm_source_branch
-                  value: {{ inputs.parameters.scm_source_branch }}
-                - name: appname
-                  value: {{ inputs.parameters.appname }}
-                - name: image
-                  value: {{ inputs.parameters.image }}
-                - name: image_id
-                  value: {{ inputs.parameters.image_id }}
-                - name: email
-                  value: "{{ inputs.parameters.email }}"
-                - name: slack
-                  value: "{{ inputs.parameters.slack }}"
-                - name: is_scan_lifetime
-                  value: "{{ inputs.parameters.is_scan_lifetime }}"
-                - name: is_scan_distroless
-                  value: "{{ inputs.parameters.is_scan_distroless }}"
-                - name: is_scan_malware
-                  value: "{{ inputs.parameters.is_scan_malware }}"
-                - name: is_scan_dependency_check
-                  value: "{{ inputs.parameters.is_scan_dependency_check }}"
-                - name: is_scan_runasroot
-                  value: "{{ inputs.parameters.is_scan_runasroot }}"
-                - name: scan_lifetime_max_days
-                  value: "{{ inputs.parameters.scan_lifetime_max_days }}"
-            workflowTemplateRef:
-              name: scan-image-job
-        successCondition: status.phase == Succeeded
-        failureCondition: status.phase in (Failed, Error)
+        artifacts:
+          - name: imageList
+            path: /clusterscanner/imageList.json
+      script:
+        image: quay.io/sdase/clusterscanner-imagecollector:2
+        imagePullPolicy: Always
+        command: [/bin/bash]
+        workingDir: /clusterscanner
+        source: |
+          set -e
+          cat /clusterscanner/imageList.json | jq -cMr '.[] | @base64' > /clusterscanner/imageListSeparated.json
+          cat /clusterscanner/imageListSeparated.json | while read line
+          do
+            echo "YXBpVmVyc2lvbjogYXJnb3Byb2ouaW8vdjFhbHBoYTEKa2luZDogV29ya2Zsb3cKbWV0YWRhdGE6CiAgZ2VuZXJhdGVOYW1lOiBzY2Fuam9iLSMjI2Vudmlyb25tZW50IyMjLSMjI25hbWVzcGFjZSMjIy0jIyN0ZWFtIyMjLQogIGxhYmVsczoKICAgIGNsdXN0ZXJzY2FubmVyLnNkYS5zZS9zY2FuLWlkOiAiIyMjU0NBTl9JRCMjIyIKc3BlYzoKICBhcmd1bWVudHM6CiAgICBwYXJhbWV0ZXJzOgogICAgICAtIG5hbWU6IFJFR0lTVFJZX1NFQ1JFVAogICAgICAgIHZhbHVlOiAiIyMjUkVHSVNUUllfU0VDUkVUIyMjIgogICAgICAtIG5hbWU6IERFUEVOREVOQ1lfU0NBTl9DTQogICAgICAgIHZhbHVlOiAiIyMjREVQRU5ERU5DWV9TQ0FOX0NNIyMjIgogICAgICAtIG5hbWU6IERFRkVDVERPSk9fQ00KICAgICAgICB2YWx1ZTogIiMjI0RFRkVDVERPSk9fQ00jIyMiCiAgICAgIC0gbmFtZTogREVGRUNURE9KT19TRUNSRVRTCiAgICAgICAgdmFsdWU6ICIjIyNERUZFQ1RET0pPX1NFQ1JFVFMjIyMiCiAgICAgIC0gbmFtZTogU0NBTl9JRAogICAgICAgIHZhbHVlOiAiIyMjU0NBTl9JRCMjIyIKICAgICAgLSBuYW1lOiB0ZWFtCiAgICAgICAgdmFsdWU6ICIjIyN0ZWFtIyMjIgogICAgICAtIG5hbWU6IGFwcG5hbWUKICAgICAgICB2YWx1ZTogIiMjI2FwcG5hbWUjIyMiCiAgICAgIC0gbmFtZTogZW52aXJvbm1lbnQKICAgICAgICB2YWx1ZTogIiMjI2Vudmlyb25tZW50IyMjIgogICAgICAtIG5hbWU6IG5hbWVzcGFjZQogICAgICAgIHZhbHVlOiAiIyMjbmFtZXNwYWNlIyMjIgogICAgICAtIG5hbWU6IHNjbV9zb3VyY2VfYnJhbmNoCiAgICAgICAgdmFsdWU6ICIjIyNzY21fc291cmNlX2JyYW5jaCMjIyIKICAgICAgLSBuYW1lOiBpbWFnZQogICAgICAgIHZhbHVlOiAiIyMjaW1hZ2UjIyMiCiAgICAgIC0gbmFtZTogaW1hZ2VfaWQKICAgICAgICB2YWx1ZTogIiMjI2ltYWdlX2lkIyMjIgogICAgICAtIG5hbWU6IHNsYWNrCiAgICAgICAgdmFsdWU6ICIjIyNzbGFjayMjIyIKICAgICAgLSBuYW1lOiBpc19zY2FuX2xpZmV0aW1lCiAgICAgICAgdmFsdWU6ICIjIyNpc19zY2FuX2xpZmV0aW1lIyMjIgogICAgICAtIG5hbWU6IGlzX3NjYW5fZGlzdHJvbGVzcwogICAgICAgIHZhbHVlOiAiIyMjaXNfc2Nhbl9kaXN0cm9sZXNzIyMjIgogICAgICAtIG5hbWU6IGlzX3NjYW5fbWFsd2FyZQogICAgICAgIHZhbHVlOiAiIyMjaXNfc2Nhbl9tYWx3YXJlIyMjIgogICAgICAtIG5hbWU6IGlzX3NjYW5fZGVwZW5kZW5jeV9jaGVjawogICAgICAgIHZhbHVlOiAiIyMjaXNfc2Nhbl9kZXBlbmRlbmN5X2NoZWNrIyMjIgogICAgICAtIG5hbWU6IGlzX3NjYW5fcnVuYXNyb290CiAgICAgICAgdmFsdWU6ICIjIyNpc19zY2FuX3J1bmFzcm9vdCMjIyIKICAgICAgLSBuYW1lOiBzY2FuX2xpZmV0aW1lX21heF9kYXlzCiAgICAgICAgdmFsdWU6ICIjIyNzY2FuX2xpZmV0aW1lX21heF9kYXlzIyMjIgogIHdvcmtmbG93VGVtcGxhdGVSZWY6CiAgICBuYW1lOiBzY2FuLWltYWdlLWpvYgo=" | base64 -d > /clusterscanner/template.yml
+            DATA_JSON=$(echo $line | base64 -d | jq -cM .)
+            if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
+              image=$(echo "${DATA_JSON}" | jq '.image')
+              echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
+              continue
+            fi
+            sed -i "s~###REGISTRY_SECRET###~{{ inputs.parameters.REGISTRY_SECRET }}~" /clusterscanner/template.yml
+            sed -i "s~###DEPENDENCY_SCAN_CM###~{{ inputs.parameters.DEPENDENCY_SCAN_CM }}~" /clusterscanner/template.yml
+            sed -i "s~###DEFECTDOJO_CM###~{{ inputs.parameters.DEFECTDOJO_CM }}~" /clusterscanner/template.yml
+            sed -i "s~###DEFECTDOJO_SECRETS###~{{ inputs.parameters.DEFECTDOJO_SECRETS }}~" /clusterscanner/template.yml
+            sed -i "s~###SCAN_ID###~{{ workflow.parameters.scanId }}~" /clusterscanner/template.yml
+            sed -i "s~###team###~$(echo ${DATA_JSON} | jq -r .team)~" /clusterscanner/template.yml
+            sed -i "s~###appname###~$(echo ${DATA_JSON} | jq -r .appname)~" /clusterscanner/template.yml
+            sed -i "s~###environment###~$(echo ${DATA_JSON} | jq -r .environment)~" /clusterscanner/template.yml
+            sed -i "s~###namespace###~$(echo ${DATA_JSON} | jq -r .namespace)~" /clusterscanner/template.yml
+            sed -i "s~###scm_source_branch###~$(echo ${DATA_JSON} | jq -r .scm_source_branch)~" /clusterscanner/template.yml
+            sed -i "s~###image###~$(echo ${DATA_JSON} | jq -r .image)~" /clusterscanner/template.yml
+            sed -i "s~###image_id###~$(echo ${DATA_JSON} | jq -r .image_id)~" /clusterscanner/template.yml
+            sed -i "s~###slack###~$(echo ${DATA_JSON} | jq -r .slack)~" /clusterscanner/template.yml
+            sed -i "s~###is_scan_lifetime###~$(echo ${DATA_JSON} | jq -r .is_scan_lifetime)~" /clusterscanner/template.yml
+            sed -i "s~###is_scan_distroless###~$(echo ${DATA_JSON} | jq -r .is_scan_distroless)~" /clusterscanner/template.yml
+            sed -i "s~###is_scan_malware###~$(echo ${DATA_JSON} | jq -r .is_scan_malware)~" /clusterscanner/template.yml
+            sed -i "s~###is_scan_dependency_check###~$(echo ${DATA_JSON} | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml
+            sed -i "s~###is_scan_runasroot###~$(echo ${DATA_JSON} | jq -r .is_scan_runasroot)~" /clusterscanner/template.yml
+            sed -i "s~###scan_lifetime_max_days###~$(echo ${DATA_JSON} | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
+            cat /clusterscanner/template.yml
+            kubectl create -n clusterscanner -f /clusterscanner/template.yml
+            while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail --lines=+2 | wc -l)" -gt {{ workflow.parameters.maxSubJobs }} ]]; do
+              echo "There are 10 scans running already, waiting for some to finish"
+              sleep 10
+            done
+          done
+          while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail --lines=+2 | wc -l)" -gt 0 ]]; do
+            echo "There are still scans running, waiting another 10 seconds"
+            sleep 10
+          done
+          echo "All scans have finished"
 
     - name: notify-teams
       volumes:
