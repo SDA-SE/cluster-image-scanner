@@ -47,3 +47,7 @@ _auth.json_ will be mounted to fetch to be scanned container images from registr
 	}
 ```
 Multiple registries (identified via different hosts) can be defined.
+
+## Persistent Volume Claims
+To temporary store images, they are stored in a PVC.
+Make sure to have enough space in the PVC, as all scanned images will be stored in the PVC as tar.
