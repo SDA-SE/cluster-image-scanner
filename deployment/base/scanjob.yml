@@ -312,9 +312,13 @@ spec:
         - name: DD_REPORT_TYPE
           value: "Dependency Check Scan"
         - name: DD_PRODUCT_TAGS
-          value: "{{ workflow.parameters.team }} production"
-        - name: DD_PRODUCT_TAGS
-          value: "{{ workflow.parameters.team }} production"
+          value: "{{ workflow.parameters.team }}"
+        - name: NAMESPACE
+          value: "{{ workflow.parameters.namespace }}"
+        - name: ENVIRONMENT
+          value: "{{ workflow.parameters.environment }}"
+        - name: DD_TEAM
+          value: "{{ workflow.parameters.team }}"
         - name: EXIT_CODE_ON_FINDING
           value: "0"
         - name: EXIT_CODE_ON_MISSING_REPORT
@@ -455,6 +459,7 @@ spec:
         JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
         JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
         JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
 
         JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
         isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
