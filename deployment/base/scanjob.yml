@@ -317,6 +317,8 @@ spec:
           value: "{{ workflow.parameters.team }} production"
         - name: EXIT_CODE_ON_FINDING
           value: "0"
+        - name: EXIT_CODE_ON_MISSING_REPORT
+          value: "0" # make the job successful
 
 
   - name: results-collect-generic-findings
