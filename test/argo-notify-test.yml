@@ -13,7 +13,7 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "20210428_114811" # fetch from wait log after first run of argo-main.yml in notifier
+        value: "20210602-095815" # fetch from wait log after first run of argo-main.yml in notifier OR from PV
   templates:
     - name: main
       steps:
@@ -26,7 +26,7 @@ spec:
           persistentVolumeClaim:
             claimName: clusterscanner-scandata
       container:
-        image: registry.hub.docker.com/wurstbrot/clusterscanner-notifier:2
+        image: quay.io/sdase/clusterscanner-notifier:2
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data

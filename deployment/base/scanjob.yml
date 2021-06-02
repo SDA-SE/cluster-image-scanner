@@ -311,8 +311,6 @@ spec:
           value: "{{ workflow.parameters.image }}"
         - name: DD_REPORT_TYPE
           value: "Dependency Check Scan"
-        - name: DD_PRODUCT_TAGS
-          value: "{{ workflow.parameters.team }}"
         - name: NAMESPACE
           value: "{{ workflow.parameters.namespace }}"
         - name: ENVIRONMENT
@@ -444,6 +442,7 @@ spec:
       command: [/bin/bash]
       source: |
         set -e
+        ulimit -s 65536 # enhance jq parameter size
         IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
         IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
         IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)

@@ -17,7 +17,7 @@ spec:
       - name: scanId
         value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
       - name: maxSubJobs
-        value: 10
+        value: 20
   templates:
     - name: main
       steps:
@@ -153,6 +153,7 @@ spec:
               echo "There are 10 scans running already, waiting for some to finish"
               sleep 10
             done
+            sleep 1
           done
           while [[ "$(argo list --running -n clusterscanner -l clusterscanner.sda.se/scan-id={{ workflow.parameters.scanId }} | tail --lines=+2 | wc -l)" -gt 0 ]]; do
             echo "There are still scans running, waiting another 10 seconds"
