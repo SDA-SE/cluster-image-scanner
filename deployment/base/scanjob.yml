@@ -442,7 +442,6 @@ spec:
       command: [/bin/bash]
       source: |
         set -e
-        ulimit -s 65536 # enhance jq parameter size
         IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
         IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
         IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)
@@ -468,7 +467,13 @@ spec:
           if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
             echo "Starting DepCheck Aggregate"
             echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
-            JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
+            FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
+            if [ $FILESIZE -lt 256000 ]; then # 256kb
+              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
+            else
+              echo '{ "comment": "vulnerability file too large, therefore, it is cut off" }' > /tmp/findings-dependency-check-zero.json
+              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
+            fi
           else
             JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
             echo "Warning: /tmp/findings-dependency-check.json is empty"
