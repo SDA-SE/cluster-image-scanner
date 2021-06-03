@@ -155,7 +155,7 @@ spec:
             done
             for outdatedJob in $(argo list --running -n clusterscanner --prefix scanjob | grep "Running *1h" | awk '{print $1}'); do # this is a workaround for a mount problem and should be solved
               echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
-              argo stop ${outdatedJob}
+              argo stop ${outdatedJob} -n clusterscanner
             done
             sleep 1
           done
