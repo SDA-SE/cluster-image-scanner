@@ -4,6 +4,7 @@ metadata:
   name: scan-image-job
   namespace: clusterscanner
 spec:
+  activeDeadlineSeconds: 1800
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
