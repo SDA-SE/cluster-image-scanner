@@ -497,7 +497,7 @@ spec:
         JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
         JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
 
-        echo "Starting Generic"
+        echo "Starting Generic2"
         JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
         isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
         if [ "$isFinding" == "true" ]; then
