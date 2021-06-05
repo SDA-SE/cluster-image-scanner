@@ -472,10 +472,10 @@ spec:
           DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
           JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
           if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
-            echo "Starting DepCheck Aggregate2"
+            echo "Starting DepCheck Aggregate"
             echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
             FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
-            FILESIZE_LIMT=2560 # 2kb
+            FILESIZE_LIMT=25600 # 20kb
             if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
               echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
               JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
@@ -497,7 +497,7 @@ spec:
         JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
         JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
 
-        echo "Starting Generic2"
+        echo "Starting Generic"
         JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
         isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
         if [ "$isFinding" == "true" ]; then
