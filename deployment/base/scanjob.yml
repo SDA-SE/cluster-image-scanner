@@ -475,9 +475,12 @@ spec:
             echo "Starting DepCheck Aggregate"
             echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
             FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
-            if [ $FILESIZE -lt 256000 ]; then # 256kb
+            FILESIZE_LIMT=2560 # 2kb
+            if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
+              echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
               JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
             else
+              echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
               echo '{ "comment": "vulnerability file too large, therefore, it is cut off" }' > /tmp/findings-dependency-check-zero.json
               JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
             fi
