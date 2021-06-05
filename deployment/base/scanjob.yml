@@ -517,7 +517,7 @@ spec:
         fi
         JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
         JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
-
+        echo ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]"
         JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]")
         DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
         DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
