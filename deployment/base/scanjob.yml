@@ -481,7 +481,7 @@ spec:
               JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
             else
               echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
-              echo '{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }' > /tmp/findings-dependency-check-zero.json
+              echo '[{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-check-zero.json
               JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
             fi
           else
