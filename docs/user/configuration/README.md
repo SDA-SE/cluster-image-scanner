@@ -30,5 +30,5 @@ clusterscanner.sdase.org/is-scan-malware=false # scan to be implemented
 
 clusterscanner.sdase.org/max-lifetime='14' # max lifetime days for the lifetime scan
 ```
-The inheritance is pointed out in the following figure:
+The inheritance of overriding the parent annotations/configuration is pointed out in the following figure:
 ![inheritance](inheritance.png)
