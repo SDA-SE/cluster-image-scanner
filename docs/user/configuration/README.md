@@ -1,5 +1,5 @@
 # Configration Documentation
-Target Audiance: Teams using the cluster scanner to get notified.
+Target Audience: Teams using the cluster scanner to get notified.
 
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
 As a team, annotations can be set in the following way to enable/disable scanning:
@@ -30,3 +30,5 @@ clusterscanner.sdase.org/is-scan-malware=false # scan to be implemented
 
 clusterscanner.sdase.org/max-lifetime='14' # max lifetime days for the lifetime scan
 ```
+The inheritance is pointed out in the following figure:
+![inheritance](inheritance.png)
