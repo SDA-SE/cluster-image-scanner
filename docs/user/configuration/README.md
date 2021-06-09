@@ -2,7 +2,7 @@
 Target Audience: Teams using the cluster scanner to get notified.
 
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
-As a team, annotations can be set in the following way to enable/disable scanning:
+As a team, **annotations** can be set in the following way to enable/disable scanning:
 
 ```
 # Notification configuration (namespace/object)
@@ -18,7 +18,6 @@ clusterscanner.sdase.org/skip: true # to skip all images in the namespace
 ## Skip scanning for all images in the pod
 clusterscanner.sdase.org/skip: true # specially useful for development clusters with development and production components in one namespace
 
-app.kubernetes.io/name: 'consent-service' # defaults to image
 scm.sdase.org/source_branch: 'feature/foobar'
 
 # Adjust scans on object or namespace
@@ -30,5 +29,14 @@ clusterscanner.sdase.org/is-scan-malware=false # scan to be implemented
 
 clusterscanner.sdase.org/max-lifetime='14' # max lifetime days for the lifetime scan
 ```
+
+Additionally the following **labels** can be used:
+
+```
+app.kubernetes.io/name: 'consent-service' # defaults to image
+app.kubernetes.io/version: '3.42.0' # defaults to image tag
+```
+
+
 The inheritance of overriding the parent annotations/configuration is pointed out in the following figure:
 ![inheritance](inheritance.png)
