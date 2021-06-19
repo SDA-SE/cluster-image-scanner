@@ -13,6 +13,7 @@ contact.sdase.org/slack: '#mrkaplan-security' # in case not set on namespace/pod
 # Skip scanning for an image in a namespace
 clusterscanner.sdase.org/skip_regex: 'mock-service:|mongo:|opa:' # especially useful for development clusters with development and production components at the same cluster
 clusterscanner.sdase.org/skip: true # to skip all images in the namespace
+clusterscanner.sdase.org/skip: false # to scan all images in the namespace, in case the default is true
 
 # Object
 ## Skip scanning for all images in the pod
