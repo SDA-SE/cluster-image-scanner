@@ -62,7 +62,7 @@ data:
   auth.json: AUTH
 kind: Secret
 metadata:
-  name: registry-sda-default
+  name: registry-default
 type: kubernetes.io/secret
 EOL
 sed -i "s#AUTH#$AUTH#g" /tmp/config.yaml

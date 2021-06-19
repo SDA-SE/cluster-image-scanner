@@ -1,0 +1,154 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: orchestration-job-template
+  namespace: clusterscanner
+spec:
+  activeDeadlineSeconds: 1800
+  entrypoint: main # Entry point for job execution
+  templates:
+    - name: main
+      steps:
+        - - name: fetch-image-list
+            template: fetch-image-list
+        - - name: run-subflow
+            template: subflow
+            arguments:
+              artifacts:
+                - name: imageList
+                  from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
+        - - name: pvc-cleanup-post
+            template: pvc-cleanup
+        - - name: notify-teams
+            template: notify-teams
+
+    - name: pvc-cleanup
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+          - name: images
+            mountPath: /clusterscanner/images
+        imagePullPolicy: Always
+        command: [bash]
+        env:
+          - name: MAX_DAYS
+            value: "7"
+        source: |
+          set -e
+          folders="/clusterscanner/data/ /clusterscanner/images/"
+          for folderPath in ${folders}; do
+            du -sh ${folderPath}
+            for cleanupPath in $(find ${folderPath}/* -mtime +${MAX_DAYS}); do
+              echo "Removing ${cleanupPath} with size $(du ${cleanupPath})"
+              rm -Rf ${cleanupPath} || true # folders have owner rights issues
+            done
+          done
+          echo "done"
+          exit 0
+
+    - name: fetch-image-list
+      outputs:
+        artifacts:
+          - name: image-lists
+            path: /clusterscanner/out
+            archive:
+              none: {}
+          - name: image-list-merged
+            path: /clusterscanner/out/merged/merged.json
+            archive:
+              none: {}
+      volumes:
+        - name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
+          configMap:
+            name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
+        - name: "{{ workflow.parameters.gitSecretName }}"
+          secret:
+            secretName: "{{ workflow.parameters.gitSecretName }}"
+        - name: tmp
+          emptyDir: {}
+      container:
+        image: quay.io/sdase/clusterscanner-image-source-fetcher:2
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: "{{ workflow.parameters.gitSecretName }}"
+            mountPath: /clusterscanner/github/github_private_key.pem
+            subPath: github_private_key.pem
+          - name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
+            mountPath: /clusterscanner/image-source-list
+          - name: tmp
+            mountPath: /clusterscanner/out
+        env:
+          - name: GITHUB_KEY_FILE_PATH
+            value: /clusterscanner/github/github_private_key.pem
+        envFrom:
+          - secretRef:
+              name: "{{ workflow.parameters.gitSecretName }}"
+
+    - name: subflow
+      inputs:
+        artifacts:
+          - name: imageList
+            path: /clusterscanner/imageList.json
+            mode: 0444
+      container:
+        image: quay.io/sdase/clusterscanner-workflow-runner:2
+        imagePullPolicy: Always
+        env:
+          - name: SCAN_ID
+            value: "{{ workflow.parameters.scanId }}"
+          - name: REGISTRY_SECRET
+            value: "{{ workflow.parameters.registrySecretName }}"
+          - name: DEPENDENCY_SCAN_CM
+            value: "{{ workflow.parameters.dependencyCheckDbConfigMapName }}"
+          - name: DEFECTDOJO_CM
+            value: "{{ workflow.parameters.defectDojoConfigMapName }}"
+          - name: DEFECTDOJO_SECRETS
+            value: "{{ workflow.parameters.defectDojoConfigMapName }}"
+
+    - name: notify-teams
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      container:
+        image: quay.io/sdase/clusterscanner-notifier:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "{{ workflow.parameters.scanId }}"
+        imagePullPolicy: Always
+        env:
+          - name: SLACK_CLI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.slackTokenSecretName }}"
+                key: SLACK_CLI_TOKEN
+          - name: smtp
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.emailSecretName }}"
+                key: smtp
+          - name: smtp-auth
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.emailSecretName }}"
+                key: smtp-auth
+          - name: smtp-auth-user
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.emailSecretName }}"
+                key: smtp-auth-user
+          - name:  smtp-auth-password
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.emailSecretName }}"
+                key: smtp-auth-password

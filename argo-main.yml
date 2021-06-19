@@ -15,6 +15,20 @@ spec:
     parameters:
       - name: scanId
         value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
+      - name: gitSecretName
+        value: "github"
+      - name: imageSourceListConfigMapName
+        value: "image-source-list"
+      - name: registrySecretName
+        value: "registry-default"
+      - name: defectDojoConfigMapName
+        value: "defectdojo"
+      - name: slackTokenSecretName
+        value: "slacktoken"
+      - name: emailSecretName
+        value: "email"
+      - name: dependencyCheckDbConfigMapName
+        value: "dependency-check-db"
   templates:
     - name: main
       steps:
@@ -22,7 +36,3 @@ spec:
             templateRef:
               name: orchestration-job-template
               template: main
-            arguments:
-              parameters:
-                - name: scanId
-                  value: "{{ workflow.parameters.scanId }}"
