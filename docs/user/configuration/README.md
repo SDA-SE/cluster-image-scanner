@@ -11,7 +11,7 @@ contact.sdase.org/team: 'mrkaplan'
 contact.sdase.org/slack: '#mrkaplan-security' # in case not set on namespace/pod: derived from as <team>-security
 
 # Skip scanning for an image in a namespace
-clusterscanner.sdase.org/skip_regex: '.*-mock' # especially  useful for development clusters with development and production components at the same cluster
+clusterscanner.sdase.org/skip_regex: 'mock-service|mongo|opa' # especially useful for development clusters with development and production components at the same cluster
 clusterscanner.sdase.org/skip: true # to skip all images in the namespace
 
 # Object
