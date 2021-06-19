@@ -27,7 +27,7 @@ spec:
         value: "slacktoken"
       - name: emailSecretName
         value: "email"
-      - name: dependencyCheckDbConfigMapName
+      - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
         value: "dependency-check-db"
   templates:
     - name: main
