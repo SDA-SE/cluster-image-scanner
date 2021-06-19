@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ClusterScanner
+  description: |
+    Discover vulnerabilities and container image misconfiguration in production environments.
+  tags:
+    - security-stack
+  annotations:
+    sda.se/summary: |
+      Discover vulnerabilities and container image misconfiguration in production environments.
+    sda.se/federation-scopes: public
+    backstage.io/techdocs-ref: url:https://github.com/SDA-SE/clusterscanner-orchestration/tree/master
+spec:
+  type: service
+  owner: security-journey
+  system: clusterscanner
+  lifecycle: production

@@ -1,0 +1,86 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../test
+  - ./defectdojo.secret.yml
+  - ./slack.yml
+  - rbac.yml
+
+generatorOptions:
+  labels:
+    app.kubernetes.io/name: clusterscanner
+    app.kubernetes.io/instance: test
+
+patches:
+- path: artifacts.yml
+- patch: |-
+    - op: replace
+      path: /data/DD_URL
+      value: "http://192.168.178.26:8081/"
+  target:
+    kind: ConfigMap
+    name: defectdojo
+    namespace: clusterscanner
+
+- patch: |-
+    - op: replace
+      path: /data/DD_URL
+      value: "http://192.168.178.26:8081/"
+  target:
+    kind: ConfigMap
+    name: defectdojo-test
+    namespace: clusterscanner
+
+secretGenerator:
+  - name: email
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/email.env
+  - name: defectdojo-test
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/defectdojo.env
+  - name: defectdojo
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/defectdojo.env
+  - name: s3-cred
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/s3.env
+  - name: slacktoken
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/slack.env
+  - name: github
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/github.env
+    files:
+      - config-source/github_private_key.pem
+
+
+configMapGenerator:
+  - name: dependency-check-db
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/depcheck.env
+  - name: image-source-list
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/repolist.env

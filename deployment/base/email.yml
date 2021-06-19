@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: email
+  namespace: clusterscanner
+stringData:
+  smtp: smtp_SECRET
+  smtp-auth: smtp_auth_SECRET
+  smtp-auth-user: smtp_auth_user_SECRET
+  smtp-auth-password: smtp_auth_password_SECRET

@@ -1,0 +1,29 @@
+site_name: ClusterScanner
+
+# These files are relative to the /docs repository
+# Learn more on https://www.mkdocs.org/user-guide/writing-your-docs/
+nav:
+  - Home: index.md
+  - User:
+    - Configuration for Teams: user/configuration/README.md
+    - Repolists: deployment/repolist.md
+  - Deployment:
+    - Orchestrator: deployment/add-clusterscanner.md
+    - Collector: deployment/clusterscanner-image-collector.md
+    - Repolists: deployment/repolist.md
+  - Scans:
+      - Overview: user/scans/README.md
+      - Distroless: user/scans/distroless.md
+      - Image Lifetime: user/scans/image-lifetime.md
+      - Known Vulnerabilities: user/scans/known-vulnerabilities.md
+      - Malware: user/scans/malware.md
+      - Root-User: user/scans/run-as-root.md
+  - Architecture:
+      - Overview: architecture/README.md
+      - Image Fetcher: architecture/fetcher.md
+      - Decision Orchestration: architecture/decisions/architecture-orchestration.md
+      - Decision Image Transfer: architecture/decisions/case-study-image-transfer.md
+      - Threat Model: architecture/threat-model.md
+
+plugins:
+  - techdocs-core
