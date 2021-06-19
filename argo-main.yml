@@ -3,7 +3,6 @@ kind: Workflow
 metadata:
   generateName: orchestration-
 spec:
-  onExit: notify-teams
   serviceAccountName: clusterscanner
   ttlStrategy:
     secondsAfterSuccess: 3600
@@ -19,142 +18,11 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: fetch-image-list
-            template: fetch-image-list
-        - - name: run-subflow
-            template: subflow
+        - - name: orchestration-job
+            templateRef:
+              name: orchestration-job-template
+              template: main
             arguments:
-              artifacts:
-                - name: imageList
-                  from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
-        - - name: pvc-status-post
-            template: pvc-scandata-cleanup
-
-    - name: pvc-scandata-cleanup
-      volumes:
-        - name: scandata
-          persistentVolumeClaim:
-            claimName: clusterscanner-scandata
-        - name: images
-          persistentVolumeClaim:
-            claimName: clusterscanner-images
-      script:
-        image: quay.io/sdase/clusterscanner-base:2
-        volumeMounts:
-          - name: scandata
-            mountPath: /clusterscanner/data
-          - name: images
-            mountPath: /clusterscanner/images
-        imagePullPolicy: Always
-        command: [bash]
-        env:
-          - name: MAX_DAYS
-            value: "7"
-        source: |
-          set -e
-          folders="/clusterscanner/data/ /clusterscanner/images/"
-          for folderPath in ${folders}; do
-            du -sh ${folderPath}
-            for cleanupPath in $(find ${folderPath}/* -mtime +${MAX_DAYS}); do
-              echo "Removing ${cleanupPath} with size $(du ${cleanupPath})"
-              rm -Rf ${cleanupPath} || true # folders have owner rights issues
-            done
-          done
-          echo "done"
-          exit 0
-    - name: fetch-image-list
-      outputs:
-        artifacts:
-          - name: image-lists
-            path: /clusterscanner/out
-            archive:
-              none: {}
-          - name: image-list-merged
-            path: /clusterscanner/out/merged/merged.json
-            archive:
-              none: {}
-      volumes:
-        - name: image-source-list
-          configMap:
-            name: image-source-list
-        - name: github
-          secret:
-            secretName: github
-        - name: tmp
-          emptyDir: {}
-      container:
-        image: quay.io/sdase/clusterscanner-image-source-fetcher:2
-        imagePullPolicy: Always
-        volumeMounts:
-          - name: github
-            mountPath: /clusterscanner/github/github_private_key.pem
-            subPath: github_private_key.pem
-          - name: image-source-list
-            mountPath: /clusterscanner/image-source-list
-          - name: tmp
-            mountPath: /clusterscanner/out
-        env:
-          - name: GITHUB_KEY_FILE_PATH
-            value: /clusterscanner/github/github_private_key.pem
-        envFrom:
-          - secretRef:
-              name: "github"
-
-    - name: subflow
-      inputs:
-        artifacts:
-          - name: imageList
-            path: /clusterscanner/imageList.json
-            mode: 0444
-      container:
-        image: quay.io/sdase/clusterscanner-workflow-runner:2
-        imagePullPolicy: Always
-        env:
-          - name: SCAN_ID
-            value: "{{ workflow.parameters.scanId }}"
-          - name: REGISTRY_SECRET
-            value: registry-sda-default
-          - name: DEPENDENCY_SCAN_CM
-            value: dependency-check-db
-          - name: DEFECTDOJO_CM
-            value: defectdojo
-          - name: DEFECTDOJO_SECRETS
-            value: defectdojo
-    - name: notify-teams
-      volumes:
-        - name: scandata
-          persistentVolumeClaim:
-            claimName: clusterscanner-scandata
-      container:
-        image: quay.io/sdase/clusterscanner-notifier:2
-        volumeMounts:
-          - name: scandata
-            mountPath: /clusterscanner/data
-            subPath: "{{ workflow.parameters.scanId }}"
-        imagePullPolicy: Always
-        env:
-          - name: SLACK_CLI_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: slacktoken
-                key: SLACK_CLI_TOKEN
-          - name: smtp
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp
-          - name: smtp-auth
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth
-          - name: smtp-auth-user
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth-user
-          - name:  smtp-auth-password
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth-password
+              parameters:
+                - name: scanId
+                  value: "{{ workflow.parameters.scanId }}"
