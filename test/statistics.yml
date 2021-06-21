@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: clusterscanner-pvcstats
+spec:
+  ttlStrategy:
+    secondsAfterSuccess: 3600
+    secondsAfterFailure: 86400
+  artifactRepositoryRef:
+    configMap: artifact-repositories
+    key: default-v1
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+      - - name: pvc-stats
+          template: pvc-stats
+
+    - name: pvc-stats
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+          - name: images
+            mountPath: /clusterscanner/images
+        imagePullPolicy: Always
+        command: [bash]
+        source: |
+          set -e
+          folder="/clusterscanner/data"
+          newestResultFolder=$(ls --sort=time ${folder} | head -n 1)
+          echo "newestResultFolder: $newestResultFolder"
+          #ls -la $folder
+          #ls -la ${folder}/${newestResultFolder}
+          for notificationFile in $(ls ${folder}/${newestResultFolder} | grep tools); do
+            image=$(cat ${folder}/${newestResultFolder}/${notificationFile} | jq -r '.image')
+            age=$(cat ${folder}/${newestResultFolder}/${notificationFile} | jq -r '.scanResults[][] | .age' | grep -v null ) || age=""
+            if [ "${age}" != "null" ] && [ "${age}" != "" ]; then
+                echo "${age} ${image}" >> ages-images.txt
+            fi
+            cat ${folder}/${newestResultFolder}/${notificationFile} | jq '.scanResults[][] | .age' | grep -v null >> ages.txt || true
+          done
+          cat ages-images.txt | sort -n
+          count=0; total=0
+          for i in $( awk '{ print $1; }' ages.txt ); do
+            #echo $total+$i | bc
+            total=$(echo $total+$i | bc );
+            let "count=count+1"
+          done;
+          echo "done"
+          avgAge=$(echo "scale=2; $total / $count" | bc)
+          echo "Avg. Age of Images: ${avgAge}"
+          exit 0
