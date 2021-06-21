@@ -35,12 +35,13 @@ spec:
         command: [bash]
         source: |
           set -e
+          cluster="tools"
           folder="/clusterscanner/data"
           newestResultFolder=$(ls --sort=time ${folder} | head -n 1)
           echo "newestResultFolder: $newestResultFolder"
           #ls -la $folder
           #ls -la ${folder}/${newestResultFolder}
-          for notificationFile in $(ls ${folder}/${newestResultFolder} | grep tools); do
+          for notificationFile in $(ls ${folder}/${newestResultFolder} | grep ${CLUSTER}); do
             image=$(cat ${folder}/${newestResultFolder}/${notificationFile} | jq -r '.image')
             age=$(cat ${folder}/${newestResultFolder}/${notificationFile} | jq -r '.scanResults[][] | .age' | grep -v null ) || age=""
             if [ "${age}" != "null" ] && [ "${age}" != "" ]; then
