@@ -44,8 +44,8 @@ The inheritance of overriding the parent annotations/configuration is pointed ou
 
 # Non-Deployment Configuration
 In case of a software development company like SDA SE, not all applications are self hosted. Some applications might be developed and shipped to the customer. The hosting in this case belongs to the customer.
-Assuming that the customer uses the latest application image, we would like to test it.
+Assuming that the customer uses the latest released application image, we would like to test it.
 As a product team, there is the option to:
-* Deploy the latest application image to a cluster which is scanned
+* Deploy the latest released application image to a cluster which is scanned
 * Use a build server like Jenkins to update an image repository like depicted in the figure below
 ![inheritance](latest-jenkins.png)
