@@ -6,6 +6,24 @@ metadata:
 spec:
   activeDeadlineSeconds: 1800
   entrypoint: main # Entry point for job execution
+  workflowSpec:
+    serviceAccountName: clusterscanner
+    ttlStrategy:
+      secondsAfterSuccess: 86400
+      secondsAfterFailure: 86400
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+  inputs:
+    parameters:
+      - workflow.parameters.imageSourceListConfigMapName
+      - workflow.parameters.gitSecretName
+      - workflow.parameters.scanId
+      - workflow.parameters.registrySecretName
+      - workflow.parameters.dependencyCheckDbConfigMapName
+      - workflow.parameters.defectDojoConfigMapName
+      - workflow.parameters.slackTokenSecretName
+      - workflow.parameters.emailSecretName
   templates:
     - name: main
       steps:
@@ -147,7 +165,7 @@ spec:
               secretKeyRef:
                 name: "{{ workflow.parameters.emailSecretName }}"
                 key: smtp-auth-user
-          - name:  smtp-auth-password
+          - name: smtp-auth-password
             valueFrom:
               secretKeyRef:
                 name: "{{ workflow.parameters.emailSecretName }}"
