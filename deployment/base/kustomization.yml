@@ -17,3 +17,4 @@ resources:
   - scanjob.yml
   - repolist.yml
   - email.yml
+  - orchestration-job.yml
