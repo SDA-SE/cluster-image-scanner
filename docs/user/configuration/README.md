@@ -22,13 +22,13 @@ clusterscanner.sdase.org/skip: true # specially useful for development clusters 
 scm.sdase.org/source_branch: 'feature/foobar'
 
 # Adjust scans on object or namespace
-clusterscanner.sdase.org/is-scan-lifetime=true # or false
-clusterscanner.sdase.org/is-scan-distroless=true # or false
-clusterscanner.sdase.org/is-scan-dependency-check=true # or false
-clusterscanner.sdase.org/is-scan-runasroot=true # or false
-clusterscanner.sdase.org/is-scan-malware=false # scan to be implemented
+clusterscanner.sdase.org/is-scan-lifetime: true # or false
+clusterscanner.sdase.org/is-scan-distroless: true # or false
+clusterscanner.sdase.org/is-scan-dependency-check: true # or false
+clusterscanner.sdase.org/is-scan-runasroot: true # or false
+clusterscanner.sdase.org/is-scan-malware: false # scan to be implemented
 
-clusterscanner.sdase.org/max-lifetime='14' # max lifetime days for the lifetime scan
+clusterscanner.sdase.org/max-lifetime: '14' # max lifetime days for the lifetime scan
 ```
 
 Additionally the following **labels** can be used:
