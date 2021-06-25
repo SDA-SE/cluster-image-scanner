@@ -58,7 +58,7 @@ for file in $(find "${RESULT_PATH}" -type f -name "*.json"); do
           fi
           sleep 1 # reduce risk of rate limit
         done
-      done <<<$(echo "${notifications}")
+      done <<< "$(echo "${notifications}")"
     done
   done
 done

@@ -49,6 +49,7 @@ githubAuth() {
   createJWT
 
   echo "will fetch github_token with GITHUB_INSTALLATION_ID ${GITHUB_INSTALLATION_ID}"
+  # shellcheck disable=SC2155
   export GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" "https://api.github.com/app/installations/${GITHUB_INSTALLATION_ID}/access_tokens" | jq '.token' | tr -d \")
   if [ "${GITHUB_TOKEN}" == "null" ]; then
     echo "GITHUB_TOKEN is null"

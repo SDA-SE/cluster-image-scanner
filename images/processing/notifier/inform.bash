@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2086
 set -e
 
 image="${1}"
@@ -22,6 +23,7 @@ if [ "${slackChannel}" != "" ]; then
     exit 1
   fi
   echo "Sending to slack ${slackChannel}"
+  # shellcheck disable=SC2001
   message=$(echo "${message}" | sed 's#"##g')
 
   ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \

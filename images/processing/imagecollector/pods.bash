@@ -132,7 +132,7 @@ getPods() {
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
-        for container in "$(echo $pod | base64 -d |  jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64')"; do
+        for container in $(echo $pod | base64 -d |  jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
           echo "container in ${namespace}"
           image=$(echo "${container}" | base64 -d | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
@@ -140,14 +140,14 @@ getPods() {
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
           fi
-          for i in "$(jq -rcM ".[]" config/imageNegativeList.json)";do
+          for i in $(jq -rcM ".[]" config/imageNegativeList.json);do
             if [ "$(echo "${image}" | grep -c ${i})" -ne 0 ] && [ "${skip}" == "false" ]; then
               echo "skipping ${image} based on imageNegativeList with term ${i}"
               skip="true"
               break;
             fi
           done
-          if [ "${IMAGE_SKIP_POSITIVE_LIST}" != "" ] && [ $(echo "${image}" | grep -c "${IMAGE_SKIP_POSITIVE_LIST}") -ne 1 ]; then
+          if [ "${IMAGE_SKIP_POSITIVE_LIST}" != "" ] && [ "$(echo "${image}" | grep -c "${IMAGE_SKIP_POSITIVE_LIST}")" -ne 1 ]; then
             echo "skipping ${image} based on IMAGE_SKIP_POSITIVE_LIST with regex ${IMAGE_SKIP_POSITIVE_LIST}"
             skip="true"
           fi
