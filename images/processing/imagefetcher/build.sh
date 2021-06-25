@@ -31,10 +31,6 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
 
-base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
-ctr_tools="$( buildah from --pull --quiet ${base_image} )"
-mnt_tools="$( buildah mount "${ctr_tools}" )"
-
 base_image="quay.io/sdase/clusterscanner-base:2"
 ctr_tools="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"

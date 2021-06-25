@@ -17,13 +17,13 @@ _config_dir=$(mktemp -d)
 
 echo "Checking for existing config manifest"
 
-skopeo inspect --config docker://${IMAGE_BY_HASH} | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${_config_dir}/config.json"
+skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${_config_dir}/config.json"
 
 [[ -f "${DEST_DIR}/config.json" ]] && diff -qs "${_config_dir}/config.json" "${DEST_DIR}/config.json" && echo "Already got image with identical config manifest, skipping" && exit 0
 
 echo "Downloading image ${IMAGE_BY_HASH}"
 
-skopeo copy docker://${IMAGE_BY_HASH} dir:${_tmp_dir}
+skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${_tmp_dir}"
 
 for l in $(cat "${_tmp_dir}/manifest.json" | jq ".layers | .[].digest" | tr -d \" | sed -e "s/^sha256://g"); do
     echo "Extracting blob ${l}"
