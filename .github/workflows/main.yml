@@ -54,7 +54,6 @@ jobs:
 
   changes:
     runs-on: ubuntu-latest
-    needs: shellcheck
     outputs:
       base: ${{ steps.filter.outputs.base }}
       imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
