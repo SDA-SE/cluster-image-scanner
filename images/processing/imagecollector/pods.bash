@@ -33,14 +33,14 @@ getPods() {
     if [ "${SCM_URL_ANNOTATION}" == "" ]; then
       SCM_URL_ANNOTATION="scm.sdase.org/source_url"
     fi
-    if [ "${SCM_BRANCH_ANNOTATION}=" == "" ]; then
+    if [ "${SCM_BRANCH_ANNOTATION}" == "" ]; then
       SCM_BRANCH_ANNOTATION="scm.sdase.org/source_branch"
     fi
-    if [ "${SCM_RELEASE_ANNOTATION}=" == "" ]; then
+    if [ "${SCM_RELEASE_ANNOTATION}" == "" ]; then
       SCM_RELEASE_ANNOTATION="scm.sdase.org/release"
     fi
 
-    echo "[" > ${IMAGE_JSON_FILE}
+    echo "[" > "${IMAGE_JSON_FILE}"
 
     # iteration needed due to memory limits in large deployments
     namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
@@ -48,7 +48,7 @@ getPods() {
     for namespace in $namespaces; do
       echo "Processing namespace ${namespace}"
       execution=true
-      namespaceAnnotations=$(kubectl get namespace ${namespace} -o jsonpath='{.metadata.annotations}' || execution=false)
+      namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' || execution=false)
       if [ "${execution}" == "false" ]; then
         echo "Namespace ${namespace} doesn't exists anymore"
         continue

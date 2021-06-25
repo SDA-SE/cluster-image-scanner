@@ -44,8 +44,8 @@ dnf_opts=(
   "--quiet"
 )
 
-buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install ${dnf_opts[@]} curl git openssl openssh
-buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean ${dnf_opts[@]} all
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" curl git openssl openssh
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf ${mnt}/var/{cache,log}/* ${mnt}/tmp/*
 
 mkdir -p "${mnt}/home/code" || true
