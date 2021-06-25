@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    name: wordpress
+  name: wordpress
+  annotations:
+    contact.sdase.org/team: "security"
+    contact.sdase.org/slack: "#security-notifications"
+    clusterscanner.sdase.org/skip_regex: "mysql."
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+      annotations:
+        contact.sdase.org/team: "security"
+        contact.sdase.org/slack: "#security-notifications-test"
+#        clusterscanner.sdase.org/skip: "true"
+    spec:
+      containers:
+        - image: mysql:5.6
+          name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: test
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim

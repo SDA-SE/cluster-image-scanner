@@ -1,0 +1,10 @@
+###DATE###,Image potentially running as root,269,,Critical,"
+Image is running as root user when started without explicit user selection.
+Image ###IMAGE###
+Cluster ###CLUSTER###
+Namespace ###NAMESPACE###  ","Change user to a non-root user during image building.
+Example in Dockerfile:
+USER 1011
+Example with builadh:
+buildah config [...] --user 1011","Greater blast radius when container is overtaken by an attacker.
+Worst case: Attacker gains root access to host machine (Container Escape).","https://sda-se.atlassian.net/wiki/spaces/DG/pages/1048281149/Guidelines+to+run+containers+in+a+cluster",TRUE,FALSE 
