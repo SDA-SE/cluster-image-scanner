@@ -46,7 +46,7 @@ dnf_opts=(
 
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" curl git openssl openssh
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
-rm -rf ${mnt}/var/{cache,log}/* ${mnt}/tmp/*
+rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 
 mkdir -p "${mnt}/home/code" || true
 rsync -a bin/jq "${mnt}/usr/local/bin/jq"

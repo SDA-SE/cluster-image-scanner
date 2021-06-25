@@ -85,7 +85,9 @@ gitSshAuth() {
   _id=$(id -u)
   echo "openshift:x:${_id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd
   # for key generated with openssh version<7.6, see https://serverfault.com/questions/854208/ssh-suddenly-returning-invalid-format/960647
+  # shellcheck disable=SC2001
   _ssh_repository_host_no_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#:.*##g')
+  # shellcheck disable=SC2001
   _ssh_repository_host_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#.*:##g')
 
   ssh-keyscan -t rsa -p "${_ssh_repository_host_port}" -H "${_ssh_repository_host_no_port}" >> "${SSH_TARGET_PATH}/known_hosts"
