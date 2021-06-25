@@ -14,19 +14,19 @@ source /clusterscanner/scan-common.bash
 scan_result_pre
 skopeo inspect docker://"${IMAGE_BY_HASH}" > /dev/null || exit=true
 if [ "${exit}" == "true" ]; then
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"failed\"}")
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
     scan_result_post
     exit 1
 fi
 
 # build date
-dt1=$(skopeo inspect docker://"${IMAGE_BY_HASH}" | jq 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
+dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
 
 
 # check for invalid dates
-if [[ "xX${dt1}" == "xXNODATE" ]]; then
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"failed\", \"infoText\": \"Image build date invalid\"}")
+if [[ "${dt1}" == "NODATE" ]]; then
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\", \"infoText\": \"Image build date invalid\"}")
     scan_result_post
     exit 1
 fi
@@ -46,21 +46,21 @@ let "hDiff=${tDiff}/3600" || true
 # day difference
 let "dDiff=${hDiff}/24" || true
 
-JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}}")
+JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}}")
 
-if [ ${dDiff} -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
+if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     infoText="Image is too old"
     if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
       infoText="Could not determine image age due to image creation date of 1970 (happens for reproducible builds)"
     fi
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/ddTemplate.csv "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###INFOTEXT###/${infoText}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###SEVERITY###/High/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###BUILDDATE###/${dt1}/" "${ARTIFACTS_PATH}/lifetime.csv"
 else
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi
 
 scan_result_post

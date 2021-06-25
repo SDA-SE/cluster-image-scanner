@@ -19,15 +19,15 @@ for sh in "bin/sh$" "bin/bash$" "bin/dash$" "bin/zsh$" "bin/ash$"; do
     if tar -tf "${IMAGE_TAR_PATH}" | grep -q ${sh}; then
         _sh_name=$(echo "${sh}" | rev | cut -c2- | rev)
         echo "${_sh_name} found"
-        JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ".shells += [\"${_sh_name}\"]")
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".shells += [\"${_sh_name}\"]")
         _shell_found=1
     fi
 done
 
 if [[ ${_shell_found} -eq 1 ]]; then
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Image has shell executables and therefore most likely is not distroless\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Image has shell executables and therefore most likely is not distroless\"}")
 else
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi
 
 scan_result_post

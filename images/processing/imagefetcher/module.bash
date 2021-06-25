@@ -29,7 +29,7 @@ echo "Downloading image ${IMAGE_BY_HASH}"
 
 skopeo copy" docker://${IMAGE_BY_HASH}" "dir:${_tmp_dir}"
 
-for l in $(cat "${_tmp_dir}/manifest.json" | jq ".layers | .[].digest" | tr -d \" | sed -e "s/^sha256://g"); do
+for l in $(jq ".layers | .[].digest" "${_tmp_dir}/manifest.json" | tr -d \" | sed -e "s/^sha256://g"); do
     echo "Extracting blob ${l}"
     tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscan --group=clusterscan -mxzf "${_tmp_dir}/${l}" -C "${_unpack_dir}" || true # TODO scan somehow dev
     find "${_unpack_dir}" -type d -exec chmod 755 {} +
@@ -40,7 +40,7 @@ cd "${_unpack_dir}"
 
 echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
 mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
-tar -cf "${IMAGE_TAR_PATH}" * || exit 1
+tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
 
 echo "Copying manifest and config file"
 cp "${_tmp_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"

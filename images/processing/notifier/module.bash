@@ -7,7 +7,7 @@ fi
 
 for file in $(find "${RESULT_PATH}" -type f -name "*.json"); do
   echo "found file ${file}"
-  item=$(cat ${file})
+  item=$(cat "${file}")
   image=$(echo "${item}" | jq -r '.image'| tr -cd '[:alnum:]./@:_-')
   team=$(echo "${item}" | jq -r '.team'| tr -cd '[:alnum:]._-')
   namespace=$(echo "${item}" | jq -r '.namespace'| tr -cd '[:alnum:]._-')
@@ -46,15 +46,15 @@ for file in $(find "${RESULT_PATH}" -type f -name "*.json"); do
           if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
             message="${message}\nError: ${errorText}"
           fi
-          output=$(./inform.bash "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${scanType}" "${title}" "${message}" || true)
-          echo $output
-          if [ $(echo "${output}" | grep '"ok": false' | wc -l) -gt 0 ]; then
+          output=$(./inform.bash "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}" || true)
+          echo "${output}"
+          if [ "$(echo "${output}" | grep -c '"ok": false')" -gt 0 ]; then
             echo "error in slack"
             exit 1;
           fi
-          if [ $(echo "${output}" | grep ratelimited | wc -l) -gt 0 ]; then
+          if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
             sleep 120 # wait for rate limt
-            ./inform.bash "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${scanType}" "${title}" "${message}"
+            ./inform.bash "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}"
           fi
           sleep 1 # reduce risk of rate limit
         done

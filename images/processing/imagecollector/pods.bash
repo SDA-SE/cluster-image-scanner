@@ -48,7 +48,7 @@ getPods() {
     for namespace in $namespaces; do
       echo "Processing namespace ${namespace}"
       execution=true
-      namespaceAnnotations=$(kubectl get namespace $namespace -o jsonpath='{.metadata.annotations}' || execution=false)
+      namespaceAnnotations=$(kubectl get namespace ${namespace} -o jsonpath='{.metadata.annotations}' || execution=false)
       if [ "${execution}" == "false" ]; then
         echo "Namespace ${namespace} doesn't exists anymore"
         continue
@@ -71,34 +71,34 @@ getPods() {
           namespaceContactEmail=""
         fi
       fi
-      skipNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r '."'${SKIP_REGEX_ANNOTATION}'"')
+      skipNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".${SKIP_REGEX_ANNOTATION}")
       if [ "${skipNamespaceRegex}" == "" ] || [ "${skipNamespaceRegex}" == "null" ]; then
         skipNamespaceRegex="NO-SKIP"
       fi
-      skipNamespace=$(echo "${namespaceAnnotations}" | jq -r '."'${SKIP_ANNOTATION}'"')
+      skipNamespace=$(echo "${namespaceAnnotations}" | jq -r ".${SKIP_ANNOTATION}")
       echo "namespace: ${namespace} (SKIP_REGEX_ANNOTATION ${SKIP_REGEX_ANNOTATION}), applying the following order: pod annotiation (not mentioned here), skipNamespaceRegex: ${skipNamespaceRegex} <- skipNamespace: ${skipNamespace} <- DEFAULT_SKIP: ${DEFAULT_SKIP}"
 
-      isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_LIFETIME_ANNOTATION}'"' )
+      isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_LIFETIME_ANNOTATION}")
       if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
         isScanLifetime="${DEFAULT_SCAN_LIFETIME}"
       fi
-      isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_DISTROLESS_ANNOTATION}'"' )
+      isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_DISTROLESS_ANNOTATION}")
       if [ "${isScanDistroless}" == "" ] || [ "${isScanDistroless}" == "null" ]; then
         isScanDistroless="${DEFAULT_SCAN_DISTROLESS}"
       fi
-      isScanMalware=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_DISTROLESS_ANNOTATION}'"' )
+      isScanMalware=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_DISTROLESS_ANNOTATION}")
       if [ "${isScanMalware}" == "" ] || [ "${isScanMalware}" == "null" ]; then
         isScanMalware="${DEFAULT_SCAN_MALWARE}"
       fi
-      isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_DEPENDENCY_CHECK_ANNOTATION}'"' )
+      isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ."${SCAN_DEPENDENCY_CHECK_ANNOTATION}")
       if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
         isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      isScanRunAsRoot=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_RUNASROOT_ANNOTATION}'"' )
+      isScanRunAsRoot=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_RUNASROOT_ANNOTATION}")
       if [ "${isScanRunAsRoot}" == "" ] || [ "${isScanRunAsRoot}" == "null" ]; then
         isScanRunAsRoot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      lifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r '."'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"' )
+      lifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}")
       if [ "${lifetimeMaxDays}" == "" ] || [ "${lifetimeMaxDays}" == "null" ]; then
         lifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
@@ -137,14 +137,14 @@ getPods() {
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
           fi
-          for i in $(cat config/imageNegativeList.json | jq -rcM ".[]");do
-            if [ $(echo "${image}" | grep ${i} | wc -l) -ne 0 ] && [ "${skip}" == "false" ]; then
+          for i in $(jq -rcM ".[]" config/imageNegativeList.json);do
+            if [ $(echo "${image}" | grep -c ${i}) -ne 0 ] && [ "${skip}" == "false" ]; then
               echo "skipping ${image} based on imageNegativeList with term ${i}"
               skip="true"
               break;
             fi
           done
-          if [ "${IMAGE_SKIP_POSITIVE_LIST}" != "" ] && [ $(echo "${image}" | grep ${IMAGE_SKIP_POSITIVE_LIST} | wc -l) -ne 1 ]; then
+          if [ "${IMAGE_SKIP_POSITIVE_LIST}" != "" ] && [ $(echo "${image}" | grep -c "${IMAGE_SKIP_POSITIVE_LIST}") -ne 1 ]; then
             echo "skipping ${image} based on IMAGE_SKIP_POSITIVE_LIST with regex ${IMAGE_SKIP_POSITIVE_LIST}"
             skip="true"
           fi

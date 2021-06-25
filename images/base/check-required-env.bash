@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "xX${MODULE_NAME}" == "xX" ]; then
+if [ "${MODULE_NAME}" == "" ]; then
     echo "MODULE_NAME not set"
     exit 1;
 fi

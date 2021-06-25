@@ -21,18 +21,18 @@ scan_result_pre
     --noupdate \
     --disableCentralCache \
     --connectionString "${DEPSCAN_DB_CONNECTSRING}" \
-    >> ${ARTIFACTS_PATH}/depScan.log || true
+    >> "${ARTIFACTS_PATH}/depScan.log" || true
 
-cat ${ARTIFACTS_PATH}/depScan.log
+cat "${ARTIFACTS_PATH}/depScan.log"
      #--suppression "/suppressions.xml" # TODO
 
 if ! [ -f "${ARTIFACTS_PATH}/dependency-check-report.xml" ]; then
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ".errors += [{\"errorText\": \"Dependency check report has not been generated\", \"artifactsPath\":\"${ARTIFACTS_PATH}\"}]")
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"failed\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"Dependency check report has not been generated\", \"artifactsPath\":\"${ARTIFACTS_PATH}\"}]")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
     scan_result_post
     exit 1
 else
-    JSON_RESULT=$(echo ${JSON_RESULT} | jq -Sc ". += {\"status\": \"completed\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\"}")
 fi
 
 scan_result_post

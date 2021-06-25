@@ -14,8 +14,8 @@ REGISTRY_USER=$5
 REGISTRY_TOKEN=$6
 BUILD_EXPORT_OCI_ARCHIVES=$7
 
-MAJOR=$(echo $VERSION | tr '.' "\n" | sed -n 1p)
-MINOR=$(echo $VERSION | tr '.' "\n" | sed -n 2p)
+MAJOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 1p)
+MINOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 2p)
 
 oci_prefix="org.opencontainers.image"
 descr="Clusterscan Notifier"
@@ -31,7 +31,6 @@ build_dir="${dir}/build"
 
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
-mnt_tools="$(buildah mount "${ctr_tools}")"
 
 base_image="quay.io/sdase/clusterscanner-base:2"
 ctr="$(buildah from --pull --quiet $base_image)"
@@ -46,7 +45,7 @@ dnf_opts=(
   "--setopt=tsflags=nocontexts,nodocs"
   "--quiet"
 )
-rm -Rf $mnt/etc/yum.repos.d || true
+rm -Rf "${mnt}/etc/yum.repos.d" || true
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" mailx dos2unix
 rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
 
@@ -63,7 +62,7 @@ base_bill_of_materials_hash=$(buildah inspect --type image $base_image | jq '.OC
 bill_of_materials_hash="$( (
   cat "${0}"
   echo "${base_bill_of_materials_hash}"
-  cat *
+  cat ./*
 ) | sha256sum | awk '{ print $1 }')"
 echo "bill_of_materials: $bill_of_materials_hash"
 buildah config \

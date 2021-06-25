@@ -44,7 +44,7 @@ base_bill_of_materials_hash=$(buildah inspect --type image ${base_image}  | jq '
 #echo "base_bill_of_materials_hash $base_bill_of_materials_hash"
 bill_of_materials_hash="$( ( cat "${0}";
   echo "${base_bill_of_materials_hash}"; \
-  cat *; \
+  cat ./*; \
   ) | sha256sum | awk '{ print $1 }' )"
 echo "bill_of_materials: $bill_of_materials_hash";
 buildah config \

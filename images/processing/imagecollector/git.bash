@@ -3,7 +3,7 @@ set -e
 
 createJWT() {
   GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
-  if [ $(cat "${GITHUB_KEY_FILE_PATH}" | wc -l) -eq 0 ]; then
+  if [ $( wc -l "${GITHUB_KEY_FILE_PATH}") -eq 0 ]; then
     echo "${GITHUB_KEY_FILE_PATH} is empty"
     exit 45
   fi
@@ -42,7 +42,7 @@ githubAuth() {
   fi
   if [ -z "${GITHUB_INSTALLATION_ID}" ]; then
     echo "ERROR: variable GITHUB_INSTALLATION_ID is empty, exit"
-    echo 'try       curl -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations | jq'
+    echo 'try       curl -H "Authorization: Bearer ##INSERT_CLUSTERSCANNER_JWT_HERE##" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations | jq'
     exit 1
   fi
 
@@ -76,14 +76,14 @@ gitSshAuth() {
     exit 1
   fi
 
-  if [ $(grep 'END' "${TARGET_SSH_KEY_PATH}" | wc -l) -eq 0 ]; then
+  if [ $(grep -c 'END' "${TARGET_SSH_KEY_PATH}") -eq 0 ]; then
     echo "-----END OPENSSH PRIVATE KEY-----" >> "${TARGET_SSH_KEY_PATH}"
   else
-    echo "" >>${TARGET_SSH_KEY_PATH}
+    echo "" >> "${TARGET_SSH_KEY_PATH}"
   fi
   CLONE_URL="ssh://git@${GIT_SSH_REPOSITORY_HOST}${GIT_REPOSITORY_PATH}"
   _id=$(id -u)
-  echo "openshift:x:$_id:0:openshift user:/home/code:/sbin/nologin" >>/etc/passwd
+  echo "openshift:x:${_id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd
   # for key generated with openssh version<7.6, see https://serverfault.com/questions/854208/ssh-suddenly-returning-invalid-format/960647
   _ssh_repository_host_no_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#:.*##g')
   _ssh_repository_host_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#.*:##g')

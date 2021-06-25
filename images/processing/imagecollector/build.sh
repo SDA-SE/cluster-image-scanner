@@ -87,7 +87,7 @@ bill_of_materials="$(buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/b
 echo "bill_of_materials: ${bill_of_materials}";
 bill_of_materials_hash="$( ( cat "${0}";
   echo "${bill_of_materials}"; \
-  cat *;
+  cat ./*;
   ) | sha256sum | awk '{ print $1 }' )"
 
 oci_prefix="org.opencontainers.image"

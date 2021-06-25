@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /home/code 
+cd /home/code
 
 export HOME=/home/code
 
@@ -15,15 +15,15 @@ echo "gitFetch"
 gitFetch
 
 echo "getPods"
-if [ "$CLUSTER_NAME" != "" ]; then
-  ENVIRONMENT_NAME="$CLUSTER_NAME"
+if [ "${CLUSTER_NAME}" != "" ]; then
+  ENVIRONMENT_NAME="${CLUSTER_NAME}"
 fi
-getPods $IMAGE_FILENAME_JSON $ENVIRONMENT_NAME
+getPods "${IMAGE_FILENAME_JSON}" "${ENVIRONMENT_NAME}"
 
 
 cd /tmp/cluster-scan
-git add $IMAGE_FILENAME_JSON || true
-git commit -m "update file" $IMAGE_FILENAME_JSON  || true
+git add "${IMAGE_FILENAME_JSON}" || true
+git commit -m "update file" "${IMAGE_FILENAME_JSON}"  || true
 
 TZ="Europe/Berlin" date > lastScan
 git add lastScan || true
