@@ -73,13 +73,13 @@ jobs:
             base:
               - 'images/base/**'
             imagesourcefetcher:
-              - 'images/processing/image-source-fetcher/**'
+              - 'images/process/image-source-fetcher/**'
             imagecollector:
-              - 'images/processing/imagecollector/**'
+              - 'images/process/imagecollector/**'
             imagefetcher:
-              - 'images/processing/imagefetcher/**'
+              - 'images/process/imagefetcher/**'
             notifier:
-              - 'images/processing/notifier/**'
+              - 'images/process/notifier/**'
             dependencycheck:
               - 'images/scan/dependency-check/**'
             distroless:
@@ -119,7 +119,7 @@ jobs:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
         with:
-          image-path: images/processing/imagecollector
+          image-path: images/process/imagecollector
           image-name: clusterscanner-imagecollector
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
@@ -138,7 +138,7 @@ jobs:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
         with:
-          image-path: images/processing/imagefetcher
+          image-path: images/process/imagefetcher
           image-name: clusterscanner-imagefetcher
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
@@ -157,7 +157,7 @@ jobs:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
         with:
-          image-path: images/processing/image-source-fetcher
+          image-path: images/process/image-source-fetcher
           image-name: clusterscanner-image-source-fetcher
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
@@ -176,7 +176,7 @@ jobs:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
         with:
-          image-path: images/processing/notifier
+          image-path: images/process/notifier
           image-name: clusterscanner-notifier
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
