@@ -171,15 +171,15 @@ getPods() {
           if .image_id|startswith("docker-pullable://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
           if .image_id|startswith("sha256:") then .image_id="\(.image|split(":")[0])\("@sha256:")\(.image_id|split(":")[1])" else . end |
           if .image|test("sha256:") then .image_id=.image else . end |
-          if .image_id == null then .image_id=.image else . end ' /tmp/container.json /tmp/meta.json >> ${IMAGE_JSON_FILE}
+          if .image_id == null then .image_id=.image else . end ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
         done
       done
     done
-    ls -lah ${IMAGE_JSON_FILE}
+    ls -lah "${IMAGE_JSON_FILE}"
 
     # fix syntax between namespaces
-    sed  -i -z 's#}\s{#},\n{#g' ${IMAGE_JSON_FILE}
-    echo "]" >> ${IMAGE_JSON_FILE}
-    jq 'unique' ${IMAGE_JSON_FILE} > ${IMAGE_JSON_FILE}.tmp
-    mv ${IMAGE_JSON_FILE}.tmp ${IMAGE_JSON_FILE}
+    sed  -i -z 's#}\s{#},\n{#g' "${IMAGE_JSON_FILE}"
+    echo "]" >> "${IMAGE_JSON_FILE}"
+    jq 'unique' "${IMAGE_JSON_FILE}" > "${IMAGE_JSON_FILE}.tmp"
+    mv "${IMAGE_JSON_FILE}.tmp" "${IMAGE_JSON_FILE}"
 }
