@@ -95,22 +95,12 @@ jobs:
     runs-on: ubuntu-latest
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: "${{ needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}"
-    env:
-      PATH_TO_BUILD_DIR: images/base
-      IMAGE_NAME: clusterscanner-base
-    steps: &build_steps
+    steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - name: create and push an image
-        run: |
-          cd ${PATH_TO_BUILD_DIR}
-          chmod +x ./build.sh
-          if [ "${GITHUB_REF##*/}" == "master" ]; then
-            VERSION="2.0.${GITHUB_RUN_NUMBER}"
-          else
-            BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-            VERSION="${BRANCH_TO_DOCKER}-${GITHUB_RUN_NUMBER}"
-          fi
-          sudo ./build.sh "quay.io" "sdase" "${IMAGE_NAME}" "${VERSION}" "${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}" "${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}" true
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/base
+          image-name: clusterscanner-base
 
   build_imagecollector:
     needs: [changes, build_image_base]
@@ -122,10 +112,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.imagecollector == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/processing/imagecollector
-      IMAGE_NAME: clusterscanner-imagecollector
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/processing/imagecollector
+          image-name: clusterscanner-imagecollector
 
   build_imagefetcher:
     needs: [changes, build_image_base]
@@ -137,10 +129,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.imagefetcher == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/processing/imagefetcher
-      IMAGE_NAME: clusterscanner-imagefetcher
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/processing/imagefetcher
+          image-name: clusterscanner-imagefetcher
 
   build_imagesourcefetcher:
     needs: [changes, build_image_base]
@@ -152,10 +146,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.imagesourcefetcher == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/processing/image-source-fetcher
-      IMAGE_NAME: clusterscanner-image-source-fetcher
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/processing/image-source-fetcher
+          image-name: clusterscanner-image-source-fetcher
 
   build_notifier:
     needs: [changes, build_image_base]
@@ -167,10 +163,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.notifier == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/processing/notifier
-      IMAGE_NAME: clusterscanner-notifier
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/processing/notifier
+          image-name: clusterscanner-notifier
 
   build_dependencycheck:
     needs: [changes, build_image_base]
@@ -182,10 +180,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.dependencycheck == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/scan/dependency-check
-      IMAGE_NAME: clusterscanner-scan-dependency-check
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/dependency-check
+          image-name: clusterscanner-scan-dependency-check
 
   build_distroless:
     needs: [changes, build_image_base]
@@ -197,10 +197,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.distroless == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/scan/distroless
-      IMAGE_NAME: clusterscanner-scan-distroless
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/distroless
+          image-name: clusterscanner-scan-distroless
 
   build_lifetime:
     needs: [changes, build_image_base]
@@ -212,10 +214,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.lifetime == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/scan/lifetime
-      IMAGE_NAME: clusterscanner-scan-lifetime
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/lifetime
+          image-name: clusterscanner-scan-lifetime
 
   build_runasroot:
     needs: [changes, build_image_base]
@@ -227,10 +231,12 @@ jobs:
       (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
       needs.changes.outputs.runasroot == 'true' &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    env:
-      PATH_TO_BUILD_DIR: images/scan/runasroot
-      IMAGE_NAME: clusterscanner-scan-runasroot
-    steps: *build_steps
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/runasroot
+          image-name: clusterscanner-scan-runasroot
 #  build_malware:
 #    needs: [changes, build_image_base]
 #    runs-on: ubuntu-latest
@@ -241,7 +247,9 @@ jobs:
 #      (needs.build_image_base.result == 'success' || needs.build_image_base.result == 'skipped') &&
 #      needs.changes.outputs.malware == 'true' &&
 #      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-#    env:
-#      PATH_TO_BUILD_DIR: images/scan/malware
-#      IMAGE_NAME: clusterscanner-scan-malware
-#    steps: *build_steps
+#    steps:
+#      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+#      - uses: ./.github/actions/build_image
+#        with:
+#          image-path: images/scan/malware
+#          image-name: clusterscanner-scan-malware
