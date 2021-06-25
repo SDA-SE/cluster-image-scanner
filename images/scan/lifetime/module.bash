@@ -39,11 +39,11 @@ dt2=$(date +%Y-%m-%d\ %H:%M:%S)
 t2=$(date --date="${dt2}" +%s)
 
 # difference in dates in seconds
-tDiff="$(( ${t2}-${t1} ))"
+tDiff="$(( t2-t1 ))"
 # hour difference
-hDiff="$(( ${tDiff}/3600 ))" || true
+hDiff="$(( tDiff/3600 ))" || true
 # day difference
-dDiff="$(( ${hDiff}/24 ))" || true
+dDiff="$(( hDiff/24 ))" || true
 
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}}")
 
