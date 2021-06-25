@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
+shopt -s globstar nullglob
 
 if [ "${RESULT_PATH}" == "" ]; then
   RESULT_PATH=/clusterscanner/data
 fi
 
-for file in $(find "${RESULT_PATH}" -type f -name "*.json"); do
+for file in "${RESULT_PATH}"/**/*.json; do
   echo "found file ${file}"
   item=$(cat "${file}")
   image=$(echo "${item}" | jq -r '.image'| tr -cd '[:alnum:]./@:_-')

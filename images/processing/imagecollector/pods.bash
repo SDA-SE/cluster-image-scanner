@@ -50,9 +50,8 @@ getPods() {
     #namespaces="kube-system" # for testing
     for namespace in $namespaces; do
       echo "Processing namespace ${namespace}"
-      execution=true
-      namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' || execution=false)
-      if [ "${execution}" == "false" ]; then
+      namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
+      if [ "$(echo "${namespaceAnnotations}" | grep -c "NotFound")" -gt 0 ]; then
         echo "Namespace ${namespace} doesn't exists anymore"
         continue
       fi
