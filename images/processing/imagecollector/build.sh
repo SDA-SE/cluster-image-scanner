@@ -44,47 +44,47 @@ dnf_opts=(
   "--quiet"
 )
 
-buildah run --volume ${mnt}:/mnt ${ctr_tools} -- /usr/bin/dnf install ${dnf_opts[@]} curl git openssl openssh
-buildah run --volume ${mnt}:/mnt ${ctr_tools} -- /usr/bin/dnf clean ${dnf_opts[@]} all
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install ${dnf_opts[@]} curl git openssl openssh
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean ${dnf_opts[@]} all
 rm -rf ${mnt}/var/{cache,log}/* ${mnt}/tmp/*
 
-mkdir -p ${mnt}/home/code || true
-rsync -a bin/jq ${mnt}/usr/local/bin/jq
-rsync -a bin/kubectl ${mnt}/usr/local/bin/kubectl
-rsync -a entrypoint.bash ${mnt}/home/code/entrypoint.bash
-rsync -a git.bash ${mnt}/home/code/git.bash
-rsync -a pods.bash ${mnt}/home/code/pods.bash
-rsync -a build.sh ${mnt}/home/code/build.sh # for sha1
-rsync -a .gitconfig ${mnt}/home/code/.gitconfig
-rsync -a config ${mnt}/home/code/
+mkdir -p "${mnt}/home/code" || true
+rsync -a bin/jq "${mnt}/usr/local/bin/jq"
+rsync -a bin/kubectl "${mnt}/usr/local/bin/kubectl"
+rsync -a entrypoint.bash "${mnt}/home/code/entrypoint.bash"
+rsync -a git.bash "${mnt}/home/code/git.bash"
+rsync -a pods.bash "${mnt}/home/code/pods.bash"
+rsync -a build.sh "${mnt}/home/code/build.sh # for sha1"
+rsync -a .gitconfig "${mnt}/home/code/.gitconfig"
+rsync -a config "${mnt}/home/code/"
 
 # git looks up for a user
 openShiftGroupId=0
-echo "nonroot:x:1001:$openShiftGroupId:nonroot:/home/code:/sbin/nologin" >> ${mnt}/etc/passwd
-echo "nobody:x:1001:" >> ${mnt}/etc/group
-echo "openshift:x:5555:" >> ${mnt}/etc/group
-chgrp $openShiftGroupId ${mnt}/etc/passwd # openShift 3.X specifc, https://docs.openshift.com/container-platform/3.3/creating_images/guidelines.html
-chmod g=u ${mnt}/etc/passwd
-chmod o=u ${mnt}/etc/passwd
+echo "nonroot:x:1001:${openShiftGroupId}:nonroot:/home/code:/sbin/nologin" >> "${mnt}/etc/passwd"
+echo "nobody:x:1001:" >> "${mnt}/etc/group"
+echo "openshift:x:5555:" >> "${mnt}/etc/group"
+chgrp "${openShiftGroupId}" "${mnt}/etc/passwd" # openShift 3.X specifc, https://docs.openshift.com/container-platform/3.3/creating_images/guidelines.html
+chmod g=u "${mnt}/etc/passwd"
+chmod o=u "${mnt}/etc/passwd"
 
-mkdir ${mnt}/.ssh
-chmod 777 -R ${mnt}/home/
-chown -R 1001:$openShiftGroupId ${mnt}/home/code/
+mkdir -p "${mnt}/.ssh"
+chmod 777 -R "${mnt}/home/"
+chown -R "1001:${openShiftGroupId}" "${mnt}/home/code/"
 #chmod 770 ${mnt}/home/code/.ssh
 #touch ${mnt}/home/code/.ssh/known_hosts
 #chown 1001:$openShiftGroupId ${mnt}/home/code/.ssh/known_hosts
 #chmod 777 ${mnt}/home/code/.ssh/known_hosts
 
-chmod 555 ${mnt}/etc/hosts
+chmod 555 "${mnt}/etc/hosts"
 
 # Get a bill of materials, TODO: use find to create bom
-bill_of_materials="$(buildah run --volume ${mnt}:/mnt ${ctr_tools} -- /usr/bin/rpm \
+bill_of_materials="$(buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/rpm \
   --query \
   --all \
   --queryformat "%{NAME} %{VERSION} %{RELEASE} %{ARCH}" \
   --dbpath="/mnt/var/lib/rpm" \
   | sort )"
-echo "bill_of_materials: $bill_of_materials";
+echo "bill_of_materials: ${bill_of_materials}";
 bill_of_materials_hash="$( ( cat "${0}";
   echo "${bill_of_materials}"; \
   cat *;
@@ -129,7 +129,7 @@ buildah config \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
   --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-imagecollector" \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-imagecollector" \
-  --label "${oci_prefix}.version=$VERSION" \
+  --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
   --label "${oci_prefix}.licenses=AGPL-3.0" \
