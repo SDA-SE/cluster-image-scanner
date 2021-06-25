@@ -7,6 +7,12 @@ inputs:
   image-name:
     description: "Name of the image to build an publish"
     required: true
+  registry-user:
+    description: "Username for pushing the image to a registry"
+    required: true
+  registry-token:
+    description: "Token for pushing the image to a registry"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -21,4 +27,4 @@ runs:
           BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
           VERSION="${BRANCH_TO_DOCKER}-${GITHUB_RUN_NUMBER}"
         fi
-        sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}" "${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}" true
+        sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true

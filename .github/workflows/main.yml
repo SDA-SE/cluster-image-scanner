@@ -101,6 +101,8 @@ jobs:
         with:
           image-path: images/base
           image-name: clusterscanner-base
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_imagecollector:
     needs: [changes, build_image_base]
@@ -118,6 +120,8 @@ jobs:
         with:
           image-path: images/processing/imagecollector
           image-name: clusterscanner-imagecollector
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_imagefetcher:
     needs: [changes, build_image_base]
@@ -135,6 +139,8 @@ jobs:
         with:
           image-path: images/processing/imagefetcher
           image-name: clusterscanner-imagefetcher
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_imagesourcefetcher:
     needs: [changes, build_image_base]
@@ -152,6 +158,8 @@ jobs:
         with:
           image-path: images/processing/image-source-fetcher
           image-name: clusterscanner-image-source-fetcher
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_notifier:
     needs: [changes, build_image_base]
@@ -169,6 +177,8 @@ jobs:
         with:
           image-path: images/processing/notifier
           image-name: clusterscanner-notifier
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_dependencycheck:
     needs: [changes, build_image_base]
@@ -186,6 +196,8 @@ jobs:
         with:
           image-path: images/scan/dependency-check
           image-name: clusterscanner-scan-dependency-check
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_distroless:
     needs: [changes, build_image_base]
@@ -203,6 +215,8 @@ jobs:
         with:
           image-path: images/scan/distroless
           image-name: clusterscanner-scan-distroless
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_lifetime:
     needs: [changes, build_image_base]
@@ -220,6 +234,8 @@ jobs:
         with:
           image-path: images/scan/lifetime
           image-name: clusterscanner-scan-lifetime
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_runasroot:
     needs: [changes, build_image_base]
@@ -237,6 +253,8 @@ jobs:
         with:
           image-path: images/scan/runasroot
           image-name: clusterscanner-scan-runasroot
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 #  build_malware:
 #    needs: [changes, build_image_base]
 #    runs-on: ubuntu-latest
@@ -253,3 +271,5 @@ jobs:
 #        with:
 #          image-path: images/scan/malware
 #          image-name: clusterscanner-scan-malware
+#          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+#          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
