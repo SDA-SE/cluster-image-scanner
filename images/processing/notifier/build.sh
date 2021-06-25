@@ -85,20 +85,20 @@ buildah config \
   --env "ssl-verify=strict" \
   "${ctr}"
 #  --env "set nss-config-dir=/etc/pki/nssdb/" \ # might be needed later?
-buildah commit --quiet "${ctr}" "$IMAGE_NAME:$VERSION" && ctr=
+buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
 
 if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]; then
   mkdir --parent "${build_dir}"
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$VERSION"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION ${image}
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${VERSION}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR.$MINOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}.${MINOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  buildah rmi "$IMAGE_NAME:$VERSION"
+  buildah rmi "${IMAGE_NAME}:${VERSION}"
 fi
 
 cleanup

@@ -15,8 +15,8 @@ REGISTRY_USER=$5
 REGISTRY_TOKEN=$6
 BUILD_EXPORT_OCI_ARCHIVES=$7
 
-MAJOR=$(echo $VERSION | tr  '.' "\n" | sed -n 1p)
-MINOR=$(echo $VERSION | tr  '.' "\n" | sed -n 2p)
+MAJOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 1p)
+MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
 
 trap cleanup INT EXIT
 
@@ -140,20 +140,20 @@ buildah config \
     echo "${bill_of_materials_hash}" )" \
   "${ctr}"
 
-buildah commit --quiet "${ctr}" "$IMAGE_NAME:$VERSION" && ctr=
+buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
 
 if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]
 then
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$VERSION"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION ${image}
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${VERSION}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR.$MINOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}.${MINOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  buildah rmi "$IMAGE_NAME:$VERSION"
+  buildah rmi "${IMAGE_NAME}:${VERSION}"
 fi
 
 cleanup

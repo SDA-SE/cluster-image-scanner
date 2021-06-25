@@ -36,6 +36,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TECHDOCS_S3_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TECHDOCS_S3_SECRET_ACCESS_KEY }}
           ENTITY: ${{ env.ENTITY_NAMESPACE || 'default' }}/${{ env.ENTITY_KIND || 'Component' }}/${{ env.ENTITY_NAME }}
+
   shellcheck:
     name: runner / shellcheck
     runs-on: ubuntu-latest
@@ -48,7 +49,7 @@ jobs:
           reporter: github-pr-review
           path: "."
           pattern: "*.*sh"
-          exclude: "./.git/*,build.sh"
+          exclude: "./.git/*"
           shellcheck_flags: "--external-sources --exclude=SC1090,SC1091,SC2116,SC2015"
 
   changes:

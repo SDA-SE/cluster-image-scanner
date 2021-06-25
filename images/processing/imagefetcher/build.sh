@@ -14,8 +14,8 @@ REGISTRY_USER=$5
 REGISTRY_TOKEN=$6
 BUILD_EXPORT_OCI_ARCHIVES=$7
 
-MAJOR=$(echo $VERSION | tr  '.' "\n" | sed -n 1p)
-MINOR=$(echo $VERSION | tr  '.' "\n" | sed -n 2p)
+MAJOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 1p)
+MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
 
 oci_prefix="org.opencontainers.image"
 descr="Clusterscanner Imagefetcher"
@@ -36,7 +36,7 @@ ctr_tools="$( buildah from --pull --quiet ${base_image} )"
 mnt_tools="$( buildah mount "${ctr_tools}" )"
 
 base_image="quay.io/sdase/clusterscanner-base:2"
-ctr="$( buildah from --pull --quiet $base_image )"
+ctr_tools="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
