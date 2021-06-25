@@ -28,7 +28,6 @@ cleanup() {
 
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$( buildah from --pull --quiet ${base_image} )"
-mnt_tools="$( buildah mount "${ctr_tools}" )"
 
 target_image="scratch"
 ctr="$( buildah from --pull --quiet $target_image)"

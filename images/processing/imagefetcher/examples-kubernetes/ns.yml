@@ -1,8 +1,0 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: clusterscan
-  labels:
-    app.kubernetes.io/name: clusterscan
-    app.kubernetes.io/instance: staging

@@ -16,24 +16,24 @@ message="${11}"
 echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slackChannel}, email: ${email}, scanType: ${scanType}, title: ${title}"
 
 #slackChannel="#nobody-security" # for testing
-if [ "$slackChannel" != "" ]; then
-  if [ "$SLACK_CLI_TOKEN" == "" ]; then
+if [ "${slackChannel}" != "" ]; then
+  if [ "${SLACK_CLI_TOKEN}" == "" ]; then
     echo "SLACK_CLI_TOKEN not set, exit"
     exit 1
   fi
-  echo "Sending to slack $slackChannel"
-  message=$(echo $message | sed 's#"##g')
+  echo "Sending to slack ${slackChannel}"
+  message=$(echo "${message}" | sed 's#"##g')
 
-  ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'$ddLink'"}' \
+  ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \
     --author 'ClusterScanner' \
-    --channel $slackChannel \
+    --channel "${slackChannel}" \
     --color bad \
-    --fields '{"image": "'$image'", "app": "'${appName}'", "namespace": "'$namespace'", "envirnoment": "'$environment'"}' \
+    --fields '{"image": "'${image}'", "app": "'${appName}'", "namespace": "'${namespace}'", "envirnoment": "'${environment}'"}' \
     --footer 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
     --footer-icon 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
     --image 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
-    --pretext "$title" \
-    --text "$message"
+    --pretext "${title}" \
+    --text "${message}"
 else
   echo "slackChannel not set"
 fi

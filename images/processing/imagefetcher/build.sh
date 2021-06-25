@@ -32,7 +32,7 @@ build_dir="${dir}/build"
 
 
 base_image="quay.io/sdase/clusterscanner-base:2"
-ctr_tools="$( buildah from --pull --quiet "${base_image}")"
+ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
