@@ -6,11 +6,11 @@ sp_authorize #> /dev/null 2>&1
 mkdir -p /clusterscanner/out/tmp
 i=0
 for repofile in /clusterscanner/image-source-list/*; do
-  repourl=$(cat ${repofile})
+  repourl=$(cat "${repofile}")
   echo "${i}: ${repofile} ${repourl}"
-  if [ $(echo "${repourl}" | grep "json$" | wc -l) -eq 1 ]; then
+  if [ "$(echo "${repourl}" | grep -c "json$")" -eq 1 ]; then
     sp_getfile "${repourl}" "/clusterscanner/out/${i}.json" #> /dev/null 2>&1#
-    if [ $(grep 'image' /clusterscanner/out/${i}.json | wc -l) -eq 0 ]; then
+    if [ $(grep -c 'image' "/clusterscanner/out/${i}.json") -eq 0 ]; then
       echo "Could not get repo ${repourl} from (${repofile}) or the repos doesn't include images"
       exit 1
     fi
