@@ -14,11 +14,14 @@ In case you identified a security related issue with severity of _high_ or _crit
 We encourage researchers to include a Proof-of-Concept, supported by screenshots or videos.
 For each given security related issue with severity _high_ or _critical_ (based on SDA SE own assessment), we will respond within one week.
 
-
 # Supported versions and update policy
 
 Please be aware that only the most recent version will be subject of security patches.
 The [changelog](https://github.com/SDA-SE/clusterscanner-orchestration/releases/) provides information about feature and security related fixes like patches.
+
+# Versioning
+
+This project uses [Semantic Versioning](https://semver.org/). Images are build nightly and receive automatic update for the operating system components. Images are immutable in this project, so the _patch_ version in increased each night.
 
 # Known security gaps and future enhancements
 There is no format in commits to identify security related fixes and it is not planned yet.
