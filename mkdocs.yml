@@ -8,7 +8,7 @@ nav:
     - Configuration for Teams: user/configuration/README.md
     - Repolists: deployment/repolist.md
   - Deployment:
-    - Orchestrator: deployment/add-clusterscanner.md
+    - Orchestrator: deployment/deployment-orchestrator.md
     - Collector: deployment/clusterscanner-image-collector.md
     - Repolists: deployment/repolist.md
   - Scans:
