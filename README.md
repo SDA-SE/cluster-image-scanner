@@ -5,20 +5,41 @@
 Discover vulnerabilities and container image misconfiguration in production environments.
 
 # Introduction
-The Cluster Scanner detects images in a Kubernetes cluster and provides fast feedback based on various security tests. It is recommended to run the Cluster Scanner in production environments in order to get up-to-date feedback on security issues where they have real impact.
+The Cluster Scanner detects images in a Kubernetes cluster and provides fast feedback based on various security tests. It is recommended to run the Cluster Scanner in production environments in order to get up-to-date feedback on security issues where they have real impact.
 
 Since the Cluster Scanner itself is a service running within your Kubernetes cluster you can re-use your existing deployment procedures.
 # Overview
-In order to achieve an understanding of the cluster scanning process, this page uses a chart and detailed documentation to describe which factors are involved and in which way.
-1. The Image Collector, as the name suggests, collects the different images.
-2. These images can be passed to the Fetcher via the Cluster Scan, via the GitOps process, or manually. The Fetcher then converts the CSV files into JSON files and provides additional fields with information about clusters, teams and images.
-3. These files are kept in a separate directory and from there they are passed to the scanner.
-4. This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
-5. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results and makes them available to the developers via Slack.
+The following figure provides an overview:
+![Overview](docs/images/overview.png)
+The following steps are conducted.
+1. The Image Collector, as the name suggests, collects the different images from a container environment like a kubernetes cluster. The Collector creates a JSON file and including information like the cluster, the responsible team, and image.
+2. The Orchestrator (implemented via ArgoWorkflows) starts the workflow periodically (e.g. nightly)
+3. The images from the Collector can be pulled by the Image Fetcher 
+4. These files are kept in a separate directory and from there they are passed to the scanner
+5. This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
+6. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results 
+7. Non responded to findings are made available to the developers via a communication channel (Slack/Email).
+
 ## Table of Contents
 - [User documentation](docs/user)
 - [Architecture and Decisions](docs/architecture)
 - [Operator documentation](docs/deployment)
+
+# Images
+Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
+
+- `quay.io/sdase/clusterscanner-scan-dependency-check`
+- `quay.io/sdase/clusterscanner-scan-runasroot`
+- `quay.io/sdase/clusterscanner-scan-distroless`
+- `quay.io/sdase/clusterscanner-scan-lifetime`
+- `quay.io/sdase/clusterscanner-imagefetcher`
+- `quay.io/sdase/clusterscanner-notifier`
+- `quay.io/sdase/clusterscanner-imagecollector`
+- `quay.io/sdase/clusterscanner-image-source-fetcher`
+- `quay.io/sdase/clusterscanner-workflow-runner`
+- `quay.io/sdase/clusterscanner-notifier-slack`
+
+`quay.io/sdase/clusterscanner-base` is the base for other images.
 
 # Legal Notice
 The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend to run extensive tests by experienced penetration testers on all your applications.

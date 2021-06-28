@@ -1,8 +1,11 @@
 # Architecture
-The architecture is depicted in the following figure:
+The detailed architecture is depicted in the following dataflow diagram:
 ![archicture](images/technical.png)
 
-The Architectural Descisions are documented:
+The Fetcher is in detail documented in [Fetcher](fetcher.md).
+The Collector is in detail documented in [Collector](collector.md).
+
+The Architectural Decisions are documented:
 
 - [Orchestration](decisions/architecture-orchestration.md)
 - [Image Transfer](decisions/case-study-image-transfer.md)
