@@ -39,7 +39,9 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 - `quay.io/sdase/clusterscanner-workflow-runner`
 - `quay.io/sdase/clusterscanner-notifier-slack`
 
-`quay.io/sdase/clusterscanner-base` is the base for other images.
+`quay.io/sdase/clusterscanner-base` is the base for all images.
+
+Images are build with [buildah](https://buildah.io/). The env. parameters the image can be started with are documented via --config within the _build.sh_ scripts within the [images](images/).
 
 # Legal Notice
 The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend to run extensive tests by experienced penetration testers on all your applications.
