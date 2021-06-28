@@ -20,9 +20,5 @@ For each given security related issue with severity _high_ or _critical_ (based 
 Please be aware that only the most recent version will be subject of security patches.
 The [changelog](https://github.com/SDA-SE/clusterscanner-orchestration/releases/) provides information about feature and security related fixes like patches.
 
-
-# Security related configuration
-TODO
-
 # Known security gaps and future enhancements
 There is no format in commits to identify security related fixes and it is not planned yet.
