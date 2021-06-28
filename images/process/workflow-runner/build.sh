@@ -51,9 +51,9 @@ mv ./argo-linux-amd64 "${mnt}/usr/local/bin/argo"
 # Test installation not working, as kubectl context is not given
 # ${mnt}/usr/local/bin/argo version
 
-curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x ./kubectl
-mv ./kubectl ${mnt}//usr/local/bin
+mv ./kubectl "${mnt}/usr/local/bin"
 
 
 # Get a bill of materials
