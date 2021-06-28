@@ -21,7 +21,7 @@ The [changelog](https://github.com/SDA-SE/clusterscanner-orchestration/releases/
 
 # Versioning
 
-This project uses [Semantic Versioning](https://semver.org/). Images are build nightly and receive automatic update for the operating system components. Images are immutable in this project, so the _patch_ version in increased each night.
+This project uses [Semantic Versioning](https://semver.org/). Images are build nightly and receive automatic update for the operating system components. Images are immutable in this project, so the _patch_ version is increased each night.
 
 # Known security gaps and future enhancements
 There is no format in commits to identify security related fixes and it is not planned yet.
