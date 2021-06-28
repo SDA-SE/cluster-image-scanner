@@ -15,8 +15,8 @@ REGISTRY_USER=$5
 REGISTRY_TOKEN=$6
 BUILD_EXPORT_OCI_ARCHIVES=$7
 
-MAJOR=$(echo $VERSION | tr  '.' "\n" | sed -n 1p)
-MINOR=$(echo $VERSION | tr  '.' "\n" | sed -n 2p)
+MAJOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 1p)
+MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
 
 oci_prefix="org.opencontainers.image"
 
@@ -29,7 +29,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
 base_image="quay.io/sdase/clusterscanner-base:2"
-ctr="$( buildah from --pull --quiet $base_image )"
+ctr="$( buildah from --pull --quiet ${base_image} )"
 mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
@@ -41,13 +41,13 @@ chmod 777 "${mnt}/clusterscanner/template.yml"
 # set argo version
 export ARGO_VERSION=$(curl --silent https://api.github.com/repos/argoproj/argo-workflows/releases/latest | jq '.tag_name' | sed 's/"//g')
 # Download archive
-curl -sLO https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz
+curl -sLO "https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
 # Unzip
 gunzip argo-linux-amd64.gz
 # Make binary executable
 chmod +x argo-linux-amd64
 # Move binary to path
-mv ./argo-linux-amd64 ${mnt}/usr/local/bin/argo
+mv ./argo-linux-amd64 "${mnt}/usr/local/bin/argo"
 # Test installation not working, as kubectl context is not given
 # ${mnt}/usr/local/bin/argo version
 
@@ -57,13 +57,13 @@ mv ./kubectl ${mnt}//usr/local/bin
 
 
 # Get a bill of materials
-base_bill_of_materials_hash=$(buildah inspect --type image $base_image  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
+base_bill_of_materials_hash=$(buildah inspect --type image ${base_image}  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
 #echo "base_bill_of_materials_hash $base_bill_of_materials_hash"
 bill_of_materials_hash="$( ( cat "${0}";
   echo "${base_bill_of_materials_hash}"; \
-  cat *; \
+  cat ./*; \
   ) | sha256sum | awk '{ print $1 }' )"
-echo "bill_of_materials: $bill_of_materials_hash";
+echo "bill_of_materials: ${bill_of_materials_hash}";
 buildah config \
   --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-${MODULE_NAME}" \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-${MODULE_NAME}" \
@@ -75,21 +75,20 @@ buildah config \
   --env "GITHUB_KEY_FILE_PATH=/clusterscanner/github/github_private_key.pem" \
   "${ctr}"
 
-buildah commit --quiet "${ctr}" "$IMAGE_NAME:$VERSION" && ctr=
+buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
 
-if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]
-then
+if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]; then
   mkdir --parent "${build_dir}"
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$VERSION"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION ${image}
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${VERSION}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR.$MINOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}.${MINOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  image="docker://$REGISTRY/$ORGANIZATION/$IMAGE_NAME:$MAJOR"
-  buildah push --quiet --creds $REGISTRY_USER:$REGISTRY_TOKEN $IMAGE_NAME:$VERSION "${image}"
+  image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${MAJOR}"
+  buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
-  buildah rmi "$IMAGE_NAME:$VERSION"
+  buildah rmi "${IMAGE_NAME}:${VERSION}"
 fi
 
 cleanup
