@@ -20,10 +20,12 @@ The following steps are conducted.
 6. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results 
 7. Non responded to findings are made available to the developers via a communication channel (Slack/Email).
 
-## Table of Contents
+## Documentation Table of Contents
 - [User documentation](docs/user)
 - [Architecture and Decisions](docs/architecture)
 - [Operator documentation](docs/deployment)
+
+[Video (English): SDA SE CluserScanner is going Open Source, 2021-03](https://www.youtube.com/watch?v=_AElSBKSizc&t=2966s)
 
 # Images
 Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
@@ -42,6 +44,7 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 `quay.io/sdase/clusterscanner-base` is the base for all images.
 
 Images are build with [buildah](https://buildah.io/). The env. parameters the image can be started with are documented via --config within the _build.sh_ scripts within the [images](images/).
+
 
 # Legal Notice
 The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend to run extensive tests by experienced penetration testers on all your applications.
