@@ -1,46 +1,48 @@
-# Configration Documentation
-Target Audience: Teams using the cluster scanner to get notified.
+# Target Audience
+Teams using the cluster scanner to get notified.
 
+# Image Collector Configuration
+## Via Annotations
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
 As a team, **annotations** can be set in the following way to enable/disable scanning:
 
 ```
 # Notification configuration (namespace/object)
-contact.sdase.org/email: 'clusterscannertest@sda.se'
-contact.sdase.org/team: 'mrkaplan'
-contact.sdase.org/slack: '#mrkaplan-security' # in case not set on namespace/pod: derived from as <team>-security
+contact.sdase.org/email: "clusterscannertest@sda.se"
+contact.sdase.org/team: "The Fellowship of the Ring"
+contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/pod: derived from as <team>-security
 
 # Skip scanning for an image in a namespace
-clusterscanner.sdase.org/skip_regex: 'mock-service:|mongo:|opa:' # especially useful for development clusters with development and production components at the same cluster
-clusterscanner.sdase.org/skip: true # to skip all images in the namespace
-clusterscanner.sdase.org/skip: false # to scan all images in the namespace, in case the default is true
+clusterscanner.sdase.org/skip_regex: "mock-service:|mongo:|opa:" # String, especially useful for development clusters with development and production components at the same cluster
+clusterscanner.sdase.org/skip: "true" # Boolean, to skip all images in the namespace
+clusterscanner.sdase.org/skip: "false" # Boolean,  to scan all images in the namespace, in case the default is true
 
 # Object
 ## Skip scanning for all images in the pod
-clusterscanner.sdase.org/skip: true # specially useful for development clusters with development and production components in one namespace
+clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for development clusters with development and production components in one namespace
 
-scm.sdase.org/source_branch: 'feature/foobar'
+scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
 
 # Adjust scans on object or namespace
-clusterscanner.sdase.org/is-scan-lifetime: true # or false
-clusterscanner.sdase.org/is-scan-distroless: true # or false
-clusterscanner.sdase.org/is-scan-dependency-check: true # or false
-clusterscanner.sdase.org/is-scan-runasroot: true # or false
-clusterscanner.sdase.org/is-scan-malware: false # scan to be implemented
+clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
+clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
+clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
+clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
+clusterscanner.sdase.org/is-scan-malware: "false" # Boolean, scan to be implemented
 
-clusterscanner.sdase.org/max-lifetime: '14' # max lifetime days for the lifetime scan
+clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the lifetime scan
+```
+## Via Labels
+Additionally, the following **labels** can be used:
+
+```
+app.kubernetes.io/name: "consent-service" # defaults to image
+app.kubernetes.io/version: "3.42.0" # defaults to image tag
 ```
 
-Additionally the following **labels** can be used:
-
-```
-app.kubernetes.io/name: 'consent-service' # defaults to image
-app.kubernetes.io/version: '3.42.0' # defaults to image tag
-```
-
-
+# Inheritance of annotations.
 The inheritance of overriding the parent annotations/configuration is pointed out in the following figure:
-![inheritance](inheritance.png)
+![inheritance](inheritance.png =400x)
 
 # Non-Deployment Configuration
 In case of a software development company like SDA SE, not all applications are self hosted. Some applications might be developed and shipped to the customer. The hosting in this case belongs to the customer.
@@ -48,4 +50,4 @@ Assuming that the customer uses the latest released application image, we would 
 As a product team, there is the option to:
 * Deploy the latest released application image to a cluster which is scanned
 * Use a build server like Jenkins to update an image repository like depicted in the figure below
-![inheritance](latest-jenkins.png)
+![inheritance](latest-jenkins.png =400x)
