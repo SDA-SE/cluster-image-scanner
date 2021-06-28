@@ -1,0 +1,76 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cluster-scan-collector
+  namespace: cluster-scan
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cluster-scan
+          automountServiceAccountToken: true # mount cluster-scan
+          restartPolicy: Never
+          containers:
+            - name: cluster-scan-image-collector
+              securityContext:
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                runAsUser: 1001
+              image: quay.io/sdase/cluster-scan-image-collector:1.2.52
+              imagePullPolicy: Always
+              env:
+                - name: GITHUB_APP_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: collector.upload.github.appid
+                - name: GITHUB_INSTALLATION_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: collector.upload.github.installlationid
+                - name: GITHUB_REPOSITORY
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: collector.upload.github.repository
+                - name: CLUSTER_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: cluster-name
+                - name: CONTACT_METHOD
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: collector.contact.method
+                - name: CONTACT_DEFAULT
+                  valueFrom:
+                    configMapKeyRef:
+                      name: collector-upload-repository
+                      key: collector.contact.default
+                      collector.contact.: "slack"
+              volumeMounts:
+                - name: github
+                  mountPath: "/etc/github"
+                  readOnly: true
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 124Mi
+          volumes:
+            - name: collector-upload-repository
+              configMap:
+                name: collector-upload-repository
+            - name: github
+              secret:
+                secretName: github
+                items:
+                  - key: keyfile
+                    path: keyfile

@@ -1,0 +1,30 @@
+name: "Build image"
+description: "Builds an publishes an image to quay.io"
+inputs:
+  image-path:
+    description: "Path in repository to image build dir"
+    required: true
+  image-name:
+    description: "Name of the image to build an publish"
+    required: true
+  registry-user:
+    description: "Username for pushing the image to a registry"
+    required: true
+  registry-token:
+    description: "Token for pushing the image to a registry"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: create and push an image
+      shell: bash
+      run: |
+        cd ${{ inputs.image-path }}
+        chmod +x ./build.sh
+        if [ "${GITHUB_REF##*/}" == "master" ]; then
+          VERSION="2.0.${GITHUB_RUN_NUMBER}"
+        else
+          BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+          VERSION="${BRANCH_TO_DOCKER}-${GITHUB_RUN_NUMBER}"
+        fi
+        sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true

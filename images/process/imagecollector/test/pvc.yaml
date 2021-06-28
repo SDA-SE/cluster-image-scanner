@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clusterscanner-staging-images
+  namespace: cluster-scan
+  annotations:
+    app.kubernetes.io/name: cluster-scan
+    app.kubernetes.io/instance: staging
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---

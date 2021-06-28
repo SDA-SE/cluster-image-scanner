@@ -22,8 +22,7 @@ jobs:
     container:
       image: quay.io/sdase/techdocs:1
     steps:
-      - uses: actions/checkout@v2.3.4
-
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: build
         run: techdocs-cli generate --no-docker --verbose
         working-directory: ${{ matrix.site.directory }}
@@ -37,3 +36,241 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TECHDOCS_S3_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TECHDOCS_S3_SECRET_ACCESS_KEY }}
           ENTITY: ${{ env.ENTITY_NAMESPACE || 'default' }}/${{ env.ENTITY_KIND || 'Component' }}/${{ env.ENTITY_NAME }}
+
+  shellcheck:
+    name: runner / shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@bb5be3440d752c70c5ade03b2b6bf859316db5e2
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          path: "."
+          pattern: "*.*sh"
+          exclude: "./.git/*"
+          shellcheck_flags: "--external-sources --exclude=SC1090,SC1091,SC2116,SC2015"
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.filter.outputs.base }}
+      imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
+      imagecollector: ${{ steps.filter.outputs.imagecollector }}
+      imagefetcher: ${{ steps.filter.outputs.imagefetcher }}
+      notifier: ${{ steps.filter.outputs.notifier }}
+      dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
+      distroless: ${{ steps.filter.outputs.distroless }}
+      lifetime: ${{ steps.filter.outputs.lifetime }}
+      malware: ${{ steps.filter.outputs.malware }}
+      runasroot: ${{ steps.filter.outputs.runasroot }}
+    steps:
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
+        id: filter
+        with:
+          filters: |
+            base:
+              - 'images/base/**'
+            imagesourcefetcher:
+              - 'images/process/image-source-fetcher/**'
+            imagecollector:
+              - 'images/process/imagecollector/**'
+            imagefetcher:
+              - 'images/process/imagefetcher/**'
+            notifier:
+              - 'images/process/notifier/**'
+            dependencycheck:
+              - 'images/scan/dependency-check/**'
+            distroless:
+              - 'images/scan/distroless/**'
+            lifetime:
+              - 'images/scan/lifetime/**'
+            malware:
+              - 'images/scan/malware/**'
+            runasroot:
+              - 'images/scan/runasroot/**'
+
+  build_image_base:
+    needs: changes
+    runs-on: ubuntu-latest
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: "${{ needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}"
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/base
+          image-name: clusterscanner-base
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_imagecollector:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagecollector == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/process/imagecollector
+          image-name: clusterscanner-imagecollector
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_imagefetcher:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagefetcher == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/process/imagefetcher
+          image-name: clusterscanner-imagefetcher
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_imagesourcefetcher:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagesourcefetcher == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/process/image-source-fetcher
+          image-name: clusterscanner-image-source-fetcher
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_notifier:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/process/notifier
+          image-name: clusterscanner-notifier
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_dependencycheck:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.dependencycheck == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/dependency-check
+          image-name: clusterscanner-scan-dependency-check
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_distroless:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.distroless == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/distroless
+          image-name: clusterscanner-scan-distroless
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_lifetime:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.lifetime == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/lifetime
+          image-name: clusterscanner-scan-lifetime
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_runasroot:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.runasroot == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/runasroot
+          image-name: clusterscanner-scan-runasroot
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+#  build_malware:
+#    needs: [changes, build_image_base]
+#    runs-on: ubuntu-latest
+#    # run on base image change
+#    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+#    if: |
+#      always() &&
+#      (needs.build_image_base.result == 'success' ||
+#      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.malware == 'true')) &&
+#     ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+#    steps:
+#      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+#      - uses: ./.github/actions/build_image
+#        with:
+#          image-path: images/scan/malware
+#          image-name: clusterscanner-scan-malware
+#          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+#          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
