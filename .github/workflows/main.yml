@@ -60,6 +60,7 @@ jobs:
       imagecollector: ${{ steps.filter.outputs.imagecollector }}
       imagefetcher: ${{ steps.filter.outputs.imagefetcher }}
       notifier: ${{ steps.filter.outputs.notifier }}
+      workflowrunner: ${{ steps.filter.outputs.workflowrunner }}
       dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
       distroless: ${{ steps.filter.outputs.distroless }}
       lifetime: ${{ steps.filter.outputs.lifetime }}
