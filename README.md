@@ -39,7 +39,6 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 - `quay.io/sdase/clusterscanner-imagecollector`
 - `quay.io/sdase/clusterscanner-image-source-fetcher`
 - `quay.io/sdase/clusterscanner-workflow-runner`
-- `quay.io/sdase/clusterscanner-notifier-slack`
 
 `quay.io/sdase/clusterscanner-base` is the base for all images.
 
