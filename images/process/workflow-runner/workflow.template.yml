@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: scanjob-###environment###-###namespace###-###team###-
+  labels:
+    clusterscanner.sda.se/scan-id: "###SCAN_ID###"
+spec:
+  arguments:
+    parameters:
+      - name: REGISTRY_SECRET
+        value: "###REGISTRY_SECRET###"
+      - name: DEPENDENCY_SCAN_CM
+        value: "###DEPENDENCY_SCAN_CM###"
+      - name: DEFECTDOJO_CM
+        value: "###DEFECTDOJO_CM###"
+      - name: DEFECTDOJO_SECRETS
+        value: "###DEFECTDOJO_SECRETS###"
+      - name: SCAN_ID
+        value: "###SCAN_ID###"
+      - name: team
+        value: "###team###"
+      - name: appname
+        value: "###appname###"
+      - name: environment
+        value: "###environment###"
+      - name: namespace
+        value: "###namespace###"
+      - name: scm_source_branch
+        value: "###scm_source_branch###"
+      - name: image
+        value: "###image###"
+      - name: image_id
+        value: "###image_id###"
+      - name: slack
+        value: "###slack###"
+      - name: email
+        value: "###email###"
+      - name: is_scan_lifetime
+        value: "###is_scan_lifetime###"
+      - name: is_scan_distroless
+        value: "###is_scan_distroless###"
+      - name: is_scan_malware
+        value: "###is_scan_malware###"
+      - name: is_scan_dependency_check
+        value: "###is_scan_dependency_check###"
+      - name: is_scan_runasroot
+        value: "###is_scan_runasroot###"
+      - name: scan_lifetime_max_days
+        value: "###scan_lifetime_max_days###"
+  workflowTemplateRef:
+    name: scan-image-job
