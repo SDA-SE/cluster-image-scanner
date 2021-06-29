@@ -32,8 +32,6 @@ sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#$DEPSCAN_DB_USERNAME_PLACEHOLDER#" $DE
 sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#$DEPSCAN_DB_PASSWORD_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#$DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
 
-sed -i "s#SLACK_CLI_TOKEN_SECRET#$SLACK_CLI_TOKEN_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/slack.env
-
 sed -i "s#smtp_SECRET#$smtp_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
 sed -i "s#smtp-auth_SECRET#$smtp_auth_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
 sed -i "s#smtp-auth-user_SECRET#$smtp_auth_user_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
