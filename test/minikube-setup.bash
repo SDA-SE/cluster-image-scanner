@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-source $HOME/.clusterscanner/secrets
+source ${HOME}/.clusterscanner/secrets
 
 if [ "${QUAY_SECRET}" == "" ]; then
-  echo "Please set $HOME/.clusterscanner/secrets"
+  echo "Please set ${HOME}/.clusterscanner/secrets"
   exit 1
 fi
 
@@ -17,28 +17,28 @@ DEPLOYMENT_PATH=../deployment
 kubectl create namespace argocd || true
 kubectl create namespace clusterscanner || true
 
-sed -i "s#ACCESS_KEY#$ACCESS_KEY#" $DEPLOYMENT_PATH/overlays/test-local/config-source/s3.env
-sed -i "s#SECRET_KEY#$SECRET_KEY#" $DEPLOYMENT_PATH/overlays/test-local/config-source/s3.env
-sed -i "s#DD_TOKEN_SECRET#$DD_TOKEN_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/defectdojo.env
-sed -i "s#SLACK_CLI_TOKEN_SECRET#$SLACK_CLI_TOKEN_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/slack.env
+sed -i "s#ACCESS_KEY#${ACCESS_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
+sed -i "s#SECRET_KEY#$SECRET_KEY#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
+sed -i "s#DD_TOKEN_SECRET#$DD_TOKEN_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.env
+sed -i "s#SLACK_CLI_TOKEN_SECRET#$SLACK_CLI_TOKEN_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
-sed -i "s#GITHUB_APP_ID_PLACEHOLDER#$GITHUB_APP_ID_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/github.env
-sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#$GITHUB_APP_LOGIN_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/github.env
-sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#$GITHUB_INSTALLATION_ID_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/github.env
-cp $HOME/.clusterscanner/github_private_key.pem $DEPLOYMENT_PATH/overlays/test-local/config-source/github_private_key.pem
+sed -i "s#GITHUB_APP_ID_PLACEHOLDER#$GITHUB_APP_ID_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#$GITHUB_APP_LOGIN_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#$GITHUB_INSTALLATION_ID_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+cp ${HOME}/.clusterscanner/github_private_key.pem ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
 
-sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#$DEPSCAN_DB_DRIVER_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
-sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#$DEPSCAN_DB_USERNAME_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
-sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#$DEPSCAN_DB_PASSWORD_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
-sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#$DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#" $DEPLOYMENT_PATH/overlays/test-local/config-source/depcheck.env
+sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#$DEPSCAN_DB_DRIVER_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
+sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#$DEPSCAN_DB_USERNAME_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
+sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#$DEPSCAN_DB_PASSWORD_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
+sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#$DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 
-sed -i "s#smtp_SECRET#$smtp_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth_SECRET#$smtp_auth_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth-user_SECRET#$smtp_auth_user_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth-password_SECRET#$smtp_auth_password_SECRET#" $DEPLOYMENT_PATH/overlays/test-local/config-source/email.env
+sed -i "s#smtp_SECRET#$smtp_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp-auth_SECRET#$smtp_auth_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp-auth-user_SECRET#$smtp_auth_user_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp-auth-password_SECRET#$smtp_auth_password_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 
-
-AUTH=$(cat $HOME/.docker/config.json | base64 -w 0)
+AUTH_FILE=${HOME}/.docker/config.json
+AUTH=$(cat ${AUTH_FILE} | base64 -w 0)
 cat << EOL >> /tmp/config.yaml
 apiVersion: v1
 data:
@@ -48,12 +48,12 @@ metadata:
   name: clusterscanner-pull-registry
 type: kubernetes.io/dockerconfigjson
 EOL
-sed -i "s#AUTH#$AUTH#g" /tmp/config.yaml
+sed -i "s#AUTH#${AUTH}#g" /tmp/config.yaml
 kubectl apply -f  /tmp/config.yaml -n default
 kubectl apply -f  /tmp/config.yaml -n argocd
 kubectl apply -f  /tmp/config.yaml -n clusterscanner
 
-AUTH=$(cat $HOME/.docker/config.json | base64 -w 0)
+AUTH=$(cat ${AUTH_FILE} | base64 -w 0)
 cat << EOL >> /tmp/config.yaml
 apiVersion: v1
 data:
@@ -63,7 +63,7 @@ metadata:
   name: registry-default
 type: kubernetes.io/secret
 EOL
-sed -i "s#AUTH#$AUTH#g" /tmp/config.yaml
+sed -i "s#AUTH#${AUTH}#g" /tmp/config.yaml
 kubectl apply -f  /tmp/config.yaml -n clusterscanner
 kubectl apply -f  serviceaccount.yml -n clusterscanner
 
@@ -101,8 +101,8 @@ argocd proj --server localhost:8080 --insecure allow-cluster-resource clustersca
 argocd proj --server localhost:8080 --insecure deny-namespace-resource "clusterscanner" '*' '*' # needed for add
 argocd proj --server localhost:8080 --insecure allow-namespace-resource  clusterscanner '*' '*'
 sleep 1
-argocd repo --server localhost:8080 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
-
+#argocd repo --server localhost:8080 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
+echo "Applying argoworkflow.yml"
 kubectl apply -f ./argoworkflow.yml
 sleep 20
 
@@ -112,7 +112,7 @@ if [ "$IS_MINIKUBE" == "true" ]; then
   done
 fi
 
-kubectl apply -k $DEPLOYMENT_PATH/overlays/test-local/
+kubectl apply -k ${DEPLOYMENT_PATH}/overlays/test-local/
 # restart pods
 for i in $(kubectl get pods -n clusterscanner | awk '{print $1}' | grep -v NAME); do
   kubectl delete pod $i -n clusterscanner
@@ -129,7 +129,8 @@ kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 argo submit ../argo-main.yml  -n clusterscanner
 
 echo "reverting secret changes"
-git checkout  $DEPLOYMENT_PATH/overlays/test-local/config-source || true
+git checkout  ${DEPLOYMENT_PATH}/overlays/test-local/config-source || true
 
 echo "please visit https://localhost:2746/"
+
 
