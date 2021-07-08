@@ -46,5 +46,8 @@ Images are build with [buildah](https://buildah.io/). The env. parameters the im
 
 
 # Legal Notice
-The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend to run extensive tests by experienced penetration testers on all your applications.
-The ClusterScanner is to be used only for testing purpose of your running applications/containers. You need a written aggreement of the organization of the _envirnoment under scan_ to scan components with the ClusterScanner.
+The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
+The ClusterScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
+
+# Author Information
+This project is developed by [Signal Iduna](https://www.signal-iduna.de) and [SDA SE](https://sda.se/). 
