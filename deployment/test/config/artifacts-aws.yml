@@ -26,5 +26,5 @@ metadata:
   name: s3-workflow-secret-tmp
   namespace: clusterscanner
 data:
-  accesskey: QUtJQVNTWU5BTFFNSExBU0lSVjY=
-  secretkey: THFqRDRPSTNzVVhIYWdjQUZ2dk9qczRtZ2FER3hoQUN5TE1WTHNEbg==
+  accesskey: YWNjZXNza2V5Cg==
+  secretkey: c2VjcmV0a2V5Cg==
