@@ -44,6 +44,13 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 
 Images are build with [buildah](https://buildah.io/). The env. parameters the image can be started with are documented via --config within the _build.sh_ scripts within the [images](images/).
 
+# Contributing
+We are looking forward to contributions. Take a look at our [Contribution Guidelines](CONTRIBUTING.md) before submitting Pull Requests.
+
+# Responsible Disclosure and Security
+The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
+
+
 
 # Legal Notice
 The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.

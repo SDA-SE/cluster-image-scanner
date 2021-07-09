@@ -4,7 +4,7 @@
 
 We take security very seriously at SDA SE.
 We welcome any review of the latest release of all our open source code to ensure that these components can not be compromised.
-In case you identified a security related issue with severity of _low_ to _medium_, please create a [GitHub issue](https://github.com/SDA-SE/cluster-scanner-orchestration). 
+In case you identified a security related issue with severity of _low_ to _medium_, please create a [GitHub issue](https://github.com/SDA-SE/clusterscanner). 
 
 
 ## Security related bugs with severity _high_ or _critical_

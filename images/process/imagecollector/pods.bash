@@ -73,34 +73,36 @@ getPods() {
           namespaceContactEmail=""
         fi
       fi
-      skipNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".${SKIP_REGEX_ANNOTATION}")
+
+      skipNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SKIP_REGEX_ANNOTATION}\"]")
       if [ "${skipNamespaceRegex}" == "" ] || [ "${skipNamespaceRegex}" == "null" ]; then
         skipNamespaceRegex="NO-SKIP"
       fi
-      skipNamespace=$(echo "${namespaceAnnotations}" | jq -r ".${SKIP_ANNOTATION}")
+
+      skipNamespace=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SKIP_ANNOTATION}\"]")
       echo "namespace: ${namespace} (SKIP_REGEX_ANNOTATION ${SKIP_REGEX_ANNOTATION}), applying the following order: pod annotiation (not mentioned here), skipNamespaceRegex: ${skipNamespaceRegex} <- skipNamespace: ${skipNamespace} <- DEFAULT_SKIP: ${DEFAULT_SKIP}"
 
-      isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_LIFETIME_ANNOTATION}")
+      isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_ANNOTATION}\"]")
       if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
         isScanLifetime="${DEFAULT_SCAN_LIFETIME}"
       fi
-      isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_DISTROLESS_ANNOTATION}")
+      isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
       if [ "${isScanDistroless}" == "" ] || [ "${isScanDistroless}" == "null" ]; then
         isScanDistroless="${DEFAULT_SCAN_DISTROLESS}"
       fi
-      isScanMalware=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_DISTROLESS_ANNOTATION}")
+      isScanMalware=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
       if [ "${isScanMalware}" == "" ] || [ "${isScanMalware}" == "null" ]; then
         isScanMalware="${DEFAULT_SCAN_MALWARE}"
       fi
-      isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ."${SCAN_DEPENDENCY_CHECK_ANNOTATION}")
+      isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_CHECK_ANNOTATION}\"]")
       if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
         isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      isScanRunAsRoot=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_RUNASROOT_ANNOTATION}")
+      isScanRunAsRoot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
       if [ "${isScanRunAsRoot}" == "" ] || [ "${isScanRunAsRoot}" == "null" ]; then
         isScanRunAsRoot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      lifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}")
+      lifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
       if [ "${lifetimeMaxDays}" == "" ] || [ "${lifetimeMaxDays}" == "null" ]; then
         lifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
