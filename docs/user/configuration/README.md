@@ -11,6 +11,7 @@ As a team, **annotations** can be set in the following way to enable/disable sca
 contact.sdase.org/email: "clusterscannertest@sda.se"
 contact.sdase.org/team: "The Fellowship of the Ring"
 contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/pod: derived from as <team>-security
+sdase.org/description: "My service description" # optional
 
 # Skip scanning for an image in a namespace
 clusterscanner.sdase.org/skip_regex: "mock-service:|mongo:|opa:" # String, especially useful for development clusters with development and production components at the same cluster
@@ -32,6 +33,10 @@ clusterscanner.sdase.org/is-scan-malware: "false" # Boolean, scan to be implemen
 
 clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the lifetime scan
 ```
+
+### ISO 27001 compliance
+You might use `sdase.org/description` to describe the services in all namespaces. It will enforce an extra file `service-description.json` in the target repository. This procedure might solve parts of the ISO 27001 requirement _A.8_ to establish an asset inventory.
+
 ## Via Labels
 Additionally, the following **labels** can be used:
 

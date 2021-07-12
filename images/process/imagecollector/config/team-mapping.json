@@ -1,0 +1,5 @@
+[
+  {"namespace_filter": "defectdojo", "team": "operations"},
+  {"namespace_filter": "kube-", "team": "operations"},
+  {"namespace_filter": "argocd", "team": "operations"}
+]

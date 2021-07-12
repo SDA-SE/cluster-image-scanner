@@ -65,6 +65,19 @@ getPods() {
         echo ${newDescriptionFile} > ${DESCRIPTION_JSON_FILE}
       fi
 
+      team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
+      if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
+        team="${DEFAULT_TEAM_NAME}"
+      fi
+      for mapping in $(jq -rcM ".[]" config/team-mapping.json); do
+        teamMapping=$(echo $mapping | jq -rcM '.team')
+        namespaceMapping=$(echo $mapping | jq -rcM '.namespace_filter')
+        if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
+          team="${teamMapping}"
+          break;
+        fi
+      done
+
       #echo "getting namespaceContact"
       namespaceContactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       if [ "${namespaceContactSlack}" == "" ] || [ "$namespaceContactSlack" == "null" ]; then
