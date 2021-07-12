@@ -12,8 +12,9 @@ fi
 
 getPods() {
     echo "In getPods()"
-    ENVIRONMENT_NAME=$2
-    IMAGE_JSON_FILE=$1
+    ENVIRONMENT_NAME=${2}
+    IMAGE_JSON_FILE=${1}
+    DESCRIPTION_JSON_FILE=${3}
 
     if [ "${CONTACT_ANNOTATION_PREFIX}" == "" ]; then
       CONTACT_ANNOTATION_PREFIX="contact.sdase.org"
@@ -44,6 +45,7 @@ getPods() {
     fi
 
     echo "[" > "${IMAGE_JSON_FILE}"
+    echo "[]" > "${DESCRIPTION_JSON_FILE}"
 
     # iteration needed due to memory limits in large deployments
     namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
@@ -56,10 +58,13 @@ getPods() {
         continue
       fi
 
-      team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
-      if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
-        team="${DEFAULT_TEAM_NAME}"
+      if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
+        description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
+        namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\"}")
+        newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
+        echo ${newDescriptionFile} > ${DESCRIPTION_JSON_FILE}
       fi
+
       #echo "getting namespaceContact"
       namespaceContactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       if [ "${namespaceContactSlack}" == "" ] || [ "$namespaceContactSlack" == "null" ]; then

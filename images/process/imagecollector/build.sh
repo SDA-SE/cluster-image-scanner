@@ -124,6 +124,8 @@ buildah config \
   --env SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware" \
   --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check" \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
+  --env DESCRIPTION_ANNOTATION="sdase.org/description" \
+  --env IS_FETCH_DESCRIPTION="true" \
   --cmd "/home/code/entrypoint.bash" \
   --user $openShiftGroupId \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \

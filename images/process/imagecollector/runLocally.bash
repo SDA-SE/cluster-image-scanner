@@ -1,9 +1,13 @@
 #!/bin/bash
 
 export ENVIRONMENT_NAME="minikube"
-export IMAGE_JSON_FILE=/tmp/clusterscanner/output.json
+export IMAGE_JSON_FILE=/tmp/cluster-scan/output.json
+export DESCRIPTION_JSON_FILE=/tmp/cluster-scan/description/service-description.json
+mkdir -p /tmp/cluster-scan/description/ || true
+export IS_FETCH_DESCRIPTION="true"
 
-export DEFAULT_SKIP=false
+DESCRIPTION_ANNOTATION="sdase.org/description"
+export DEFAULT_SKIP="false"
 export DEFAULT_SCAN_LIFETIME="true"
 export DEFAULT_SCAN_DISTROLESS="true"
 export DEFAULT_SCAN_MALWARE="false"
@@ -15,8 +19,8 @@ export SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware"
 export SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check"
 export SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot"
 
-mkdir /tmp/clusterscanner
+mkdir /tmp/cluster-scan
 
 source "pods.bash"
 
-getPods "${IMAGE_JSON_FILE}" "${ENVIRONMENT_NAME}"
+getPods "${IMAGE_JSON_FILE}" "${ENVIRONMENT_NAME}" ${DESCRIPTION_JSON_FILE}
