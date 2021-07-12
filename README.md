@@ -39,8 +39,9 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 - `quay.io/sdase/clusterscanner-imagecollector`
 - `quay.io/sdase/clusterscanner-image-source-fetcher`
 - `quay.io/sdase/clusterscanner-workflow-runner`
+- [quay.io/sdase/defectdojo-client](https://github.com/SDA-SE/defectdojo-client)
 
-`quay.io/sdase/clusterscanner-base` is the base for all images.
+`quay.io/sdase/clusterscanner-base` is the base for all `quay.io/sdase/clusterscanner-*` images.
 
 Images are build with [buildah](https://buildah.io/). The env. parameters the image can be started with are documented via --config within the _build.sh_ scripts within the [images](images/).
 
@@ -49,8 +50,6 @@ We are looking forward to contributions. Take a look at our [Contribution Guidel
 
 # Responsible Disclosure and Security
 The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
-
-
 
 # Legal Notice
 The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
