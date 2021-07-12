@@ -5,6 +5,7 @@ export IMAGE_JSON_FILE=/tmp/cluster-scan/output.json
 export DESCRIPTION_JSON_FILE=/tmp/cluster-scan/description/service-description.json
 mkdir -p /tmp/cluster-scan/description/ || true
 export IS_FETCH_DESCRIPTION="true"
+export TEAM_MAPPING='[{ "namespace_filter": "verdaccio-", "team": "operations", "description": "verdaccio is about..." }]'
 
 DESCRIPTION_ANNOTATION="sdase.org/description"
 export DEFAULT_SKIP="false"

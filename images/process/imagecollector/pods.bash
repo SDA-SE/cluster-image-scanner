@@ -10,6 +10,12 @@ if [ "${IMAGE_SKIP_NEGATIVE_LIST}" != "" ]; then
   jq -s '. | add' /tmp/negative.json /tmp/negative2.json > ${SKIP_NEGATIVE_LIST_FILE}
 fi
 
+if [ "${TEAM_MAPPING}" != "" ]; then
+  echo ${TEAM_MAPPING} > /tmp/team-mapping.json
+  TEAM_MAPPING=$(jq -s '. | add' /tmp/team-mapping.json config/namespace-mapping.json)
+fi
+
+
 getPods() {
     echo "In getPods()"
     ENVIRONMENT_NAME=${2}
@@ -46,6 +52,7 @@ getPods() {
 
     echo "[" > "${IMAGE_JSON_FILE}"
     echo "[]" > "${DESCRIPTION_JSON_FILE}"
+    echo "\"Missing description on namespace:\"" > /tmp/cluster-scan/description/missing-service-description.txt
 
     # iteration needed due to memory limits in large deployments
     namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
@@ -58,25 +65,33 @@ getPods() {
         continue
       fi
 
-      if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
-        description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
-        namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\"}")
-        newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
-        echo ${newDescriptionFile} > ${DESCRIPTION_JSON_FILE}
-      fi
-
       team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team="${DEFAULT_TEAM_NAME}"
       fi
-      for mapping in $(jq -rcM ".[]" config/team-mapping.json); do
-        teamMapping=$(echo $mapping | jq -rcM '.team')
-        namespaceMapping=$(echo $mapping | jq -rcM '.namespace_filter')
+      descriptionMapping=""
+      for mapping in $(echo $TEAM_MAPPING | jq -rcM ".[] | @base64"); do
+        mapping=$(echo $mapping | base64 -d)
+        namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
-          team="${teamMapping}"
+          team=$(echo ${mapping} | jq -rcM '.team')
+          descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           break;
         fi
       done
+
+      if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
+        description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
+        if [ "${description}" == "" ]; then
+          description="${descriptionMapping}"
+        fi
+        namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\", \"team\": \"${team}\"}")
+        newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
+        echo ${newDescriptionFile} > ${DESCRIPTION_JSON_FILE}
+        if [ "${description}" == "" ]; then
+          echo "\"${namespace}\"" >> /tmp/cluster-scan/description/missing-service-description.txt
+        fi
+      fi
 
       #echo "getting namespaceContact"
       namespaceContactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
