@@ -18,3 +18,22 @@ An overview is depicted in the following figure:
 * These files are kept in a separate directory and from there they are passed to the scanner.
 * This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
 * The vulnerability management tool then collects the results and makes them available to the developers via a communication channel like Slack.
+
+## Why using ClusterScanner
+### Scanner
+The various scans help to enhance the security of images. This is required by GDPR.
+In addition, the ClusterScanner helps to be compliant with regulations like [DRAFT Digital Operational Resilience Act (short DORA)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:52020PC0595&from=EN).
+Some samples of what DORA (2021-07) requires and how the ClusterScanner addresses it:
+- Article 6: _[...] Financial entities shall use and maintain updated ICT systems, protocols and tools, which fulfil the following conditions [...]_ which the lifetime check addresses
+- Article 7: _[...]Financial entities shall on a continuous basis identify all sources of ICT risk, in particular the risk exposure to and from other financial entities, and assess cyber threats and ICT vulnerabilities relevant to their ICT-related business functions and information assets.[...]_, which the continuously/periodically running ClusterScanner addresses
+
+The [OWASP DevSecOps Maturity Model](https://dsomm.timo-pagel.de) provides a guideline on what security activities to perform at which organization maturity.
+The ClusterScanner solves the following activities directly (via tests on the left side) and enforces indirectly that an organization or team enhances the maturity. For example enforces the lifetime check, that a defined maximum image lifetime has to be set.
+![DSOMM](dsomm.png)
+
+See also [scans](user/scans/README.md) for details about the scans itself.
+
+### ClusterScanner Image Collector
+The _ClusterScanner Image Collector_ provides the following features:
+- Version of the images in production to know what was in production in case of an incident and discovery later (compliance)
+- Up to date asset inventory (like required by ISO 27001 A.8), specially by providing a brief description on namespaces
