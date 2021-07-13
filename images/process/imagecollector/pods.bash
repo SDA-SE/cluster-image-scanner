@@ -15,12 +15,13 @@ if [ "${NAMESPACE_MAPPINGS}" != "" ]; then
   NAMESPACE_MAPPINGS=$(jq -s '. | add' /tmp/team-mapping.json config/namespace-mapping.json)
 fi
 
+export DESCRIPTION_JSON_FILE=/tmp/cluster-scan/description/service-description.json
+mkdir -p /tmp/cluster-scan/description/ || true
 
 getPods() {
     echo "In getPods()"
     ENVIRONMENT_NAME=${2}
     IMAGE_JSON_FILE=${1}
-    DESCRIPTION_JSON_FILE=${3}
 
     if [ "${CONTACT_ANNOTATION_PREFIX}" == "" ]; then
       CONTACT_ANNOTATION_PREFIX="contact.sdase.org"

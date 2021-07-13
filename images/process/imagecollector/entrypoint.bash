@@ -8,9 +8,6 @@ export HOME=/home/code
 source pods.bash
 source git.bash
 IMAGE_FILENAME_JSON=/tmp/cluster-scan/output.json
-DESCRIPTION_JSON_FILE=/tmp/cluster-scan/description/service-description.json
-echo "creating /tmp/cluster-scan/description/"
-mkdir -p /tmp/cluster-scan/description/ || true
 
 echo "gitAuth"
 gitAuth
@@ -21,7 +18,7 @@ echo "getPods"
 if [ "${CLUSTER_NAME}" != "" ]; then
   ENVIRONMENT_NAME="${CLUSTER_NAME}"
 fi
-getPods "${IMAGE_FILENAME_JSON}" "${ENVIRONMENT_NAME}" "${DESCRIPTION_JSON_FILE}"
+getPods "${IMAGE_FILENAME_JSON}" "${ENVIRONMENT_NAME}"
 
 
 cd /tmp/cluster-scan
