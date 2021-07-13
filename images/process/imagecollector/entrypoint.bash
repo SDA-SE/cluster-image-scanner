@@ -26,8 +26,8 @@ git add "${IMAGE_FILENAME_JSON}" || true
 git commit -m "update file" "${IMAGE_FILENAME_JSON}" || true
 
 if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
-  git add ${DESCRIPTION_JSON_FILE}
-  git commit -m "update file" "${DESCRIPTION_JSON_FILE}" || true
+  git add /tmp/cluster-scan/description/ || true
+  git commit -m "update file" /tmp/cluster-scan/description/ || true
 fi
 
 TZ="Europe/Berlin" date > lastScan
