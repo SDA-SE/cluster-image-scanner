@@ -10,9 +10,9 @@ if [ "${IMAGE_SKIP_NEGATIVE_LIST}" != "" ]; then
   jq -s '. | add' /tmp/negative.json /tmp/negative2.json > ${SKIP_NEGATIVE_LIST_FILE}
 fi
 
-if [ "${TEAM_MAPPING}" != "" ]; then
-  echo ${TEAM_MAPPING} > /tmp/team-mapping.json
-  TEAM_MAPPING=$(jq -s '. | add' /tmp/team-mapping.json config/namespace-mapping.json)
+if [ "${NAMESPACE_MAPPINGS}" != "" ]; then
+  echo ${NAMESPACE_MAPPINGS} > /tmp/team-mapping.json
+  NAMESPACE_MAPPINGS=$(jq -s '. | add' /tmp/team-mapping.json config/namespace-mapping.json)
 fi
 
 
@@ -70,7 +70,7 @@ getPods() {
         team="${DEFAULT_TEAM_NAME}"
       fi
       descriptionMapping=""
-      for mapping in $(echo $TEAM_MAPPING | jq -rcM ".[] | @base64"); do
+      for mapping in $(echo $NAMESPACE_MAPPINGS | jq -rcM ".[] | @base64"); do
         mapping=$(echo $mapping | base64 -d)
         namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then

@@ -126,6 +126,7 @@ buildah config \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env IS_FETCH_DESCRIPTION="true" \
+  --env NAMESPACE_MAPPINGS="[]" \
   --cmd "/home/code/entrypoint.bash" \
   --user $openShiftGroupId \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \

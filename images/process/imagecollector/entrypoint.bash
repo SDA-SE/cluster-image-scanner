@@ -9,6 +9,7 @@ source pods.bash
 source git.bash
 IMAGE_FILENAME_JSON=/tmp/cluster-scan/output.json
 DESCRIPTION_JSON_FILE=/tmp/cluster-scan/description/service-description.json
+echo "creating /tmp/cluster-scan/description/"
 mkdir -p /tmp/cluster-scan/description/ || true
 
 echo "gitAuth"
