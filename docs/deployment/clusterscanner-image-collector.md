@@ -20,7 +20,9 @@ data:
   collector.upload.github.appid: "1111"
   collector.upload.github.installlationid: "2222"
   collector.namespacemapping: |
-    {"namespace_filter": "istio-", "team": "operations", "description": "Istio is a service mesh to establish end to end encryption and authentication (mTLS)"},
+    [
+      {"namespace_filter": "istio-", "team": "operations", "description": "Istio is a service mesh to establish end to end encryption and authentication (mTLS)"}
+    ]
 ```
 ### Sample cronjob.yaml
 ```
