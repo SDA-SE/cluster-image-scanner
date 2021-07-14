@@ -135,7 +135,6 @@ buildah config \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
-  --label "${oci_prefix}.licenses=AGPL-3.0" \
   --label "${oci_prefix}.title=Cluster Scan Collector" \
   --label "${oci_prefix}.description=Collect images from cluster with kubectl" \
   --label "io.sda-se.image.bill-of-materials-hash=$( \
