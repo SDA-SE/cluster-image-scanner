@@ -124,7 +124,7 @@ spec:
           secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
     container:
       image: quay.io/sdase/clusterscanner-imagefetcher:2
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       volumeMounts:
         - name: images
           mountPath: /clusterscanner/images
@@ -154,7 +154,7 @@ spec:
           archiveLogs: true
     container:
       image: quay.io/sdase/clusterscanner-scan-distroless:2
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       volumeMounts:
         - name: images
           mountPath: /clusterscanner/images
@@ -186,7 +186,7 @@ spec:
           archiveLogs: true
     container:
       image: quay.io/sdase/clusterscanner-scan-lifetime:2
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       volumeMounts:
         - name: images
           mountPath: /clusterscanner/images
@@ -224,7 +224,7 @@ spec:
           archiveLogs: true
     container:
       image: quay.io/sdase/clusterscanner-scan-runasroot:2
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       volumeMounts:
         - name: images
           mountPath: /clusterscanner/images
@@ -260,7 +260,7 @@ spec:
           path: /clusterscanner/data
     container:
       image: quay.io/sdase/clusterscanner-scan-dependency-check:2
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       volumeMounts:
         - name: images
           mountPath: /clusterscanner/images
@@ -293,7 +293,7 @@ spec:
           path: /code/findings.json
     container:
       image: quay.io/sdase/defectdojo-client:3
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       retryStrategy:
         limit: 10
         retryPolicy: "OnFailure"
@@ -380,7 +380,7 @@ spec:
           path: /code/findings.json
     container:
       image: quay.io/sdase/defectdojo-client:3
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotExists
       retryStrategy:
         limit: 10
         retryPolicy: "OnFailure"
