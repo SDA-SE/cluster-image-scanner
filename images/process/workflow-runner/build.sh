@@ -41,7 +41,8 @@ chmod 777 "${mnt}/clusterscanner/template.yml"
 # set argo version
 export ARGO_VERSION=$(curl --silent https://api.github.com/repos/argoproj/argo-workflows/releases/latest | jq '.tag_name' | sed 's/"//g')
 # Download archive
-curl -sLO "https://github.com/argoproj/argo/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
+echo "Will download from https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
+curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
 # Unzip
 gunzip argo-linux-amd64.gz
 # Make binary executable

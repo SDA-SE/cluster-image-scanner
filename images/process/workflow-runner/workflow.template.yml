@@ -35,6 +35,8 @@ spec:
         value: "###slack###"
       - name: email
         value: "###email###"
+      - name: is_scan_baseimage_lifetime
+        value: "###is_scan_baseimage_lifetime###"
       - name: is_scan_lifetime
         value: "###is_scan_lifetime###"
       - name: is_scan_distroless

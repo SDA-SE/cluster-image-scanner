@@ -9,6 +9,7 @@ while read -r line; do
     echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
     continue
   fi
+  IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
   cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
@@ -25,6 +26,7 @@ while read -r line; do
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /clusterscanner/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /clusterscanner/template.yml
+  sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /clusterscanner/template.yml
   sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml

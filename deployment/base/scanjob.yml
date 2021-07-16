@@ -28,507 +28,557 @@ spec:
       - name: image_id
       - name: slack
       - name: is_scan_lifetime
+      - name: is_scan_baseimage_lifetime
       - name: is_scan_distroless
       - name: is_scan_malware
       - name: is_scan_dependency_check
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
   templates:
-  - name: main
-    dag:
-      tasks:
-      - name: imagefetcher
-        template: imagefetcher
-      - name: scan-distroless
-        depends: imagefetcher
-        template: scan-distroless
-      - name: scan-lifetime
-        depends: imagefetcher
-        template: scan-lifetime
-      - name: scan-dependency-check
-        depends: imagefetcher
-        template: scan-dependency-check
-      - name: scan-runasroot
-        depends: imagefetcher
-        template: scan-runasroot
+    - name: main
+      dag:
+        tasks:
+          - name: imagefetcher
+            template: imagefetcher
+          - name: scan-distroless
+            depends: imagefetcher
+            template: scan-distroless
+          - name: scan-lifetime
+            depends: imagefetcher
+            template: scan-lifetime
+          - name: scan-baseimage-lifetime
+            depends: imagefetcher
+            template: scan-baseimage-lifetime
+          - name: scan-dependency-check
+            depends: imagefetcher
+            template: scan-dependency-check
+          - name: scan-runasroot
+            depends: imagefetcher
+            template: scan-runasroot
 
-      - name: results-dependency-check-dd-upload
-        #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
-        depends: scan-dependency-check
-        template: results-dependency-check-dd-upload
-        arguments:
-          artifacts:
-          - name: results-dependency-check
-            from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
+          - name: results-dependency-check-dd-upload
+            #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
+            depends: scan-dependency-check
+            template: results-dependency-check-dd-upload
+            arguments:
+              artifacts:
+                - name: results-dependency-check
+                  from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
 
-      - name: results-collect-generic-findings
-        depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-runasroot.Succeeded)
-        template: results-collect-generic-findings
-        arguments:
-          artifacts:
+          - name: results-collect-generic-findings
+            depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded)
+            template: results-collect-generic-findings
+            arguments:
+              artifacts:
+                - name: results-distroless
+                  from: "{{ tasks.scan-distroless.outputs.artifacts.results-distroless }}"
+                - name: results-baseimage-lifetime
+                  from: "{{ tasks.scan-baseimage-lifetime.outputs.artifacts.results-baseimage-lifetime }}"
+                - name: results-lifetime
+                  from: "{{ tasks.scan-lifetime.outputs.artifacts.results-lifetime }}"
+                - name: results-runasroot
+                  from: "{{ tasks.scan-runasroot.outputs.artifacts.results-runasroot }}"
+
+          - name: results-generic-dd-upload
+            depends: results-collect-generic-findings
+            template: results-generic-dd-upload
+            arguments:
+              artifacts:
+                - name: results-generic-findings
+                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
+
+          - name: results-aggregate
+            depends: results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded
+            template: results-aggregate
+            arguments:
+              artifacts:
+                - name: results-dd-generic-test-link
+                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link }}"
+                - name: results-dd-generic-is-finding-file
+                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file }}"
+                - name: results-dd-generic-findings-file
+                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file }}"
+                - name: results-dd-dependency-check-test-link
+                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
+                - name: results-dd-dependency-check-is-finding-file
+                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
+                - name: results-dd-dependency-check-findings-file
+                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
+                - name: results-generic
+                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
+              parameters:
+                - name: "dd-generic-exitcode"
+                  value: "{{ tasks.results-generic-dd-upload.exitCode }}"
+                - name: "dd-generic-startedat"
+                  value: "{{ tasks.results-generic-dd-upload.startedAt }}"
+                - name: "dd-generic-finishedat"
+                  value: "{{ tasks.results-generic-dd-upload.finishedAt }}"
+                - name: "dd-dependency-check-exitcode"
+                  value: "{{ tasks.results-dependency-check-dd-upload.exitCode }}"
+                - name: "dd-dependency-check-startedat"
+                  value: "{{ tasks.results-dependency-check-dd-upload.startedAt }}"
+                - name: "dd-dependency-check-finishedat"
+                  value: "{{ tasks.results-dependency-check-dd-upload.finishedAt }}"
+
+    - name: imagefetcher
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+      container:
+        image: quay.io/sdase/clusterscanner-imagefetcher:2
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            defaultMode: 0777 # to allow the cleanup to delete the folders
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+
+
+    - name: scan-distroless
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: scandata
+          emptyDir: {}
+      outputs:
+        artifacts:
           - name: results-distroless
-            from: "{{ tasks.scan-distroless.outputs.artifacts.results-distroless }}"
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/clusterscanner-scan-distroless:2
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+        env:
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_distroless }}"
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+
+    - name: scan-lifetime
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: scandata
+          emptyDir: {}
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+      outputs:
+        artifacts:
           - name: results-lifetime
-            from: "{{ tasks.scan-lifetime.outputs.artifacts.results-lifetime }}"
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/clusterscanner-scan-lifetime:2
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: MAX_IMAGE_LIFETIME_IN_DAYS
+            value: "{{ workflow.parameters.scan_lifetime_max_days }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_lifetime }}"
+
+    - name: scan-baseimage-lifetime
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: scandata
+          emptyDir: {}
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+      outputs:
+        artifacts:
+          - name: results-baseimage-lifetime
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/clusterscanner-scan-lifetime:2
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: MAX_IMAGE_LIFETIME_IN_DAYS
+            value: "{{ workflow.parameters.scan_lifetime_max_days }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_baseimage_lifetime }}"
+          - name: MODULE_NAME
+            value: "scan-baseimage-lifetime"
+          - name: IS_BASE_IMAGE_LIFETIME_SCAN
+            value: "true"
+
+    - name: scan-runasroot
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+        - name: scandata
+          emptyDir: {}
+      outputs:
+        artifacts:
           - name: results-runasroot
-            from: "{{ tasks.scan-runasroot.outputs.artifacts.results-runasroot }}"
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/clusterscanner-scan-runasroot:2
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_runasroot }}"
 
-      - name: results-generic-dd-upload
-        depends: results-collect-generic-findings
-        template: results-generic-dd-upload
-        arguments:
-          artifacts:
-          - name: results-generic-findings
-            from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
 
-      - name: results-aggregate
-        depends: results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded
-        template: results-aggregate
-        arguments:
-          artifacts:
-          - name: results-dd-generic-test-link
-            from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link }}"
-          - name: results-dd-generic-is-finding-file
-            from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file }}"
-          - name: results-dd-generic-findings-file
-            from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file }}"
+    - name: scan-dependency-check
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: scandata
+          emptyDir: {}
+      outputs:
+        artifacts:
+          - name: results-dependency-check
+            path: /clusterscanner/data/module_scan-dependency-check.json
+            archiveLogs: true
+          - name: results-dependency-check-report
+            path: /clusterscanner/data
+      container:
+        image: quay.io/sdase/clusterscanner-scan-dependency-check:2
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_dependency_check }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
+
+
+    - name: results-dependency-check-dd-upload
+      inputs:
+        artifacts:
+          - name: results-dependency-check
+            path: /tmp/dependency-check-results
+      outputs:
+        artifacts:
           - name: results-dd-dependency-check-test-link
-            from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
-          - name: results-dd-dependency-check-is-finding-file
-            from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
-          - name: results-dd-dependency-check-findings-file
-            from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
+            path: /code/defectDojoTestLink.txt
+          - name: is-finding-file
+            path: /code/isFinding
+          - name: findings-file
+            path: /code/findings.json
+      container:
+        image: quay.io/sdase/defectdojo-client:3
+        imagePullPolicy: IfNotPresent
+        retryStrategy:
+          limit: 10
+          retryPolicy: "OnFailure"
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - secretRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+        env:
+          - name: DD_PRODUCT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: DD_REPORT_TYPE
+            value: "Dependency Check Scan"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: DD_TEAM
+            value: "{{ workflow.parameters.team }}"
+          - name: EXIT_CODE_ON_FINDING
+            value: "0"
+          - name: EXIT_CODE_ON_MISSING_REPORT
+            value: "0" # make the job successful
+
+
+    - name: results-collect-generic-findings
+      inputs:
+        artifacts:
+          - name: results-distroless
+            path: /tmp/results/distroless
+          - name: results-lifetime
+            path: /tmp/results/lifetime
+          - name: results-baseimage-lifetime
+            path: /tmp/results/baseimage-lifetime
+          - name: results-runasroot
+            path: /tmp/results/runasroot
+      outputs:
+        artifacts:
           - name: results-generic
-            from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
-          parameters:
-          - name: "dd-generic-exitcode"
-            value: "{{ tasks.results-generic-dd-upload.exitCode }}"
-          - name: "dd-generic-startedat"
-            value: "{{ tasks.results-generic-dd-upload.startedAt }}"
-          - name: "dd-generic-finishedat"
-            value: "{{ tasks.results-generic-dd-upload.finishedAt }}"
-          - name: "dd-dependency-check-exitcode"
-            value: "{{ tasks.results-dependency-check-dd-upload.exitCode }}"
-          - name: "dd-dependency-check-startedat"
-            value: "{{ tasks.results-dependency-check-dd-upload.startedAt }}"
-          - name: "dd-dependency-check-finishedat"
-            value: "{{ tasks.results-dependency-check-dd-upload.finishedAt }}"
+            path: /tmp/result.json
+          - name: results-generic-findings
+            path: /tmp/findings.csv
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        command: [/bin/bash]
+        source: |
+          JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+          for j in /tmp/results/**/*.json; do
+            echo "Collecting ${j}"
+            JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
+          done
+          echo "${JSON_RESULT}" > /tmp/result.json
+          echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
+          cat /tmp/results/**/*.csv >> /tmp/findings.csv
+          DATE=$(date +%m/%d/%Y)
+          echo "Will change IMAGE {{ workflow.parameters.image }}"
+          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
+          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
+          echo "Will change CLUSTER"
+          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
+          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
+          echo "Will change NAMESPACE"
+          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
+          sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
+          sed -i "s-###DATE###-$DATE-g" /tmp/result.json
 
-  - name: imagefetcher
-    volumes:
-      - name: images
-        persistentVolumeClaim:
-          claimName: clusterscanner-images
-      - name: registry-creds
-        secret:
-          secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-    container:
-      image: quay.io/sdase/clusterscanner-imagefetcher:2
-      imagePullPolicy: IfNotExists
-      volumeMounts:
-        - name: images
-          mountPath: /clusterscanner/images
-          subPath: "{{ workflow.parameters.image_id }}"
-          defaultMode: 0777 # to allow the cleanup to delete the folders
-        - name: registry-creds
-          mountPath: /run/containers/auth.json
-          subPath: auth.json
-          defaultMode: 0444
-      env:
-        - name: IMAGE_BY_HASH
-          value: "{{ workflow.parameters.image_id }}"
+    - name: results-generic-dd-upload
+      inputs:
+        artifacts:
+          - name: results-generic-findings
+            path: /tmp/generic-results.csv
+      outputs:
+        artifacts:
+          - name: results-dd-generic-test-link
+            path: /code/defectDojoTestLink.txt
+          - name: is-finding-file
+            path: /code/isFinding
+          - name: findings-file
+            path: /code/findings.json
+      container:
+        image: quay.io/sdase/defectdojo-client:3
+        imagePullPolicy: IfNotPresent
+        retryStrategy:
+          limit: 10
+          retryPolicy: "OnFailure"
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - secretRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+        env:
+          - name: DD_PRODUCT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: DD_REPORT_TYPE
+            value: "Generic Findings Import"
+          - name: DD_REPORT_PATH
+            value: /tmp/generic-results.csv
+          - name: EXIT_CODE_ON_FINDING
+            value: "0"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: DD_TEAM
+            value: "{{ workflow.parameters.team }}"
+          - name: EXIT_CODE_ON_MISSING_REPORT
+            value: "0" # make the job successful
 
-
-  - name: scan-distroless
-    volumes:
-      - name: images
-        persistentVolumeClaim:
-          claimName: clusterscanner-images
-          readOnly: true
-      - name: scandata
-        emptyDir: {}
-    outputs:
-      artifacts:
-        - name: results-distroless
-          path: /clusterscanner/data
-          archiveLogs: true
-    container:
-      image: quay.io/sdase/clusterscanner-scan-distroless:2
-      imagePullPolicy: IfNotExists
-      volumeMounts:
-        - name: images
-          mountPath: /clusterscanner/images
-          subPath: "{{ workflow.parameters.image_id }}"
-          readOnly: true
+    - name: results-aggregate
+      inputs:
+        artifacts:
+          - name: results-dd-dependency-check-test-link
+            path: /tmp/dd-dependency-check-test-link.txt
+          - name: results-dd-generic-test-link
+            path: /tmp/dd-generic-test-link.txt
+          - name: results-dd-generic-is-finding-file
+            path: /tmp/isFinding-generic
+          - name: results-dd-generic-findings-file
+            path: /tmp/findings-generic.json
+          - name: results-dd-dependency-check-is-finding-file
+            path: /tmp/isFinding-dependency-check
+          - name: results-dd-dependency-check-findings-file
+            path: /tmp/findings-dependency-check.json
+          - name: results-generic
+            path: /tmp/result.json
+        parameters:
+          - name: dd-generic-exitcode
+          - name: dd-generic-startedat
+          - name: dd-generic-finishedat
+          - name: dd-dependency-check-exitcode
+          - name: dd-dependency-check-startedat
+          - name: dd-dependency-check-finishedat
+      volumes:
         - name: scandata
-          mountPath: /clusterscanner/data
-      env:
-      - name: IS_SCAN
-        value: "{{ workflow.parameters.is_scan_distroless }}"
-      - name: IMAGE_BY_HASH
-        value: "{{ workflow.parameters.image_id }}"
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      script:
+        image: quay.io/sdase/clusterscanner-base:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "{{ workflow.parameters.SCAN_ID }}"
+            defaultMode: 0777 # to allow the cleanup to delete the folders
+        command: [/bin/bash]
+        source: |
+          set -e
+          IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
+          IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
+          IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)
+          IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | cut -d: -f2)
 
-  - name: scan-lifetime
-    volumes:
-      - name: images
-        persistentVolumeClaim:
-          claimName: clusterscanner-images
-          readOnly: true
-      - name: scandata
-        emptyDir: {}
-      - name: registry-creds
-        secret:
-          secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-    outputs:
-      artifacts:
-        - name: results-lifetime
-          path: /clusterscanner/data
-          archiveLogs: true
-    container:
-      image: quay.io/sdase/clusterscanner-scan-lifetime:2
-      imagePullPolicy: IfNotExists
-      volumeMounts:
-        - name: images
-          mountPath: /clusterscanner/images
-          subPath: "{{ workflow.parameters.image_id }}"
-          readOnly: true
-        - name: scandata
-          mountPath: /clusterscanner/data
-        - name: registry-creds
-          mountPath: /run/containers/auth.json
-          subPath: auth.json
-          defaultMode: 0444
-      env:
-      - name: IMAGE_BY_HASH
-        value: "{{ workflow.parameters.image_id }}"
-      - name: MAX_IMAGE_LIFETIME_IN_DAYS
-        value: "{{ workflow.parameters.scan_lifetime_max_days }}"
-      - name: IS_SCAN
-        value: "{{ workflow.parameters.is_scan_lifetime }}"
+          JSON_RESULT=$(cat /tmp/result.json)
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageHash = \"${IMAGE_HASH}\"")
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.image = "{{ workflow.parameters.image }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.environment = "{{ workflow.parameters.environment }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.namespace = "{{ workflow.parameters.namespace }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
 
-  - name: scan-runasroot
-    volumes:
-      - name: images
-        persistentVolumeClaim:
-          claimName: clusterscanner-images
-          readOnly: true
-      - name: registry-creds
-        secret:
-          secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-      - name: scandata
-        emptyDir: {}
-    outputs:
-      artifacts:
-        - name: results-runasroot
-          path: /clusterscanner/data
-          archiveLogs: true
-    container:
-      image: quay.io/sdase/clusterscanner-scan-runasroot:2
-      imagePullPolicy: IfNotExists
-      volumeMounts:
-        - name: images
-          mountPath: /clusterscanner/images
-          subPath: "{{ workflow.parameters.image_id }}"
-          readOnly: true
-        - name: scandata
-          mountPath: /clusterscanner/data
-        - name: registry-creds
-          mountPath: /run/containers/auth.json
-          subPath: auth.json
-          defaultMode: 0444
-      env:
-      - name: IMAGE_BY_HASH
-        value: "{{ workflow.parameters.image_id }}"
-      - name: IS_SCAN
-        value: "{{ workflow.parameters.is_scan_runasroot }}"
-
-
-  - name: scan-dependency-check
-    volumes:
-      - name: images
-        persistentVolumeClaim:
-          claimName: clusterscanner-images
-          readOnly: true
-      - name: scandata
-        emptyDir: {}
-    outputs:
-      artifacts:
-        - name: results-dependency-check
-          path: /clusterscanner/data/module_scan-dependency-check.json
-          archiveLogs: true
-        - name: results-dependency-check-report
-          path: /clusterscanner/data
-    container:
-      image: quay.io/sdase/clusterscanner-scan-dependency-check:2
-      imagePullPolicy: IfNotExists
-      volumeMounts:
-        - name: images
-          mountPath: /clusterscanner/images
-          subPath: "{{ workflow.parameters.image_id }}"
-          readOnly: true
-        - name: scandata
-          mountPath: /clusterscanner/data
-      env:
-      - name: IMAGE_BY_HASH
-        value: "{{ workflow.parameters.image_id }}"
-      - name: IS_SCAN
-        value: "{{ workflow.parameters.is_scan_dependency_check }}"
-      envFrom:
-        - configMapRef:
-            name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
-
-
-  - name: results-dependency-check-dd-upload
-    inputs:
-      artifacts:
-        - name: results-dependency-check
-          path: /tmp/dependency-check-results
-    outputs:
-      artifacts:
-        - name: results-dd-dependency-check-test-link
-          path: /code/defectDojoTestLink.txt
-        - name: is-finding-file
-          path: /code/isFinding
-        - name: findings-file
-          path: /code/findings.json
-    container:
-      image: quay.io/sdase/defectdojo-client:3
-      imagePullPolicy: IfNotExists
-      retryStrategy:
-        limit: 10
-        retryPolicy: "OnFailure"
-      command: [/usr/bin/groovy]
-      args:
-        - "/code/defectdojo.groovy"
-      workingDir: "/code"
-      envFrom:
-        - configMapRef:
-            name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
-        - secretRef:
-            name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
-      env:
-        - name: DD_PRODUCT_NAME
-          value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
-        - name: DD_BRANCH_NAME
-          value: "{{ workflow.parameters.image }}"
-        - name: DD_REPORT_TYPE
-          value: "Dependency Check Scan"
-        - name: NAMESPACE
-          value: "{{ workflow.parameters.namespace }}"
-        - name: ENVIRONMENT
-          value: "{{ workflow.parameters.environment }}"
-        - name: DD_TEAM
-          value: "{{ workflow.parameters.team }}"
-        - name: EXIT_CODE_ON_FINDING
-          value: "0"
-        - name: EXIT_CODE_ON_MISSING_REPORT
-          value: "0" # make the job successful
-
-
-  - name: results-collect-generic-findings
-    inputs:
-      artifacts:
-        - name: results-distroless
-          path: /tmp/results/distroless
-        - name: results-lifetime
-          path: /tmp/results/lifetime
-        - name: results-runasroot
-          path: /tmp/results/runasroot
-    outputs:
-      artifacts:
-        - name: results-generic
-          path: /tmp/result.json
-        - name: results-generic-findings
-          path: /tmp/findings.csv
-    script:
-      image: quay.io/sdase/clusterscanner-base:2
-      command: [/bin/bash]
-      source: |
-        JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
-        for j in /tmp/results/**/*.json; do
-          echo "Collecting ${j}"
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
-        done
-        echo "${JSON_RESULT}" > /tmp/result.json
-        echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
-        cat /tmp/results/**/*.csv >> /tmp/findings.csv
-        DATE=$(date +%m/%d/%Y)
-        echo "Will change IMAGE {{ workflow.parameters.image }}"
-        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
-        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
-        echo "Will change CLUSTER"
-        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
-        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
-        echo "Will change NAMESPACE"
-        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
-        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
-        sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
-        sed -i "s-###DATE###-$DATE-g" /tmp/result.json
-
-  - name: results-generic-dd-upload
-    inputs:
-      artifacts:
-        - name: results-generic-findings
-          path: /tmp/generic-results.csv
-    outputs:
-      artifacts:
-        - name: results-dd-generic-test-link
-          path: /code/defectDojoTestLink.txt
-        - name: is-finding-file
-          path: /code/isFinding
-        - name: findings-file
-          path: /code/findings.json
-    container:
-      image: quay.io/sdase/defectdojo-client:3
-      imagePullPolicy: IfNotExists
-      retryStrategy:
-        limit: 10
-        retryPolicy: "OnFailure"
-      command: [/usr/bin/groovy]
-      args:
-        - "/code/defectdojo.groovy"
-      workingDir: "/code"
-      envFrom:
-        - configMapRef:
-            name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
-        - secretRef:
-            name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
-      env:
-        - name: DD_PRODUCT_NAME
-          value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
-        - name: DD_BRANCH_NAME
-          value: "{{ workflow.parameters.image }}"
-        - name: DD_REPORT_TYPE
-          value: "Generic Findings Import"
-        - name: DD_REPORT_PATH
-          value: /tmp/generic-results.csv
-        - name: EXIT_CODE_ON_FINDING
-          value: "0"
-        - name: NAMESPACE
-          value: "{{ workflow.parameters.namespace }}"
-        - name: ENVIRONMENT
-          value: "{{ workflow.parameters.environment }}"
-        - name: DD_TEAM
-          value: "{{ workflow.parameters.team }}"
-        - name: EXIT_CODE_ON_MISSING_REPORT
-          value: "0" # make the job successful
-
-  - name: results-aggregate
-    inputs:
-      artifacts:
-        - name: results-dd-dependency-check-test-link
-          path: /tmp/dd-dependency-check-test-link.txt
-        - name: results-dd-generic-test-link
-          path: /tmp/dd-generic-test-link.txt
-        - name: results-dd-generic-is-finding-file
-          path: /tmp/isFinding-generic
-        - name: results-dd-generic-findings-file
-          path: /tmp/findings-generic.json
-        - name: results-dd-dependency-check-is-finding-file
-          path: /tmp/isFinding-dependency-check
-        - name: results-dd-dependency-check-findings-file
-          path: /tmp/findings-dependency-check.json
-        - name: results-generic
-          path: /tmp/result.json
-      parameters:
-        - name: dd-generic-exitcode
-        - name: dd-generic-startedat
-        - name: dd-generic-finishedat
-        - name: dd-dependency-check-exitcode
-        - name: dd-dependency-check-startedat
-        - name: dd-dependency-check-finishedat
-    volumes:
-      - name: scandata
-        persistentVolumeClaim:
-          claimName: clusterscanner-scandata
-    script:
-      image: quay.io/sdase/clusterscanner-base:2
-      volumeMounts:
-        - name: scandata
-          mountPath: /clusterscanner/data
-          subPath: "{{ workflow.parameters.SCAN_ID }}"
-          defaultMode: 0777 # to allow the cleanup to delete the folders
-      command: [/bin/bash]
-      source: |
-        set -e
-        IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
-        IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
-        IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)
-        IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | cut -d: -f2)
-
-        JSON_RESULT=$(cat /tmp/result.json)
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageHash = \"${IMAGE_HASH}\"")
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.image = "{{ workflow.parameters.image }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.environment = "{{ workflow.parameters.environment }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.namespace = "{{ workflow.parameters.namespace }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
-
-        JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
-        isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
-        if [ "$isFinding" == "true" ]; then
-          DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
-          if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
-            echo "Starting DepCheck Aggregate"
-            echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
-            FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
-            FILESIZE_LIMT=25600 # 20kb
-            if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
-              echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
-              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
+          JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
+          isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
+          if [ "$isFinding" == "true" ]; then
+            DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
+            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
+            if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
+              echo "Starting DepCheck Aggregate"
+              echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
+              FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
+              FILESIZE_LIMT=25600 # 20kb
+              if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
+                echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
+                JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
+              else
+                echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
+                echo '[{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-check-zero.json
+                JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
+              fi
             else
-              echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
-              echo '[{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-check-zero.json
-              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
+              JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
+              echo "Warning: /tmp/findings-dependency-check.json is empty"
             fi
+          elif [ "xX{{ inputs.parameters.dd-dependency-check-exitcode }}" != "xX0" ]; then
+            echo "Exit code != 0"
+            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
           else
-            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
-            echo "Warning: /tmp/findings-dependency-check.json is empty"
+            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
-        elif [ "xX{{ inputs.parameters.dd-dependency-check-exitcode }}" != "xX0" ]; then
-          echo "Exit code != 0"
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
-        else
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
-        fi
-        JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
-        JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
 
-        echo "Starting Generic"
-        JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
-        isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
-        if [ "$isFinding" == "true" ]; then
-          DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
-          if [ $(cat /tmp/findings-generic.json  | wc -c) -gt 5 ]; then
-            echo $JSON_DD_GENERIC> /tmp/generic.json
-            JSON_DD_GENERIC=$(jq '.findings += input'  /tmp/generic.json /tmp/findings-generic.json)
+          echo "Starting Generic"
+          JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
+          isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
+          if [ "$isFinding" == "true" ]; then
+            DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
+            JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Unhandled vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
+            if [ $(cat /tmp/findings-generic.json  | wc -c) -gt 5 ]; then
+              echo $JSON_DD_GENERIC> /tmp/generic.json
+              JSON_DD_GENERIC=$(jq '.findings += input'  /tmp/generic.json /tmp/findings-generic.json)
+            else
+              JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
+              echo "Warning: /tmp/finding-generic  is empty"
+            fi
+          elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
+            JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\"}")
           else
-            JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
-            echo "Warning: /tmp/finding-generic  is empty"
+            JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
-        elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\"}")
-        else
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
-        fi
-        JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
-        JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
-        echo ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]"
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]")
-        DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
-        DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
-        if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ]; then
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = true")
-        else
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
-        fi
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
+          echo ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]"
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]")
+          DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
+          DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
+          if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ]; then
+            JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = true")
+          else
+            JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
+          fi
 
-        echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
-        echo "${JSON_RESULT}"
-        echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
+          echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
+          echo "${JSON_RESULT}"
+          echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json

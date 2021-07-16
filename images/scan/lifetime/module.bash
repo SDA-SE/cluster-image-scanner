@@ -21,12 +21,19 @@ if [ "${exit}" == "true" ]; then
 fi
 
 # build date
-dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
+if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
+  dt1=$(skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -r '.history[-1] | if has("created") then .created else if has("Created") then .Created else "NODATE" end end')
+  sed -i '#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
+  IMAGE_TYPE="BaseImage"
+else
+  dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
+  IMAGE_TYPE="Image"
+fi
 
 
 # check for invalid dates
 if [[ "${dt1}" == "NODATE" ]]; then
-    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\", \"infoText\": \"Image build date invalid\"}")
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\", \"infoText\": \"${IMAGE_TYPE} build date invalid\"}")
     scan_result_post
     exit 1
 fi
@@ -45,12 +52,12 @@ hDiff="$(( tDiff/3600 ))" || true
 # day difference
 dDiff="$(( hDiff/24 ))" || true
 
-JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}}")
+JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
-    infoText="Image is too old"
+    infoText="${IMAGE_TYPE} is too old"
     if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
-      infoText="Could not determine image age due to image creation date of 1970 (happens for reproducible builds)"
+      infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/ddTemplate.csv "${ARTIFACTS_PATH}/lifetime.csv"

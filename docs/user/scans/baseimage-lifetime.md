@@ -1,8 +1,8 @@
-# Scan Image Lifetime
-The image lifetime scan has the implication that the respective container image should only run for a certain period of time (e.g. 5 days) in the cluster, otherwise libraries contained in the image might be outdated.
+# Scan BaseImage Lifetime
+The baseimage lifetime scan has the implication that images based on the respective container baseimage should only run for a certain period of time (e.g. 5 days) in the cluster, otherwise libraries contained in the baseimage might be outdated.
 
 ## Relevance
-The lifetime scan is used as an indicator for missing patch management. So that no image runs too long without updated components being included in the images. 
+The baseimage lifetime scan inspects the build time of first image layer (called base image) of the image under scan. In case the baseimage is older than the defined lifetime, the baseimage and therefore the image might run with outdated components.
 By using an update to date base image, it minimizes the potential vulnerabilities, since a newly build image is up to date with the latest software components.
 
 Container images consists of:
@@ -16,7 +16,7 @@ Use the following threat treatments on issues:
 Do not use the image in production.
 
 ### Mitigation
-In case the scanned container image exceeds the specified period of time, it is urged to create and deploy a new container image. The creation of a new container image reduces the risk of having outdated software with vulnerabilities in operation.
+Update the base image. In a Dockerfile, the image in the first line `FROM` should be checked for new versions.
 
 In case the image is a third party image, consider to build the image on your own and using the latest available application/service version.
 
