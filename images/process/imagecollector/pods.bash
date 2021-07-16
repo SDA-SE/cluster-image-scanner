@@ -122,6 +122,10 @@ getPods() {
       if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
         isScanLifetime="${DEFAULT_SCAN_LIFETIME}"
       fi
+      isScanBaseImageLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_BASEIMAGE_LIFETIME_ANNOTATION}\"]")
+      if [ "${isScanBaseImageLifetime}" == "" ] || [ "${isScanBaseImageLifetime}" == "null" ]; then
+        isScanBaseImageLifetime="${DEFAULT_SCAN_BASEIMAGE_LIFETIME}"
+      fi
       isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
       if [ "${isScanDistroless}" == "" ] || [ "${isScanDistroless}" == "null" ]; then
         isScanDistroless="${DEFAULT_SCAN_DISTROLESS}"
@@ -162,6 +166,7 @@ getPods() {
           "container_running_as": "TODO",
           "environment": "'${ENVIRONMENT_NAME}'",
           "is_scan_lifetime": .metadata.annotations["'${SCAN_LIFETIME_ANNOTATION}'"],
+          "is_scan_baseimage_lifetime": .metadata.annotations["'${SCAN_BASEIMAGE_LIFETIME_ANNOTATION}'"],
           "is_scan_distroless": .metadata.annotations["'${SCAN_DISTROLESS_ANNOTATION}'"],
           "is_scan_malware": .metadata.annotations["'${SCAN_MALWARE_ANNOTATION}'"],
           "is_scan_dependency_check": .metadata.annotations["'${SCAN_DEPENDENCY_CHECK_ANNOTATION}'"],
@@ -203,6 +208,7 @@ getPods() {
           if .slack == null then .slack="'${namespaceContactSlack}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
           if .is_scan_lifetime == null then .is_scan_lifetime="'${isScanLifetime}'" else . end |
+          if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseImageLifetime}'" else . end |
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunAsRoot}'" else . end |
