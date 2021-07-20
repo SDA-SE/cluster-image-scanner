@@ -4,6 +4,7 @@ Software and infrastructure are potential points of attack. Such attacks can lea
 There are a number of different types of scans that can produce different findings. Each check is introduced by a short summary of the relevance and different response possibilities.
 
 - [Distroless](distroless.md)
+- [BaseImage Lifetime](baseimage-lifetime.md)
 - [Image Lifetime](image-lifetime.md)
 - [Known Vulnerabilities](known-vulnerabilities.md)
 - [Root-User](run-as-root.md)

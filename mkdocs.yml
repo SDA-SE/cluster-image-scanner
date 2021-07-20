@@ -14,6 +14,7 @@ nav:
   - Scans:
       - Overview: user/scans/README.md
       - Distroless: user/scans/distroless.md
+      - BaseImage Lifetime: user/scans/baseimage-lifetime.md
       - Image Lifetime: user/scans/image-lifetime.md
       - Known Vulnerabilities: user/scans/known-vulnerabilities.md
       - Malware: user/scans/malware.md
