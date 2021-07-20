@@ -25,6 +25,7 @@ clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for developmen
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
 
 # Adjust scans on object or namespace
+clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
 clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
