@@ -9,6 +9,8 @@ Container images consists of:
 - Application and the application dependencies
 - Operating system packages
 
+![Lifetime Scans](lifetime-scans.png)
+
 ## Response
 Use the following threat treatments on issues:
 
