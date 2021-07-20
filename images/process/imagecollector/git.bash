@@ -108,8 +108,8 @@ gitAuth() {
 }
 
 gitFetch() {
-  rm -Rf /tmp/cluster-scan || true
+  rm -Rf /tmp/clusterscanner-remote || true
   echo "CLONE_URL: ${CLONE_URL}"
-  git clone "${CLONE_URL}" /tmp/cluster-scan
-  echo "fetched"
+  git clone "${CLONE_URL}" /tmp/clusterscanner-remote
+  echo "fetched to /tmp/clusterscanner-remote"
 }

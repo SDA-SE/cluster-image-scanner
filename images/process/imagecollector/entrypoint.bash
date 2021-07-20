@@ -9,10 +9,8 @@ source pods.bash
 source git.bash
 IMAGE_FILENAME_JSON=/tmp/cluster-scan/output.json
 
-echo "gitAuth"
-gitAuth
-echo "gitFetch"
-gitFetch
+echo "gitAuth1"
+gitAuth # test that it works
 
 echo "getPods"
 if [ "${CLUSTER_NAME}" != "" ]; then
@@ -20,22 +18,28 @@ if [ "${CLUSTER_NAME}" != "" ]; then
 fi
 getPods "${IMAGE_FILENAME_JSON}" "${ENVIRONMENT_NAME}"
 
+echo "gitAuth2"
+gitAuth
+echo "gitFetch"
+gitFetch
+cp -a /tmp/cluster-scan/* /tmp/clusterscanner-remote
 
-cd /tmp/cluster-scan
-git add "${IMAGE_FILENAME_JSON}" || true
-git commit -m "update file" "${IMAGE_FILENAME_JSON}" || true
+cd /tmp/clusterscanner-remote
+git add "output.json" || true
+git commit -m "update file" "output.json" || true
 
 if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
-  git add /tmp/cluster-scan/description/ || true
-  git commit -m "update file" /tmp/cluster-scan/description/ || true
+  git add description/ || true
+  git commit -m "update file" description/ || true
 fi
 
 TZ="Europe/Berlin" date > lastScan
 git add lastScan || true
 
-#echo "Old csv is not to be used anymore" TODO
-#git rm imagesAndCluster.csv || true
+echo "Old csv is not to be used anymore" # TODO: Remove
+git rm imagesAndCluster.csv || true
 
 git commit -m "update lastscan" lastScan  || true
-gitAuth # token might not be valid anymore
 git push -f origin master || true
+
+
