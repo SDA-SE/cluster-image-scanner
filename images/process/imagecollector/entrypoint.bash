@@ -37,5 +37,5 @@ git add lastScan || true
 #git rm imagesAndCluster.csv || true
 
 git commit -m "update lastscan" lastScan  || true
-
+gitAuth # token might not be valid anymore
 git push -f origin master || true
