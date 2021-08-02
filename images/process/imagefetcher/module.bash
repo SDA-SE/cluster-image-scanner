@@ -27,7 +27,7 @@ skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f
 
 echo "Downloading image ${IMAGE_BY_HASH}"
 
-skopeo copy" docker://${IMAGE_BY_HASH}" "dir:${_tmp_dir}"
+skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${_tmp_dir}"
 
 for l in $(jq ".layers | .[].digest" "${_tmp_dir}/manifest.json" | tr -d \" | sed -e "s/^sha256://g"); do
     echo "Extracting blob ${l}"
