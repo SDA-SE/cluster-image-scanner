@@ -5,9 +5,9 @@
 Discover vulnerabilities and container image misconfiguration in production environments.
 
 # Introduction
-The Cluster Scanner detects images in a Kubernetes cluster and provides fast feedback based on various security tests. It is recommended to run the Cluster Scanner in production environments in order to get up-to-date feedback on security issues where they have real impact.
+The ClusterImageScanner detects images in a Kubernetes cluster and provides fast feedback based on various security tests. It is recommended to run the Cluster Scanner in production environments in order to get up-to-date feedback on security issues where they have real impact.
 
-Since the Cluster Scanner itself is a service running within your Kubernetes cluster you can re-use your existing deployment procedures.
+Since the ClusterImageScanner itself is a service running within your Kubernetes cluster you can re-use your existing deployment procedures.
 # Overview
 The following figure provides an overview:
 ![Overview](docs/images/overview.png)
@@ -25,7 +25,7 @@ The following steps are conducted.
 - [Architecture and Decisions](docs/architecture)
 - [Operator documentation](docs/deployment)
 
-[Video (English): SDA SE CluserScanner is going Open Source, 2021-03](https://www.youtube.com/watch?v=_AElSBKSizc&t=2966s)
+[Video (English): SDA SE CluserImageScanner is going Open Source, 2021-03](https://www.youtube.com/watch?v=_AElSBKSizc&t=2966s)
 
 # Images
 Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
@@ -52,7 +52,7 @@ We are looking forward to contributions. Take a look at our [Contribution Guidel
 The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
 
 # Legal Notice
-The purpose of the ClusterScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
+The purpose of the ClusterImageScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
 The ClusterScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
 
 # Author Information
