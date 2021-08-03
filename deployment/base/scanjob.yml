@@ -129,7 +129,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
       container:
-        image: quay.io/sdase/clusterscanner-imagefetcher:2.0
+        image: quay.io/sdase/clusterscanner-imagefetcher:2.0.237
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: images
