@@ -14,10 +14,10 @@ fi
 mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
 
 _tmp_dir="${IMAGE_TAR_FOLDER_PATH}/tmp"
-rm -Rf ${_tmp_dir} || true
-mkdir ${_tmp_dir}
-_unpack_dir=$(mktemp -d --tmpdir=${_tmp_dir})
-_config_dir=$(mktemp -d --tmpdir=${_tmp_dir})
+rm -Rf "${_tmp_dir}" || true
+mkdir "${_tmp_dir}"
+_unpack_dir=$(mktemp -d --tmpdir="${_tmp_dir}")
+_config_dir=$(mktemp -d --tmpdir="${_tmp_dir}")
 
 echo "Directory /run/containers"
 ls -lah /run/containers
