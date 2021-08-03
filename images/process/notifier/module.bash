@@ -23,7 +23,7 @@ for file in "${RESULT_PATH}"/**/*.json; do
   for result in $(echo "${item}" | jq -rcM '.uploadResults[] | @base64'); do
     #for result2 in $(echo "${result}" | base64 -d | jq -rcM '.[] | @base64'); do
       notifications=$(echo "${result}" | base64 -d | jq 'select(.finding == true)')
-      echo "${notifications}"
+      echo "notifications: ${notifications}"
       while IFS= read -r notification; do
         echo "in notification for ${image}"
 
