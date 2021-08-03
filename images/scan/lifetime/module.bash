@@ -63,7 +63,7 @@ tDiff="$(( t2-t1 ))"
 hDiff="$(( tDiff/3600 ))" || true
 # day difference
 dDiff="$(( hDiff/24 ))" || true
-
+echo "dDiff: ${dDiff}"
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
