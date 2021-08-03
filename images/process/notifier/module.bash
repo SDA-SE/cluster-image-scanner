@@ -22,8 +22,8 @@ for file in "${RESULT_PATH}"/**/*.json; do
   echo "Inspecting team ${team} for image ${image}"
   for result in $(echo "${item}" | jq -rcM '.uploadResults[] | @base64'); do
     #for result2 in $(echo "${result}" | base64 -d | jq -rcM '.[] | @base64'); do
-      echo "${notifications}"
       notifications=$(echo "${result}" | base64 -d | jq 'select(.finding == true)')
+      echo "${notifications}"
       while IFS= read -r notification; do
         echo "in notification for ${image}"
 
@@ -56,7 +56,7 @@ for file in "${RESULT_PATH}"/**/*.json; do
             exit 1;
           fi
           if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
-            sleep 120 # wait for rate limt
+            sleep 120 # wait for rate limit
             ./inform.bash "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}"
           fi
           sleep 1 # reduce risk of rate limit
