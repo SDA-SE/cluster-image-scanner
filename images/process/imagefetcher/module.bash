@@ -21,7 +21,6 @@ _config_dir=$(mktemp -d --tmpdir="${_tmp_dir}")
 
 echo "Directory /run/containers"
 ls -lah /run/containers
-sha256sum /run/containers/auth.json
 
 echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
 # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
