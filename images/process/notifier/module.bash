@@ -21,11 +21,11 @@ for file in "${RESULT_PATH}"/**/*.json; do
   fi
   echo "Inspecting team ${team} for image ${image}"
   for result in $(echo "${item}" | jq -rcM '.uploadResults[] | @base64'); do
-    for result2 in $(echo "${result}" | base64 -d | jq -rcM '.[] | @base64'); do
-      notifications=$(echo "${result2}" | base64 -d | jq 'select(.finding == true)')
+    #for result2 in $(echo "${result}" | base64 -d | jq -rcM '.[] | @base64'); do
+      notifications=$(echo "${result}" | base64 -d | jq 'select(.finding == true)')
       while IFS= read -r notification; do
         echo "in notification for ${image}"
-        echo "${notification}"
+        echo "${notifications}"
         ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
         message=$(echo "${notification}" | jq -r ".infoText" | sed 's#{##g' | sed 's#}##g')   #| tr -cd '[:alnum:]._ \n:@*+()[]-') # at least { } needs to be removed for the slack cli
         errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
@@ -60,7 +60,7 @@ for file in "${RESULT_PATH}"/**/*.json; do
           fi
           sleep 1 # reduce risk of rate limit
         done
-      done <<< "$(echo "${notifications}")"
+      #done <<< "$(echo "${notifications}")"
     done
   done
 done
