@@ -6,18 +6,22 @@ set -e
 #
 # Skips if there already is a identical config file present
 
-_tmp_dir=$(mktemp -d)
-_unpack_dir=$(mktemp -d)
-_config_dir=$(mktemp -d)
-
-echo "Directory /run/containers"
-ls -lah /run/containers
-sha256sum /run/containers/auth.json
-
 if [ "${IMAGE_TAR_FOLDER_PATH}" == "" ]; then
   echo "IMAGE_TAR_FOLDER_PATH is not set"
   exit 2
 fi
+
+mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
+
+_tmp_dir="${IMAGE_TAR_FOLDER_PATH}/tmp"
+rm -Rf ${_tmp_dir} || true
+mkdir ${_tmp_dir}
+_unpack_dir=$(mktemp -d --tmpdir=${_tmp_dir})
+_config_dir=$(mktemp -d --tmpdir=${_tmp_dir})
+
+echo "Directory /run/containers"
+ls -lah /run/containers
+sha256sum /run/containers/auth.json
 
 echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
 # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
@@ -39,7 +43,6 @@ done
 cd "${_unpack_dir}"
 
 echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
-mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
 tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
 
 echo "Copying manifest and config file"
@@ -47,4 +50,4 @@ cp "${_tmp_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
 cp "${_config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
 echo "Cleaning up"
-rm -rf "${_tmp_dir}" "${_unpack_dir}"
+rm -rf "${_tmp_dir}"
