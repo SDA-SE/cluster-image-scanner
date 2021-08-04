@@ -27,13 +27,13 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   imageHistory=$(skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -r '.history')
 
   for updateCommand in ${distroPackageUpdateCommands[@]}; do
-    if [ "${dt1}" == "" ]; then
+    if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
       echo "$updateCommand"
       dt1=$(echo ${imageHistory} | jq -r 'map(select(.created_by | match("'${updateCommand}'")))[0] | .created')
       break
     fi
   done;
-  if [ "${dt1}" == "" ]; then
+  if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
     dt1=$(echo ${imageHistory} | jq -r '[0] | if has("created") then .created else if has("Created") then .Created else "NODATE" end end')
   fi
   sed -i '#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
