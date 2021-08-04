@@ -1,0 +1,161 @@
+{
+  "appname": "petstore",
+  "email": "clusterscannertest@sda.se",
+  "environment": "test-cluster",
+  "image": "swaggerapi/petstore:1.0.3",
+  "imageHash": "b4c0c6faac37e2051df9cd525a4fe7a3e0aef93c6d190e71619c6a70ccae4e4f",
+  "imageTag": "1.0.3",
+  "namespace": "petstore-prod",
+  "notificationRequired": true,
+  "scanResults": [
+    {
+      "scan-lifetime": {
+        "age": 657,
+        "buildDate": "2019-10-16T08:26:52.757799248Z",
+        "finding": true,
+        "finishedAt": "2021-08-03 15:39:52.449591964+00:00",
+        "imageType": "BaseImage",
+        "infoText": "BaseImage is too old",
+        "maxAge": 14,
+        "startedAt": "2021-08-03 15:39:47.617094296+00:00",
+        "status": "completed"
+      }
+    },
+    {
+      "scan-distroless": {
+        "finding": true,
+        "finishedAt": "2021-08-03 15:39:39.349366631+00:00",
+        "infoText": "Image has shell executables and therefore most likely is not distroless",
+        "shells": [
+          "bin/sh",
+          "bin/bash",
+          "bin/dash"
+        ],
+        "startedAt": "2021-08-03 15:39:39.258318905+00:00",
+        "status": "completed"
+      }
+    },
+    {
+      "scan-lifetime": {
+        "age": 657,
+        "buildDate": "2019-10-16T08:26:52.757799248Z",
+        "finding": true,
+        "finishedAt": "2021-08-03 15:39:56.740972767+00:00",
+        "imageType": "Image",
+        "infoText": "Image is too old",
+        "maxAge": 14,
+        "startedAt": "2021-08-03 15:39:50.567968270+00:00",
+        "status": "completed"
+      }
+    },
+    {
+      "scan-runasroot": {
+        "finding": true,
+        "finishedAt": "2021-08-03 15:39:51.729900566+00:00",
+        "infoText": "Image is potentially running as root",
+        "startedAt": "2021-08-03 15:39:48.135737939+00:00",
+        "status": "completed"
+      }
+    }
+  ],
+  "scm_source_branch": "TODO",
+  "slack": "#security-notifications-test",
+  "team": "security-test",
+  "uploadResults": [
+    {
+      "ddGenericUpload": {
+        "ddLink": "http://192.168.178.55:8081//test/418",
+        "errors": [],
+        "finding": true,
+        "findings": [
+          {
+            "active": true,
+            "description": "\nImage is running as root user when started without explicit user selection.\nImage swaggerapi/petstore:1.0.3\nCluster test-cluster\nNamespace petstore-prod ",
+            "duplicate": false,
+            "duplicateFinding": null,
+            "endpoints": [
+              20
+            ],
+            "falsePositive": false,
+            "foundBy": [
+              120
+            ],
+            "id": 4352,
+            "impact": "Greater blast radius when container is overtaken by an attacker.\nWorst case: Attacker gains root access to host machine (Container Escape).",
+            "mitigation": "Change user to a non-root user during image building.\nExample in Dockerfile:\nUSER 1011\nExample with builadh:\nbuildah config [...] --user 1011",
+            "numericalSeverity": "S0",
+            "severity": "Critical",
+            "test": 187,
+            "title": "Image Potentially Running as Root",
+            "verified": false
+          },
+          {
+            "active": true,
+            "description": "\nBaseImage is too old\nImage has a build date of 2019-10-16T08:26:52.757799248Z, which is over the defined lifetime of 14.\nImage swaggerapi/petstore:1.0.3\nCluster test-cluster\nNamespace petstore-prod",
+            "duplicate": false,
+            "duplicateFinding": null,
+            "endpoints": [
+              20
+            ],
+            "falsePositive": false,
+            "foundBy": [
+              120
+            ],
+            "id": 14229,
+            "impact": "Vulnerabilities in images of running containers stay for too long and might get exploited.\nLong running containers have potential memory leaks.\nA compromised container might get killed by restarting the container (e.g. in case the attacker has not reached the persistence layer).\nSource: OWASP DevSecOps Maturity Model",
+            "mitigation": "3rd party components:\nCheck for newer versions of image and deploy it.\nOwn components:\nRebuild image and deploy it.",
+            "numericalSeverity": "S1",
+            "severity": "High",
+            "test": 408,
+            "title": "Image Age > 14 Days",
+            "verified": false
+          },
+          {
+            "active": true,
+            "description": "\nImage is too old\nImage has a build date of 2019-10-16T08:26:52.757799248Z, which is over the defined lifetime of 14.\nImage swaggerapi/petstore:1.0.3\nCluster test-cluster\nNamespace petstore-prod",
+            "duplicate": false,
+            "duplicateFinding": null,
+            "endpoints": [
+              20
+            ],
+            "falsePositive": false,
+            "foundBy": [
+              120
+            ],
+            "id": 4348,
+            "impact": "Vulnerabilities in images of running containers stay for too long and might get exploited.\nLong running containers have potential memory leaks.\nA compromised container might get killed by restarting the container (e.g. in case the attacker has not reached the persistence layer).\nSource: OWASP DevSecOps Maturity Model",
+            "mitigation": "3rd party components:\nCheck for newer versions of image and deploy it.\nOwn components:\nRebuild image and deploy it.",
+            "numericalSeverity": "S1",
+            "severity": "High",
+            "test": 187,
+            "title": "Image Age > 14 Days",
+            "verified": false
+          }
+        ],
+        "finishedAt": "2021-08-03T15:40:46Z",
+        "infoText": "Unhandled vulnerabilities found in image",
+        "scanType": "Generic",
+        "startedAt": "2021-08-03T15:40:36Z",
+        "status": "completed"
+      }
+    },
+    {
+      "ddDependencyCheckUpload": {
+        "ddLink": "http://192.168.178.55:8081//test/414",
+        "errors": [],
+        "finding": true,
+        "findings": [
+          {
+            "description": "OWASP Dependency Check found some findings, please check DefectDojo",
+            "title": "Dependency Check Finding"
+          }
+        ],
+        "finishedAt": "2021-08-03T15:41:02Z",
+        "infoText": "Unhandled vulnerabilities found in image",
+        "scanType": "Dependency Check",
+        "startedAt": "2021-08-03T15:40:26Z",
+        "status": "completed"
+      }
+    }
+  ]
+}
