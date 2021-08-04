@@ -25,10 +25,8 @@ for file in "${RESULT_PATH}"/**/*.json; do
       notifications=$(echo "${result2}" | base64 -d | jq -rcM 'select(.finding == true)')
       while IFS= read -r notification; do
         echo "in notification for ${image}"
-        echo "${notification}"
         ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
-        echo "ddLinkTest: $ddLinkTest"
-        message=$(echo "${notification}" | jq -r ".infoText" | sed 's#{##g' | sed 's#}##g')   #| tr -cd '[:alnum:]._ \n:@*+()[]-') # at least { } needs to be removed for the slack cli
+        message=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   #| tr -cd '[:alnum:]._ \n:@*+()[]-') # at least { } needs to be removed for the slack cli
         errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
         status=$(echo "${notification}" | jq -r ".status" | tr -cd '[:alnum:]._ -')
         ddLinkScheme=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $1}')
