@@ -146,7 +146,6 @@ spec:
             value: "{{ workflow.parameters.image_id }}"
         source: |
           set -e
-
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
