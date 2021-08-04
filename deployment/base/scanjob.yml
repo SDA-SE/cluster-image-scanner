@@ -145,16 +145,18 @@ spec:
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
         source: |
+          set -e
+
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
-
+          ls -lah "${IMAGE_TAR_FOLDER_PATH}"
           tmp_dir="${IMAGE_TAR_FOLDER_PATH}/tmp"
           rm -Rf "${tmp_dir}" || true
-          mkdir "${tmp_dir}"
+          mkdir -p "${tmp_dir}"
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           unpack_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           config_dir=$(mktemp -d --tmpdir="${tmp_dir}")
-
+          mkdir -p "${image_copy_dir}" "${config_dir}"
           echo "Directory /run/containers"
           ls -lah /run/containers
 
