@@ -13,7 +13,7 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "20210602-095815" # fetch from wait log after first run of argo-main.yml in notifier OR from PV
+        value: "20210803-153857" # fetch from wait log after first run of argo-main.yml in notifier OR from PV
   templates:
     - name: main
       steps:
