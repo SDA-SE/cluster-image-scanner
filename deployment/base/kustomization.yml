@@ -15,7 +15,7 @@ resources:
   - depcheck.yml
   - pvc.yml
   - rbac.yml
-  - scanjob.yml
   - repolist.yml
   - email.yml
+  - scanjob.yml
   - orchestration-job.yml
