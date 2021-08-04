@@ -5,6 +5,7 @@ kind: Kustomization
 commonLabels:
   app.kubernetes.io/name: clusterscanner
 
+
 generatorOptions:
   labels:
     app.kubernetes.io/name: clusterscanner
