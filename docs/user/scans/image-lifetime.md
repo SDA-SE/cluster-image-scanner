@@ -9,7 +9,8 @@ Container images consists of:
 - Application and the application dependencies
 - Operating system packages
 
-![Lifetime Scans](lifetime-scans.png)
+The creation date of the first layer is used for the Image Lifetime Scan:
+![BaseImageLifetime Scans](images/baseimage-lifetime.png)
 
 ## Response
 Use the following threat treatments on issues:

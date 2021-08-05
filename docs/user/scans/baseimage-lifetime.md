@@ -9,7 +9,10 @@ Container images consists of:
 - Application and the application dependencies
 - Operating system packages
 
-![Lifetime Scans](lifetime-scans.png)
+The BaseImage Lifetime scan checks the history for package updates like `yum.*update` or `apt.*upgrade`. In case a package update has been performed in one of the layers (determined from the image history), the latest layer will be used:
+![BaseImageLifetime Scans](images/baseimage-lifetime.png)
+In case no update has been performed, the first layer will be used:
+![BaseImageLifetime Yum Scans](images/lifetime-yum.png)
 
 ## Response
 Use the following threat treatments on issues:
