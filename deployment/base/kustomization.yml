@@ -17,5 +17,6 @@ resources:
   - rbac.yml
   - repolist.yml
   - email.yml
+  - synchronization.cm.yml
   - scanjob.yml
   - orchestration-job.yml
