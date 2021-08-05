@@ -35,7 +35,7 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
     dt1=$(echo ${imageHistory} | jq -r '.[0] | if has("created") then .created else if has("Created") then .Created else "NODATE" end end')
   fi
-  sed -i '#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
+  sed -i 's#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
   IMAGE_TYPE="BaseImage"
 else
   dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
