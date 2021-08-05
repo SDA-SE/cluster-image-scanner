@@ -38,6 +38,12 @@ while read -r line; do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
     argo stop "${outdatedJob}" -n clusterscanner
   done
+  if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
+    while [[ "$(argo list --status Pending,Running -n clusterscanner -l | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do
+      echo "There are more than ${MAX_JOBS_RUNNING} workflows pendinig/running, waiting another 1 minute until there are less"
+      sleep 1m
+    done
+  fi
 done < /clusterscanner/imageListSeparated.json
 while [[ "$(argo list --running -n clusterscanner -l "clusterscanner.sda.se/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
   echo "There are still scans running, waiting another 10 seconds"
