@@ -34,10 +34,12 @@ while read -r line; do
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
   cat /clusterscanner/template.yml
   kubectl create -n clusterscanner -f /clusterscanner/template.yml
+
   for outdatedJob in $(argo list --running -n clusterscanner --prefix scanjob | grep "Running *1h" | awk '{print $1}'); do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
     argo stop "${outdatedJob}" -n clusterscanner
   done
+
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     while [[ "$(argo list --status Pending,Running -n clusterscanner -l | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
       echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pendinig/running, waiting another 1 minute until there are less"
