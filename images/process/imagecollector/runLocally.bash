@@ -17,7 +17,7 @@ export SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless"
 export SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware"
 export SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check"
 export SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot"
-
+#export NAMESPACE_SKIP_REGEX="\-pr\-"
 mkdir /tmp/cluster-scan
 
 source "pods.bash"

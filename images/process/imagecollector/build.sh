@@ -112,6 +112,7 @@ buildah config \
   --env DEFAULT_SKIP="false" \
   --env IMAGE_SKIP_POSITIVE_LIST="" \
   --env IMAGE_SKIP_NEGATIVE_LIST="" \
+  --env NAMESPACE_SKIP_REGEX=="" \
   --env DEFAULT_SCAN_LIFETIME="true" \
   --env DEFAULT_SCAN_DISTROLESS="true" \
   --env DEFAULT_SCAN_MALWARE="false" \
@@ -126,6 +127,7 @@ buildah config \
   --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check" \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
   --env IS_SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \
+  --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="[]" \

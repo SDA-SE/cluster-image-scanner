@@ -34,8 +34,8 @@ getPods() {
     if [ "${TEAM_ANNOTATION}" == "" ]; then
       TEAM_ANNOTATION="$CONTACT_ANNOTATION_PREFIX/team"
     fi
-    if [ "${SKIP_REGEX_ANNOTATION}" == "" ]; then
-      SKIP_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex"
+    if [ "${NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION}" == "" ]; then
+      NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex"
     fi
     if [ "${SKIP_REGEX_DEFAULT}" == "" ]; then
       SKIP_REGEX_DEFAULT=""
@@ -73,8 +73,8 @@ getPods() {
         team="${DEFAULT_TEAM_NAME}"
       fi
       descriptionMapping=""
-      for mapping in $(echo $NAMESPACE_MAPPINGS | jq -rcM ".[] | @base64"); do
-        mapping=$(echo $mapping | base64 -d)
+      for mapping in $(echo ${NAMESPACE_MAPPINGS} | jq -rcM ".[] | @base64"); do
+        mapping=$(echo ${mapping} | base64 -d)
         namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
           team=$(echo ${mapping} | jq -rcM '.team')
@@ -110,13 +110,13 @@ getPods() {
         fi
       fi
 
-      skipNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SKIP_REGEX_ANNOTATION}\"]")
-      if [ "${skipNamespaceRegex}" == "" ] || [ "${skipNamespaceRegex}" == "null" ]; then
-        skipNamespaceRegex="NO-SKIP"
+      skipImageBasedOnNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION}\"]")
+      if [ "${skipImageBasedOnNamespaceRegex}" == "" ] || [ "${skipImageBasedOnNamespaceRegex}" == "null" ]; then
+          skipImageBasedOnNamespaceRegex="NO-SKIP"
       fi
 
       skipNamespace=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SKIP_ANNOTATION}\"]")
-      echo "namespace: ${namespace} (SKIP_REGEX_ANNOTATION ${SKIP_REGEX_ANNOTATION}), applying the following order: pod annotiation (not mentioned here), skipNamespaceRegex: ${skipNamespaceRegex} <- skipNamespace: ${skipNamespace} <- DEFAULT_SKIP: ${DEFAULT_SKIP}"
+      echo "namespace: ${namespace} (NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION ${NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION}), applying the following order: pod annotation (not mentioned here), skipImageBasedOnNamespaceRegex: ${skipImageBasedOnNamespaceRegex} <- skipNamespace: ${skipNamespace} <- DEFAULT_SKIP: ${DEFAULT_SKIP}"
 
       isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_ANNOTATION}\"]")
       if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
@@ -181,7 +181,13 @@ getPods() {
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
+          else
+            if [ "${NAMESPACE_SKIP_REGEX}" != "" ] && [ $(echo "${namespace}" | grep "${NAMESPACE_SKIP_REGEX}" | wc -l) -gt 0 ]; then
+              echo "Skipping image due to namespace name and NAMESPACE_SKIP_REGEX ${NAMESPACE_SKIP_REGEX}"
+              skip="true"
+            fi
           fi
+
           for i in $(jq -rcM ".[]" config/imageNegativeList.json);do
             if [ "$(echo "${image}" | grep -c ${i})" -ne 0 ] && [ "${skip}" == "false" ]; then
               echo "skipping ${image} based on imageNegativeList with term ${i}"
@@ -200,7 +206,7 @@ getPods() {
           echo "will combine both in ${namespace}"
           cleanImage=$(echo "${image}" | sed 's#:[[:alnum:].-]*$##' | sed 's#@.*##')
           jq -s '. | add |
-          if .skip == null then (if .image|test("'${skipNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
+          if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${cleanImage}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end |
