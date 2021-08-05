@@ -4,4 +4,4 @@ metadata:
   name: synchronization
   namespace: clusterscanner
 data:
-  workflow: "7"
+  workflow: "1"
