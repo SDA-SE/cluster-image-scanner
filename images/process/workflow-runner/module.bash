@@ -3,6 +3,8 @@ set -e
 
 ls -la
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /clusterscanner/imageListSeparated.json
+totalCount=$(cat /clusterscanner/imageListSeparated.json | wc -l)
+counter=0
 while read -r line; do
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
   if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
@@ -39,6 +41,8 @@ while read -r line; do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
     argo stop "${outdatedJob}" -n clusterscanner
   done
+  counter=$((counter+1))
+  echo "Job Status (Submitted Jobs/Total Jobs): ${counter}/${totalCount}"
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     while [[ "$(argo list --status Pending,Running -n clusterscanner | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
