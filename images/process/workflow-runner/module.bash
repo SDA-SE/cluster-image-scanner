@@ -42,8 +42,8 @@ while read -r line; do
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     while [[ "$(argo list --status Pending,Running -n clusterscanner | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
-      echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 20 seconds until there are less"
-      sleep 20
+      echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 10 seconds until there are less"
+      sleep 10
     done
   fi
 done < /clusterscanner/imageListSeparated.json
