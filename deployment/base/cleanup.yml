@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: cleanup-pvc-wf
+  namespace: clusterscanner
+spec:
+  schedule: "0 14 * * *"
+  concurrencyPolicy: "Forbid"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: pvc-cleanup
+    templates:
+      - name: pvc-cleanup
+        volumes:
+          - name: scandata
+            persistentVolumeClaim:
+              claimName: clusterscanner-scandata
+          - name: images
+            persistentVolumeClaim:
+              claimName: clusterscanner-images
+        script:
+          image: quay.io/sdase/clusterscanner-base:2
+          volumeMounts:
+            - name: scandata
+              mountPath: /clusterscanner/data
+            - name: images
+              mountPath: /clusterscanner/images
+          imagePullPolicy: Always
+          command: [bash]
+          env:
+            - name: MAX_DAYS
+              value: "7"
+          source: |
+            set -e
+            folders="/clusterscanner/data/ /clusterscanner/images/"
+            for folderPath in ${folders}; do
+              du -sh ${folderPath}
+              for cleanupPath in $(find ${folderPath}/* -mtime +${MAX_DAYS}); do
+                echo "Removing ${cleanupPath} with size $(du ${cleanupPath})"
+                rm -Rf ${cleanupPath} || true # folders have owner rights issues
+              done
+            done
+            echo "done"
+            exit 0

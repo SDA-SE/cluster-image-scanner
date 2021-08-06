@@ -20,3 +20,4 @@ resources:
   - synchronization.cm.yml
   - scanjob.yml
   - orchestration-job.yml
+  - cleanup.yml
