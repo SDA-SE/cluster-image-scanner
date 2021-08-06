@@ -132,7 +132,7 @@ spec:
           - name: DEFECTDOJO_SECRETS
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
           - name: MAX_RUNNING_JOBS_IN_QUEUE
-            value: "9"
+            value: "13"
 
     - name: notify-teams
       volumes:
