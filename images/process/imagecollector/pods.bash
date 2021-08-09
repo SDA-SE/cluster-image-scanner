@@ -98,13 +98,12 @@ getPods() {
       fi
 
       #echo "getting namespaceContact"
-      namespaceContactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
-      if [ "${namespaceContactSlack}" == "" ] || [ "$namespaceContactSlack" == "null" ]; then
-        if [ "$(slackNamespaceMapping)" == "" ]; then
-          namespaceContactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
-        else
-          namespaceContactSlack="#${slackNamespaceMapping}"
-        fi
+      contactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
+      if [ "${contactSlack}" == "" ] || [ "$contactSlack" == "null" ]; then
+          contactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
+      fi
+      if [ "${slackNamespaceMapping}" != "" ]; then
+        contactSlack="#${slackNamespaceMapping}"
       fi
       namespaceContactEmail=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
       if [ "${namespaceContactEmail}" == "" ] || [ "${namespaceContactEmail}" == "null" ]; then
@@ -216,7 +215,7 @@ getPods() {
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end |
           if .email == null then .email="'${namespaceContactEmail}'" else . end |
-          if .slack == null then .slack="'${namespaceContactSlack}'" else . end |
+          if .slack == null then .slack="'${contactSlack}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
           if .is_scan_lifetime == null then .is_scan_lifetime="'${isScanLifetime}'" else . end |
           if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseImageLifetime}'" else . end |
