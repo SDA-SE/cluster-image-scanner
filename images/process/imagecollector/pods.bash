@@ -79,6 +79,7 @@ getPods() {
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
+          slackNamespaceMapping=$(echo ${mapping} | jq -rcM '.slack')
           break;
         fi
       done
@@ -99,7 +100,11 @@ getPods() {
       #echo "getting namespaceContact"
       namespaceContactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       if [ "${namespaceContactSlack}" == "" ] || [ "$namespaceContactSlack" == "null" ]; then
-        namespaceContactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
+        if [ "$(slackNamespaceMapping)" == "" ]; then
+          namespaceContactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
+        else
+          namespaceContactSlack="#${slackNamespaceMapping}"
+        fi
       fi
       namespaceContactEmail=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
       if [ "${namespaceContactEmail}" == "" ] || [ "${namespaceContactEmail}" == "null" ]; then
