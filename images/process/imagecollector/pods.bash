@@ -103,7 +103,8 @@ getPods() {
           contactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
       fi
       if [ "${slackNamespaceMapping}" != "" ]; then
-        contactSlack="#${slackNamespaceMapping}"
+        echo "Overwriting contactSlack with value '${slackNamespaceMapping}' from namespaceMapping"
+        contactSlack="${slackNamespaceMapping}"
       fi
       namespaceContactEmail=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
       if [ "${namespaceContactEmail}" == "" ] || [ "${namespaceContactEmail}" == "null" ]; then
