@@ -3,7 +3,7 @@ set -e
 
 ls -la
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /clusterscanner/imageListSeparated.json
-totalCount=$(cat /clusterscanner/imageListSeparated.json | wc -l)
+totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
 while read -r line; do
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
@@ -45,7 +45,8 @@ while read -r line; do
   echo "Job Status (Submitted Jobs/Total Jobs): ${counter}/${totalCount}"
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
-    while [[ "$(argo list --status Pending,Running -n clusterscanner | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
+    # argo list --status Pending,Running results in Running only, maybe this will be fixed one day
+    while [[ "$(argo list -n clusterscanner | grep scanjob | grep "Pending\|Running" | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
       echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 10 seconds until there are less"
       sleep 10
     done
