@@ -73,6 +73,7 @@ getPods() {
         team="${DEFAULT_TEAM_NAME}"
       fi
       descriptionMapping=""
+      slackNamespaceMapping=""
       for mapping in $(echo ${NAMESPACE_MAPPINGS} | jq -rcM ".[] | @base64"); do
         mapping=$(echo ${mapping} | base64 -d)
         namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
