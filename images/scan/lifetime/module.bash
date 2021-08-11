@@ -27,10 +27,8 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   # apt.* includes apt-get, apt.*upgrade includes dist-upgrade
   distroPackageUpdateCommands=("apt.*upgrade" "yum.*update" "apk.*upgrade" "zypper.*update")
   imageHistory=$(skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -r '.history')
-dt1=""
   for updateCommand in ${distroPackageUpdateCommands[@]}; do
     if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
-      echo "hi1"
       dt1=$(echo ${imageHistory} | jq -r '.[] | select(.created_by != null) | select(.created_by | match("'${updateCommand}'")) | .created' | tail -n 1)
       break
     fi
@@ -38,7 +36,7 @@ dt1=""
   if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
     dt1=$(echo ${imageHistory} | jq -r '.[0] | if has("created") then .created else if has("Created") then .Created else "NODATE" end end')
   fi
-  #sed -i 's#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
+  sed -i 's#Image#BaseImage#g' /clusterscanner/ddTemplate.csv
   IMAGE_TYPE="BaseImage"
 else
   dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
