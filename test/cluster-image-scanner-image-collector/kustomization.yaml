@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - configmap.yaml
-  - cron-job.yaml
+  - cronjob.yaml
   - namespace.yaml
   - service-account-authorization.yaml
 
