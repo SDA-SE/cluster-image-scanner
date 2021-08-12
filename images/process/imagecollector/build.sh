@@ -132,10 +132,10 @@ buildah config \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="[]" \
   --cmd "/home/code/entrypoint.bash" \
-  --user $openShiftGroupId \
+  --user 1001 \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
   --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-imagecollector" \
-  --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-imagecollector" \
+  --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
