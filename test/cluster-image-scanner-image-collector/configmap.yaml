@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-upload-repository
+  namespace: cluster-image-scanner-image-collector
+data:
+  collector.upload.github.appid: "GITHUB_APP_ID"
+  collector.upload.github.installlationid: "GITHUB_INSTALLATION_ID"
+  collector.namespacemapping: |
+    [
+      "teams": {
+        "operations": {
+          "namespaces": [
+            {"namespace_filter": "argo", "description": "used for deployment", },
+            {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"}
+          ],
+          "scan_lifetime_max_days": "90",
+          "slack": "#security-notifications-test"
+        }
+      }
+    ]
