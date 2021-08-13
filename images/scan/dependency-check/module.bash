@@ -10,6 +10,8 @@ suppressions=""
 if [ -e /tmp/suppressions.xml ]; then
   echo "Found /tmp/suppressions.xml"
   suppressions='--suppression "/tmp/suppressions.xml"'
+else
+  echo "/tmp/suppressions.xml not existing"
 fi
 
 /usr/share/dependency-check/bin/dependency-check.sh \
