@@ -1,8 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: orchestration-
+  generateName: notify-
 spec:
+  serviceAccountName: clusterscanner
   ttlStrategy:
     secondsAfterSuccess: 3600
     secondsAfterFailure: 86400
@@ -14,49 +15,31 @@ spec:
     parameters:
       - name: scanId
         value: "20210811-071357" # fetch from wait log after first run of argo-main.yml in notifier (top, attribute "subpath")
+      - name: gitSecretName
+        value: "github"
+      - name: imageSourceListConfigMapName
+        value: "image-source-list"
+      - name: registrySecretName
+        value: "registry-default"
+      - name: defectDojoConfigMapName
+        value: "defectdojo"
+      - name: slackTokenSecretName
+        value: "slacktoken"
+      - name: emailSecretName
+        value: "email"
+      - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
+        value: "dependency-check-db"
+      - name: enforceSlackChannel
+        value: "#security-notifications-test"
+      - name: dependencyCheckSuppressionsConfigMapName
+        value: "suppressions"
   templates:
     - name: main
       steps:
-      - - name: notify-teams
-          template: notify-teams
+        - - name: notify-teams
+            templateRef:
+              name: orchestration-job-template
+              template: notify-teams
 
-    - name: notify-teams
-      volumes:
-        - name: scandata
-          persistentVolumeClaim:
-            claimName: clusterscanner-scandata
-      container:
-        image: quay.io/sdase/clusterscanner-notifier:2
-        volumeMounts:
-          - name: scandata
-            mountPath: /clusterscanner/data
-            subPath: "{{ workflow.parameters.scanId }}"
-        imagePullPolicy: Always
-        env:
-          - name: SLACK_CLI_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: slacktoken
-                key: SLACK_CLI_TOKEN
-          - name: smtp
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp
-          - name: smtp-auth
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth
-          - name: smtp-auth-user
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth-user
-          - name:  smtp-auth-password
-            valueFrom:
-              secretKeyRef:
-                name: email
-                key: smtp-auth-password
-          - name: ENFORCE_SLACK_CHANNEL
-            value: "#security-notifications-test"
+
+

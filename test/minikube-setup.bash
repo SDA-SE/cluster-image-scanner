@@ -37,6 +37,8 @@ sed -i "s#smtp-auth_SECRET#$smtp_auth_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-
 sed -i "s#smtp-auth-user_SECRET#$smtp_auth_user_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp-auth-password_SECRET#$smtp_auth_password_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 
+cp ${HOME}/.clusterscanner/suppressions.xml .
+
 AUTH_FILE=${HOME}/.docker/config.json
 AUTH=$(cat ${AUTH_FILE} | base64 -w 0)
 cat << EOL >> /tmp/config.yaml
@@ -112,7 +114,9 @@ if [ "$IS_MINIKUBE" == "true" ]; then
   done
 fi
 
-kubectl apply -k ${DEPLOYMENT_PATH}/overlays/test-local/
+#kubectl apply -k ${DEPLOYMENT_PATH}/overlays/test-local/
+
+kubectl apply -k .
 # restart pods
 for i in $(kubectl get pods -n clusterscanner | awk '{print $1}' | grep -v NAME); do
   kubectl delete pod $i -n clusterscanner
@@ -128,9 +132,12 @@ kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 
 argo submit ../argo-main.yml  -n clusterscanner
 
-echo "reverting secret changes"
-git checkout  ${DEPLOYMENT_PATH}/overlays/test-local/config-source || true
-
 echo "please visit https://localhost:2746/"
+
+echo "reverting secret changes"
+#git checkout  ${DEPLOYMENT_PATH}/overlays/test-local/config-source || true
+#git checkout suppressions.xml || true
+
+./cluster-image-scanner-image-collector/minikube-setup.bash
 
 

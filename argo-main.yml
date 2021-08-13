@@ -29,6 +29,11 @@ spec:
         value: "email"
       - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
         value: "dependency-check-db"
+      - name: enforceSlackChannel
+        value: ""
+      - name: dependencyCheckSuppressionsConfigMapName
+        value: "suppressions-sda"
+
   templates:
     - name: main
       steps:

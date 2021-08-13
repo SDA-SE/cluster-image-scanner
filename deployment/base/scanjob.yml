@@ -34,6 +34,7 @@ spec:
       - name: is_scan_dependency_check
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
+      - name: dependencyCheckSuppressionsConfigMapName
   templates:
     - name: main
       dag:
@@ -350,6 +351,9 @@ spec:
             readOnly: true
         - name: scandata
           emptyDir: {}
+        - name: suppressions
+          configMap:
+            name: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
       outputs:
         artifacts:
           - name: results-dependency-check
@@ -359,7 +363,7 @@ spec:
             path: /clusterscanner/data
       container:
         image: quay.io/sdase/clusterscanner-scan-dependency-check:2
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # TODO
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
@@ -367,6 +371,8 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+          - name: suppressions
+            mountPath: /tmp/suppressions
         env:
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"

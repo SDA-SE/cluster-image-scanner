@@ -1,2 +1,240 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[
+      sda-commons-* is creating some false positives
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.sdase\.commons.*</packageUrl>
+        <cpe regex="true">^cpe:/a:.*$</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+      sda-commons-* is creating some false positives
+   ]]></notes>
+        <filePath regex="true">^.*/sda-commons-.*.jar$</filePath>
+        <cpe regex="true">^cpe:/a:.*$</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+      h2 databases in SDA SE are only used for testing
+   ]]></notes>
+        <cpe>^cpe:/a:h2database:h2.*</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description and the dates of the fix (https://github.com/dropwizard/dropwizard/pull/3160, 2020-02-20) and the release (https://github.com/dropwizard/dropwizard/releases/tag/v1.3.20, 2020-02-24). cpe is most likly wrongly mapped.
+   ]]></notes>
+        <filePath regex="true">.*dropwizard.*-1.3.20.jar$</filePath>
+        <cve>CVE-2020-5245</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description and the dates of the fix (https://github.com/dropwizard/dropwizard/pull/3160, 2020-02-20) and the release (https://github.com/dropwizard/dropwizard/releases/tag/v1.3.20, 2020-02-24). cpe is most likly wrongly mapped.
+   ]]></notes>
+        <filePath regex="true">.*simpleclient_dropwizard-0.8.*.jar$</filePath>
+        <cve>CVE-2020-5245</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description but this bundle is not part of it due to separate version counting.
+   ]]></notes>
+        <filePath regex="true">.*/hystrix-dropwizard-bundle-0.9.2$</filePath>
+        <cve>CVE-2020-5245</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description but this jar is not part of it due to separate version counting.
+   ]]></notes>
+        <filePath regex="true">.*/dropwizard-entitymanager-[1-9].*.jar$</filePath>
+        <cve>CVE-2020-5245</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    file name: jackson-mapper-asl-1.9.13.jar, we assume that the alert of "FasterXML jackson-databind before 2.9.10. " is not in conjunction with the jackson-mapper-asl-1.9.13.jar and therefore this is a false positive
+   ]]></notes>
+        <filePath regex="true">.*/jackson-mapper-asl-*.jar$</filePath>
+        <cve>CVE-2020-5245</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+  file name: jackson-databind-2.10.5.jar
+  This vulnerability only affects XML processing. Since we usually use JSON for our REST services, we mark it as false positive.
+ ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@2\.10\.5$</packageUrl>
+        <cve>CVE-2020-25649</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: kafka-clients-1.1.1.jar, we assume that ACLs are on server side and therefore this is a false postive
+   file name: kafka-clients-2.2.1.jar based on teams analysis this is a FP
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.kafka/kafka\-clients@.*$</packageUrl>
+        <cve>CVE-2018-17196</cve>
+        <cve>CVE-2019-12399</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+      netty is not part of sda architecture, please contact the security team in case it is used in your projects
+   ]]></notes>
+        <cpe regex="true">^cpe:/a:netty:netty:.*</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: netty-3.10.5.Final.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.netty/netty@.*$</packageUrl>
+        <vulnerabilityName>CVE-2019-20444</vulnerabilityName>
+        <vulnerabilityName>CVE-2019-20445</vulnerabilityName>
+        <vulnerabilityName>CVE-2019-16869</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+      billing-external-client-dropwizard-* is creating some false positives
+   ]]></notes>
+        <filePath regex="true">^.*/billing-external-client-dropwizard-.*.jar$</filePath>
+        <cpe regex="true">^cpe:/a:.*$</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: proxy-handler-1.0.0.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.codefetti\.proxy/proxy\-handler@.*$</packageUrl>
+        <cpe>cpe:/a:gitlab:gitlab</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   We are using Bouncy Castle in the the morphia module of sda-dropwizard-commons.
+See  https://github.com/SDA-SE/sda-dropwizard-commons/blob/master/sda-commons-server-morphia/src/main/java/org/sdase/commons/server/morphia/internal/SslUtil.java
+We are already using a version of Bouncy Castle that doesn't have this issue. However we are only creating temporary Keystores, so we should not have issues with old and broken Keystores.
+this note applies to all following bouncycastle libs
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2007-6721</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000338</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000339</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000342</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000343</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000344</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000345</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000346</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2016-1000352</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2017-13098</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2018-1000613</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: bcprov-jdk15on-1.64.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+        <cve>CVE-2018-5382</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+      IBM is responsible for this library and is performing checks by themselves.
+      It is creating false positives for the original bouncy-castle library due to wrong version detection.
+   ]]></notes>
+        <filePath regex="true">^.*/bcprov-jdk15on-ega-.*.jar$</filePath>
+        <cpe regex="true">^cpe:/a:.*$</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-server-9.4.31.v20200723.jar
+   Teams (e.g. Christopher has analyized it as a FP)
+   ]]></notes>
+        <cpe regex="true">^cpe:/a:.*$</cpe>
+        <cve>CVE-2020-27216</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+ file name: libthrift-0.13.0.jar
+ Team communications analyzed it: First of all we're probably not affected because the CVE relates
+ to Thrift as a server component. As we use thrift as client of our Jaeger tracing we're probably
+ good.
+ Furthermore we're waiting for release 0.14.0 to be published on Maven Central. After that we need
+ a fix release for jaeger-client.
+ ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.thrift/libthrift@.*$</packageUrl>
+        <vulnerabilityName>CVE-2020-13949</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file names: jetty-http-9.4.37.v20210219.jar + jetty-server-9.4.37.v20210219.jar
+
+   CVE description: In Eclipse Jetty 9.4.32 to 9.4.38, 10.0.0.beta2 to 10.0.1, and 11.0.0.beta2 to 11.0.1, if a user uses a webapps directory that is a symlink, the contents of the webapps directory is deployed as a static webapp, inadvertently serving the webapps themselves and anything else that might be in that directory.
+
+   That does not affect our microservices.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-.*$</packageUrl>
+        <vulnerabilityName>CVE-2021-28163</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file names: jetty-http-9.4.37.v20210219.jar + jetty-server-9.4.37.v20210219.jar
+
+   CVE description: In Eclipse Jetty 7.2.2 to 9.4.38, 10.0.0.alpha0 to 10.0.1, and 11.0.0.alpha0 to 11.0.1, CPU usage can reach 100% upon receiving a large invalid TLS frame.
+
+   Our services are not affected because they only use HTTP within the cluster for communication.
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-.*$</packageUrl>
+        <vulnerabilityName>CVE-2021-28165</vulnerabilityName>
+    </suppress>
 </suppressions>
