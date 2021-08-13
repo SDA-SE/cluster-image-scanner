@@ -8,6 +8,7 @@ scan_result_pre
 
 suppressions=""
 if [ -e /tmp/suppressions.xml ]; then
+  echo "Found /tmp/suppressions.xml"
   suppressions='--suppression "/tmp/suppressions.xml"'
 fi
 
