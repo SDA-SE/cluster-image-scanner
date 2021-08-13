@@ -1,7 +1,22 @@
 #!/bin/bash
 # shellcheck disable=SC2086
 
+# TODO This script needs to be refactored one day, in a way that only jsons are used (and no other env variables)
+
 set -e
+
+function setAttributes {
+  snakeCaseVariableName=${1} # var_name
+  camelCaseVariableName=$(echo "${snakeCaseVariableName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
+
+  value=$(echo $mapping | jq -r ".${snakeCaseVariableName}");
+  echo "camelCaseVariableName: $camelCaseVariableName, ${value}"
+  if [ "${value}" != "" ] && [ "${value}" != "null" ]; then
+    setAttributesValue=${value}
+  else
+    setAttributesValue=""
+  fi
+}
 
 if [ "${IMAGE_SKIP_NEGATIVE_LIST}" != "" ]; then
   SKIP_NEGATIVE_LIST_FILE=/home/code/config/imageNegativeList.json
@@ -10,12 +25,24 @@ if [ "${IMAGE_SKIP_NEGATIVE_LIST}" != "" ]; then
   jq -s '. | add' /tmp/negative.json /tmp/negative2.json > ${SKIP_NEGATIVE_LIST_FILE}
 fi
 
-if [ "${NAMESPACE_MAPPINGS}" != "" ]; then
+if [ "${NAMESPACE_MAPPINGS}" != "" ] && [ -e config/namespace-mapping.json ]; then
   echo ${NAMESPACE_MAPPINGS} > /tmp/team-mapping.json
   NAMESPACE_MAPPINGS=$(jq -s '. | add' /tmp/team-mapping.json config/namespace-mapping.json)
 fi
 
+mappingNamespacesFlat="["
+for teamStructure in $(echo $NAMESPACE_MAPPINGS | jq -rcM '.teams[] | @base64'); do
+  content=$(echo $teamStructure | base64 -d);
+  echo $content | jq '.configurations' > /tmp/configurations.json;
+  for mappingNamespace in $(echo $content | jq -rcM '.namespaces[] | @base64'); do
+    echo $mappingNamespace | base64 -d > /tmp/mappingNamespace.json ;
+    mappingNamespacesFlat=${mappingNamespacesFlat}$(jq -s '.[0] * .[1]' /tmp/mappingNamespace.json /tmp/configurations.json)","
+  done;
+done
 
+mappingNamespacesFlat=${mappingNamespacesFlat%?}; # remove last char ,
+mappingNamespacesFlat="${mappingNamespacesFlat}]"
+NAMESPACE_MAPPINGS=""
 
 getPods() {
     echo "In getPods()"
@@ -61,6 +88,18 @@ getPods() {
     namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
     #namespaces="kube-system" # for testing
     for namespace in $namespaces; do
+      description=""
+      team=""
+      email=""
+      slack=""
+      isScanLifetime=""
+      isScanBaseimageLifetime=""
+      isScanDistroless=""
+      isScanMalware=""
+      isScanDependencyCheck=""
+      isScanRunAsroot=""
+      scanLifetimeMaxDays=""
+      scanLifetimeMaxDays=""
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
       if [ "$(echo "${namespaceAnnotations}" | grep -c "NotFound")" -gt 0 ]; then
@@ -68,27 +107,28 @@ getPods() {
         continue
       fi
 
-      team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
-      if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
-        team="${DEFAULT_TEAM_NAME}"
-      fi
+      configurationsToMap="scan_lifetime_max_days is_scan_lifetime is_scan_baseimage_lifetime is_scan_malware is_scan_dependency_check is_scan_dependency_check is_scan_runasroot team slack email description"
       descriptionMapping=""
-      slackNamespaceMapping=""
-      for mapping in $(echo ${NAMESPACE_MAPPINGS} | jq -rcM ".[] | @base64"); do
+      for mapping in $(echo ${mappingNamespacesFlat} | jq -rcM ".[] | @base64"); do
         mapping=$(echo ${mapping} | base64 -d)
-        namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
+        export namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
-          slackNamespaceMapping=$(echo ${mapping} | jq -rcM '.slack')
-          break;
+          slack=$(echo ${mapping} | jq -rcM '.slack')
+          for attributeName in ${configurationsToMap[@]}; do
+              setAttributes ${attributeName}
+              camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
+              if [ "${setAttributesValue}" != "" ]; then
+                declare "${camelCaseVariableName}=${setAttributesValue}" # would be create local variable in a function, therefore, it is not in the function
+              fi
+          done
         fi
       done
 
       if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
-        description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
         if [ "${description}" == "" ]; then
-          description="${descriptionMapping}"
+          description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
         fi
         namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\", \"team\": \"${team}\"}")
         newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
@@ -98,21 +138,27 @@ getPods() {
         fi
       fi
 
+      if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
+        team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
+      fi
+      if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
+        team="${DEFAULT_TEAM_NAME}"
+      fi
       #echo "getting namespaceContact"
-      contactSlack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
-      if [ "${contactSlack}" == "" ] || [ "$contactSlack" == "null" ]; then
-          contactSlack="#${team}${DEFAULT_SLACK_POSTFIX}"
+      if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
+        slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       fi
-      if [ "${slackNamespaceMapping}" != "" ]; then
-        echo "Overwriting contactSlack with value '${slackNamespaceMapping}' from namespaceMapping"
-        contactSlack="${slackNamespaceMapping}"
+      if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
+          slack="#${team}${DEFAULT_SLACK_POSTFIX}"
       fi
-      namespaceContactEmail=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
-      if [ "${namespaceContactEmail}" == "" ] || [ "${namespaceContactEmail}" == "null" ]; then
+      if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
+        email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
+      fi
+      if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
         if [ "${CONTACT_DEFAULT_EMAIL}" != "" ]; then
-            namespaceContactEmail="${CONTACT_DEFAULT_EMAIL}"
+            email="${CONTACT_DEFAULT_EMAIL}"
         else
-          namespaceContactEmail=""
+          email=""
         fi
       fi
 
@@ -124,35 +170,48 @@ getPods() {
       skipNamespace=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SKIP_ANNOTATION}\"]")
       echo "namespace: ${namespace} (NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION ${NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION}), applying the following order: pod annotation (not mentioned here), skipImageBasedOnNamespaceRegex: ${skipImageBasedOnNamespaceRegex} <- skipNamespace: ${skipNamespace} <- DEFAULT_SKIP: ${DEFAULT_SKIP}"
 
-      isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_ANNOTATION}\"]")
+      if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
+        isScanLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_ANNOTATION}\"]")
+      fi
       if [ "${isScanLifetime}" == "" ] || [ "${isScanLifetime}" == "null" ]; then
         isScanLifetime="${DEFAULT_SCAN_LIFETIME}"
       fi
-      isScanBaseImageLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_BASEIMAGE_LIFETIME_ANNOTATION}\"]")
-      if [ "${isScanBaseImageLifetime}" == "" ] || [ "${isScanBaseImageLifetime}" == "null" ]; then
-        isScanBaseImageLifetime="${DEFAULT_SCAN_BASEIMAGE_LIFETIME}"
+      if [ "${isScanBaseimageLifetime}" == "" ] || [ "${isScanBaseimageLifetime}" == "null" ]; then
+        isScanBaseimageLifetime=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_BASEIMAGE_LIFETIME_ANNOTATION}\"]")
       fi
-      isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
+      if [ "${isScanBaseimageLifetime}" == "" ] || [ "${isScanBaseimageLifetime}" == "null" ]; then
+        isScanBaseimageLifetime="${DEFAULT_SCAN_BASEIMAGE_LIFETIME}"
+      fi
+      if [ "${isScanDistroless}" == "" ] || [ "${isScanDistroless}" == "null" ]; then
+        isScanDistroless=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
+      fi
       if [ "${isScanDistroless}" == "" ] || [ "${isScanDistroless}" == "null" ]; then
         isScanDistroless="${DEFAULT_SCAN_DISTROLESS}"
       fi
-      isScanMalware=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
+      if [ "${isScanMalware}" == "" ] || [ "${isScanMalware}" == "null" ]; then
+        isScanMalware=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DISTROLESS_ANNOTATION}\"]")
+      fi
       if [ "${isScanMalware}" == "" ] || [ "${isScanMalware}" == "null" ]; then
         isScanMalware="${DEFAULT_SCAN_MALWARE}"
       fi
-      isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_CHECK_ANNOTATION}\"]")
+      if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
+        isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_CHECK_ANNOTATION}\"]")
+      fi
       if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
         isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      isScanRunAsRoot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
-      if [ "${isScanRunAsRoot}" == "" ] || [ "${isScanRunAsRoot}" == "null" ]; then
-        isScanRunAsRoot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
+      if [ "${isScanRunAsroot}" == "" ] || [ "${isScanRunAsroot}" == "null" ]; then
+        isScanRunAsroot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
       fi
-      lifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
-      if [ "${lifetimeMaxDays}" == "" ] || [ "${lifetimeMaxDays}" == "null" ]; then
-        lifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
+      if [ "${isScanRunAsroot}" == "" ] || [ "${isScanRunAsroot}" == "null" ]; then
+        isScanRunAsroot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-
+      if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
+        scanLifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
+      fi
+      if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
+        scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
+      fi
 
       # TODO in the future maybe not only running pods
       pods=$(kubectl get pods --namespace=${namespace} --field-selector=status.phase=Running --output json)
@@ -216,15 +275,15 @@ getPods() {
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${cleanImage}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end |
-          if .email == null then .email="'${namespaceContactEmail}'" else . end |
-          if .slack == null then .slack="'${contactSlack}'" else . end |
+          if .email == null then .email="'${email}'" else . end |
+          if .slack == null then .slack="'${slack}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
           if .is_scan_lifetime == null then .is_scan_lifetime="'${isScanLifetime}'" else . end |
-          if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseImageLifetime}'" else . end |
+          if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseimageLifetime}'" else . end |
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
-          if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunAsRoot}'" else . end |
-          if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${lifetimeMaxDays}'" else . end |
+          if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunAsroot}'" else . end |
+          if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .image_id|startswith("docker://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
           if .image_id|startswith("docker-pullable://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
           if .image_id|startswith("sha256:") then .image_id="\(.image|split(":")[0])\("@sha256:")\(.image_id|split(":")[1])" else . end |

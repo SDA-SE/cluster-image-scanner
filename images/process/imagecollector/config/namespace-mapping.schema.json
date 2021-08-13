@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "teams": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "namespaces": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "namespace_filter": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "namespace_filter",
+                    "description"
+                  ]
+                }
+              ]
+            },
+            "configurations": {
+              "type": "object",
+              "properties": {
+                "scan_lifetime_max_days": {
+                  "type": "string"
+                },
+                "is_scan_lifetime": {
+                  "type": "string"
+                },
+                "is_scan_baseimage_lifetime": {
+                  "type": "string"
+                },
+                "is_scan_distroless": {
+                  "type": "string"
+                },
+                "is_scan_malware": {
+                  "type": "string"
+                },
+                "is_scan_dependency_check": {
+                  "type": "string"
+                },
+                "is_scan_runasroot": {
+                  "type": "string"
+                },
+                "slack": {
+                  "type": "string"
+                },
+                "team": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "team"
+              ]
+            }
+          },
+          "required": [
+            "configurations"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "teams"
+  ]
+}

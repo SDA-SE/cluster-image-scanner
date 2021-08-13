@@ -18,7 +18,23 @@ export SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware"
 export SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check"
 export SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot"
 #export NAMESPACE_SKIP_REGEX="\-pr\-"
+export DEFAULT_TEAM_NAME="test"
+export DEFAULT_SLACK_POSTFIX="-security"
 mkdir /tmp/cluster-scan
+DEFAULT_SCAN_LIFETIME_MAX_DAYS=14
+export NAMESPACE_MAPPINGS='{
+      "teams": [
+        {
+          "namespaces": [
+            {"namespace_filter": "argo", "description": "used for deployment"},
+            {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"}
+          ],
+          "configurations": {
+            "team": "operations",
+          }
+        }
+      ]
+    }'
 
 source "pods.bash"
 
