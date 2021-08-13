@@ -6,6 +6,11 @@ source /clusterscanner/scan-common.bash
 
 scan_result_pre
 
+suppressions=""
+if [ -e /tmp/suppressions.xml ]; then
+  suppressions='--suppression "/tmp/suppressions.xml"'
+fi
+
 /usr/share/dependency-check/bin/dependency-check.sh \
     --project "test" \
     --disableRetireJS \
@@ -21,10 +26,10 @@ scan_result_pre
     --noupdate \
     --disableCentralCache \
     --connectionString "${DEPSCAN_DB_CONNECTSRING}" \
+    $suppressions \
     >> "${ARTIFACTS_PATH}/depScan.log" || true
 
 cat "${ARTIFACTS_PATH}/depScan.log"
-     #--suppression "/suppressions.xml" # TODO
 
 if ! [ -f "${ARTIFACTS_PATH}/dependency-check-report.xml" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"Dependency check report has not been generated\", \"artifactsPath\":\"${ARTIFACTS_PATH}\"}]")
