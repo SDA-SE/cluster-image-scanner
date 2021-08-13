@@ -28,7 +28,6 @@ jobs:
       base: ${{ steps.filter.outputs.base }}
       imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
       imagecollector: ${{ steps.filter.outputs.imagecollector }}
-      notifier: ${{ steps.filter.outputs.notifier }}
       workflowrunner: ${{ steps.filter.outputs.workflowrunner }}
       dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
       distroless: ${{ steps.filter.outputs.distroless }}
@@ -47,8 +46,6 @@ jobs:
               - 'images/process/image-source-fetcher/**'
             imagecollector:
               - 'images/process/imagecollector/**'
-            notifier:
-              - 'images/process/notifier/**'
             workflowrunner:
               - 'images/process/workflow-runner/**'
             dependencycheck:
@@ -111,25 +108,6 @@ jobs:
         with:
           image-path: images/process/image-source-fetcher
           image-name: clusterscanner-image-source-fetcher
-          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
-          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
-
-  build_notifier:
-    needs: [changes, build_image_base]
-    runs-on: ubuntu-latest
-    # run on base image change
-    # do not execute for PRs that origin from forks due to security concerns and missing secrets
-    if: |
-      always() &&
-      (needs.build_image_base.result == 'success' ||
-      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
-    steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - uses: ./.github/actions/build_image
-        with:
-          image-path: images/process/notifier
-          image-name: clusterscanner-notifier
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
