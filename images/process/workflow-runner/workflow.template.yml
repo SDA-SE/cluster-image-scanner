@@ -54,5 +54,7 @@ spec:
         value: "###is_scan_runasroot###"
       - name: scan_lifetime_max_days
         value: "###scan_lifetime_max_days###"
+      - name: dependencyCheckSuppressionsConfigMapName
+        value: "###dependencyCheckSuppressionsConfigMapName###"
   workflowTemplateRef:
     name: scan-image-job
