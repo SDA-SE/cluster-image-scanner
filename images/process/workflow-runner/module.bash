@@ -18,6 +18,7 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /clusterscanner/template.yml
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /clusterscanner/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /clusterscanner/template.yml
+  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /clusterscanner/template.yml
   sed -i "s~###team###~$(echo "${DATA_JSON}" | jq -r .team)~" /clusterscanner/template.yml
   sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /clusterscanner/template.yml
   sed -i "s~###environment###~$(echo "${DATA_JSON}" | jq -r .environment)~" /clusterscanner/template.yml
@@ -34,6 +35,8 @@ while read -r line; do
   sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /clusterscanner/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
+
+
   cat /clusterscanner/template.yml
   kubectl create -n clusterscanner -f /clusterscanner/template.yml
 
