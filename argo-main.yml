@@ -27,10 +27,10 @@ spec:
         value: "slacktoken"
       - name: emailSecretName
         value: "email"
-      - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
+      - name: dependencyCheckDbConfigMapName
         value: "dependency-check-db"
       - name: enforceSlackChannel
-        value: ""
+        value: "#securiity-notifications-test"
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions-sda"
 

@@ -1,11 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: cluster-image-scanner-image-collector
 
 resources:
+  - namespace.yaml
   - configmap.yaml
   - cronjob.yaml
-  - namespace.yaml
   - service-account-authorization.yaml
+  - keyfile.yaml
 
 patches:
   - secret-volume.yaml
@@ -16,10 +18,11 @@ patchesJSON6902:
       version: v1beta1
       kind: CronJob
       name: cluster-scan-collector
-      namespace: cluster-scan
     patch: |-
       - op: add
         path: /spec/jobTemplate/spec/template/spec/containers/0/env/0
         value:
           name: DEFAULT_SCAN_LIFETIME_MAX_DAYS
           value: "20"
+
+

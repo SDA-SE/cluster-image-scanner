@@ -138,6 +138,7 @@ echo "reverting secret changes"
 #git checkout  ${DEPLOYMENT_PATH}/overlays/test-local/config-source || true
 #git checkout suppressions.xml || true
 
-./cluster-image-scanner-image-collector/minikube-setup.bash
-
+cd ./cluster-image-scanner-image-collector/
+.minikube-setup.bash
+cd ..
 

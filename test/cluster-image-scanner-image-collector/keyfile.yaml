@@ -1,13 +1,8 @@
-apiVersion: bitnami.com/v1alpha1
+apiVersion: v1
+data:
+  keyfile: KEYFILE
 kind: Secret
 metadata:
   name: github
   namespace: cluster-image-scanner-image-collector
-spec:
-  data:
-    keyfile: KEYFILE
-  template:
-    metadata:
-      name: github
-      namespace: cluster-image-scanner-image-collector
-    type: Opaque
+type: Opaque

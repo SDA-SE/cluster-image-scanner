@@ -13,7 +13,7 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: cluster-scan
+          serviceAccountName: image-collector
           automountServiceAccountToken: true # mount cluster-scan
           restartPolicy: Never
           containers:
@@ -25,6 +25,10 @@ spec:
               image: quay.io/sdase/clusterscanner-imagecollector:2.0
               imagePullPolicy: Always
               env:
+                - name: CLUSTER_NAME
+                  value: "minikube"
+                - name: GITHUB_REPOSITORY
+                  value: "github.com/pagel-pro/cluster-image-scanner-test-targets.git"
                 - name: GITHUB_APP_ID
                   valueFrom:
                     configMapKeyRef:
