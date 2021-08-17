@@ -31,6 +31,12 @@ export NAMESPACE_MAPPINGS='{
           ],
           "configurations": {
             "team": "operations",
+            "is_scan_lifetime": "true",
+            "is_scan_baseimage_lifetime": "false",
+            "is_scan_distroless": "false",
+            "is_scan_malware": "false",
+            "is_scan_dependency_check": "false",
+            "is_scan_runasroot": "false"
           }
         }
       ]

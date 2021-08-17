@@ -97,7 +97,7 @@ getPods() {
       isScanDistroless=""
       isScanMalware=""
       isScanDependencyCheck=""
-      isScanRunAsroot=""
+      isScanRunasroot=""
       scanLifetimeMaxDays=""
       scanLifetimeMaxDays=""
       echo "Processing namespace ${namespace}"
@@ -107,16 +107,17 @@ getPods() {
         continue
       fi
 
-      configurationsToMap="scan_lifetime_max_days is_scan_lifetime is_scan_baseimage_lifetime is_scan_malware is_scan_dependency_check is_scan_dependency_check is_scan_runasroot team slack email description"
       descriptionMapping=""
       for mapping in $(echo ${mappingNamespacesFlat} | jq -rcM ".[] | @base64"); do
         mapping=$(echo ${mapping} | base64 -d)
+        configurationsToMap=$(echo "${mapping}" | jq -r 'keys | .[]' | grep -v namespace_filter)
         export namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
         if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
           for attributeName in ${configurationsToMap[@]}; do
+            echo "hi $attributeName"
               setAttributes ${attributeName}
               camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
               if [ "${setAttributesValue}" != "" ]; then
@@ -200,11 +201,11 @@ getPods() {
       if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
         isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
-      if [ "${isScanRunAsroot}" == "" ] || [ "${isScanRunAsroot}" == "null" ]; then
-        isScanRunAsroot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
+      if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
+        isScanRunasroot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
       fi
-      if [ "${isScanRunAsroot}" == "" ] || [ "${isScanRunAsroot}" == "null" ]; then
-        isScanRunAsroot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
+      if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
+        isScanRunasroot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
@@ -282,7 +283,7 @@ getPods() {
           if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseimageLifetime}'" else . end |
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
-          if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunAsroot}'" else . end |
+          if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .image_id|startswith("docker://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
           if .image_id|startswith("docker-pullable://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
