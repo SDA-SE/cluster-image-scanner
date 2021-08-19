@@ -20,9 +20,34 @@ data:
   collector.upload.github.appid: "1111"
   collector.upload.github.installlationid: "2222"
   collector.namespacemapping: |
-    [
-      {"namespace_filter": "istio-", "team": "operations", "description": "Istio is a service mesh to establish end to end encryption and authentication (mTLS)"}
-    ]
+    {
+      "teams": [
+        {
+        "namespaces":
+          [
+            {
+              "namespace_filter": "argo",
+              "description": "used for deployment"
+            },
+            {
+              "namespace_filter": "istio-",
+              "description": "istio is the Service Mesh of our choice, containg all services neded to run the service mesh"
+            }
+          ],
+          "configurations": {
+            "scan_lifetime_max_days": "14",
+            "is_scan_lifetime": "true",
+            "is_scan_baseimage_lifetime": "false",
+            "is_scan_distroless": "false",
+            "is_scan_malware": "false",
+            "is_scan_dependency_check": "false",
+            "is_scan_runasroot": "false",
+            "slack": "operations-security",
+            "team": "operations"
+          }
+        }
+      ]
+    }
 ```
 ### Sample cronjob.yaml
 ```
