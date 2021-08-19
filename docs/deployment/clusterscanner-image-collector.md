@@ -42,7 +42,7 @@ data:
             "is_scan_malware": "false",
             "is_scan_dependency_check": "false",
             "is_scan_runasroot": "false",
-            "slack": "operations-security",
+            "slack": "#operations-security",
             "team": "operations"
           }
         }
