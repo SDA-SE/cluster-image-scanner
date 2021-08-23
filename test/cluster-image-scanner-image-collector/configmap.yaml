@@ -4,8 +4,8 @@ metadata:
   name: collector-upload-repository
   namespace: cluster-image-scanner-image-collector
 data:
-  collector.upload.github.appid: "GITHUB_APP_ID"
-  collector.upload.github.installlationid: "GITHUB_INSTALLATION_ID"
+  collector.upload.github.appid: "GITHUB_APP_ID_PLACEHOLDER"
+  collector.upload.github.installlationid: "GITHUB_INSTALLATION_ID_PLACEHOLDER"
   collector.namespacemapping: |
     {
       "teams": [
