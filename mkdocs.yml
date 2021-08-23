@@ -7,6 +7,7 @@ nav:
   - User:
     - Configuration for Teams: user/configuration/README.md
     - Repolists: deployment/repolist.md
+    - DefectDojo: user/defectdojo/README.md
   - Deployment:
     - Orchestrator: deployment/deployment-orchestrator.md
     - Collector: deployment/clusterscanner-image-collector.md
