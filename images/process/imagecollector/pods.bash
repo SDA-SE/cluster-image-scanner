@@ -241,7 +241,23 @@ getPods() {
           ' > /tmp/meta.json
         for container in $(echo $pod | base64 -d |  jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
           echo "container in ${namespace}"
-          image=$(echo "${container}" | base64 -d | jq -rcM ".image")
+
+          # The following is an example:
+          # { "image":"sha256:XXX",
+          #   "imageID":"docker-pullable://k8s.gcr.io/ingress-nginx/controller@sha256:YYY" }
+          # k8s.gcr.io/ingress-nginx/controller@sha256:XXX is not existing, therefore, we take the imageID
+          echo "${container}" | base64 -d | jq '. |
+          if .imageID|startswith("docker://") then .imageID="\("sha256:")\(.imageID|split(":")[2])" else . end |
+          if .imageID|startswith("docker-pullable://") then if .image|startswith("sha") then .image=(.imageID|split("//"))[1] else  .imageID="\("sha256:")\(.imageID|split(":")[2])" end else . end |
+          if .imageID|startswith("docker-pullable://") then if .image|startswith("sha") then .image=.imageID else  . end else . end |
+          if .imageID|startswith("sha256:") then .imageID="\(.image|split(":")[0])\("@sha256:")\(.imageID|split(":")[1])" else . end |
+          if .image|test("sha256:") then .imageID=.image else . end |
+          if .imageID == null then .imageID=.image else . end | {
+            "image": .image,
+            "image_id": .imageID
+          }' > /tmp/container.json
+
+          image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
@@ -264,17 +280,10 @@ getPods() {
             echo "skipping ${image} based on IMAGE_SKIP_POSITIVE_LIST with regex ${IMAGE_SKIP_POSITIVE_LIST}"
             skip="true"
           fi
-          echo "${container}" | base64 -d | jq '{
-            "image": .image,
-            "image_id": .imageID
-          }' > /tmp/container.json
+
           echo "will combine both in ${namespace}"
-          cleanImage=$(echo "${image}" | sed 's#:[[:alnum:].-]*$##' | sed 's#@.*##')
           jq -s '. | add |
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
-          if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${cleanImage}'" else . end |
-          if .app_version == null then .app_version="'${imageTag}'" else . end |
-          if .scm_release == null then .scm_release=.app_version else . end |
           if .email == null then .email="'${email}'" else . end |
           if .slack == null then .slack="'${slack}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
@@ -284,12 +293,9 @@ getPods() {
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
-          if .image_id|startswith("docker://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
-          if .image_id|startswith("docker-pullable://") then if .image|startswith("sha") then .image=(.image_id|split("//"))[1] else  .image_id="\("sha256:")\(.image_id|split(":")[2])" end else . end |
-          if .image_id|startswith("docker-pullable://") then if .image|startswith("sha") then .image=.image_id else  . end else . end |
-          if .image_id|startswith("sha256:") then .image_id="\(.image|split(":")[0])\("@sha256:")\(.image_id|split(":")[1])" else . end |
-          if .image|test("sha256:") then .image_id=.image else . end |
-          if .image_id == null then .image_id=.image else . end ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
+          if .app_version == null then .app_version="'${imageTag}'" else . end |
+          if .scm_release == null then .scm_release=.app_version else . end
+          ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
         done
       done
     done
