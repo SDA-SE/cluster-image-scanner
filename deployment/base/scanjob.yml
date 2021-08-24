@@ -186,7 +186,9 @@ spec:
               echo "Extracting blob ${l}"
               tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
           done
+          echo "Changing directory permissions"
           find "${unpack_dir}" -type d -exec chmod 755 {} +
+          echo "Changing file permissions"
           find "${unpack_dir}" -type f -exec chmod 644 {} +
           cd "${unpack_dir}"
 
