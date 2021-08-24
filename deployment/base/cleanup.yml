@@ -38,8 +38,8 @@ spec:
           source: |
             set -e
             /usr/bin/whoami
-            du -sh /clusterscanner/images/
-            du -sh /clusterscanner/data/
+            du -sh /clusterscanner/images/ || true
+            du -sh /clusterscanner/data/ || true
 
             for cleanupPath in $(find /clusterscanner/images/ -maxdepth 2 -mindepth 2 -mtime +${MAX_DAYS}); do
                 echo "Removing ${cleanupPath}"
