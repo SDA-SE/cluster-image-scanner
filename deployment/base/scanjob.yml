@@ -181,8 +181,16 @@ spec:
           echo "Downloading image ${IMAGE_BY_HASH}"
 
           skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}"
-
-          for l in $(jq ".layers | .[].digest" "${image_copy_dir}/manifest.json" | tr -d \" | sed -e "s/^sha256://g"); do
+          layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
+          if [ "${layers} != "null" ] && [ "${layers} != "" ]; then
+            extractionCommand=".layers | .[].digest"
+          elif [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ] && [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ]; then
+            extractionCommand=".fsLayers | .[].blobSum"
+          else
+            echo "Could NOT find layers to unpack"
+            exit 2
+          fi
+          for l in $(jq -r "$extractionCommand" "${image_copy_dir}/manifest.json" | sed -e "s/^sha256://g"); do
               echo "Extracting blob ${l}"
               tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
           done
