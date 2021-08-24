@@ -143,11 +143,15 @@ spec:
             subPath: auth.json
             defaultMode: 0444
         env:
+          - name: IMAGE
+            value: "{{ workflow.parameters.image }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
         source: |
           # IMAGE_TAR_PATH from base image
           set -e
+          echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
+
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
@@ -191,6 +195,7 @@ spec:
 
           echo "Copying manifest and config file"
           cp "${image_copy_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
+          rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
           cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
           echo "Cleaning up"
