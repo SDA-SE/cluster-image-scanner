@@ -4,7 +4,7 @@ metadata:
   name: cleanup-pvc-wf
   namespace: clusterscanner
 spec:
-  schedule: "55 8 * * *"
+  schedule: "56 7 * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
@@ -36,13 +36,20 @@ spec:
           source: |
             set -e
             /usr/bin/whoami
-            folders="/clusterscanner/data/ /clusterscanner/images/"
-            for folderPath in ${folders}; do
-              du -sh ${folderPath}
-              for cleanupPath in $(find ${folderPath}/* -mtime +${MAX_DAYS}); do
-                echo "Removing ${cleanupPath} with size $(du ${cleanupPath})"
+            du -sh /clusterscanner/images/
+            du -sh /clusterscanner/data/
+
+            for cleanupPath in $(find /clusterscanner/images/ -maxdepth 2 -mindepth 2 -mtime +${MAX_DAYS}); do
+                echo "Removing ${cleanupPath}"
                 rm -Rf ${cleanupPath} || true # folders have owner rights issues
-              done
             done
+            find /clusterscanner/images/ -maxdepth 2 -empty -type d -delete
+
+            for cleanupPath in $(find /clusterscanner/data/ -name *.json -mtime +${MAX_DAYS}); do
+                echo "Removing ${cleanupPath}"
+                rm -Rf ${cleanupPath} || true # folders have owner rights issues
+            done
+            find /clusterscanner/data/ -empty -type d -delete
+
             echo "done"
             exit 0
