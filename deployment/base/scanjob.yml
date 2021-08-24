@@ -184,7 +184,7 @@ spec:
 
           for l in $(jq ".layers | .[].digest" "${image_copy_dir}/manifest.json" | tr -d \" | sed -e "s/^sha256://g"); do
               echo "Extracting blob ${l}"
-              tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscan --group=clusterscan -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
+              tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
           done
           find "${unpack_dir}" -type d -exec chmod 755 {} +
           find "${unpack_dir}" -type f -exec chmod 644 {} +
