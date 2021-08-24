@@ -171,9 +171,7 @@ spec:
           ls -la "${config_dir}/config.json"
           if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" ; then
             echo "Already got image with identical config manifest, skipping"
-            # touch to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
-            touch "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
-            touch "${IMAGE_TAR_FOLDER_PATH}/config.json"
+            # touch on folder to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
             touch "${IMAGE_TAR_PATH}"
             exit 0
           fi
