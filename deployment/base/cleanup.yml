@@ -4,7 +4,7 @@ metadata:
   name: cleanup-pvc-wf
   namespace: clusterscanner
 spec:
-  schedule: "50 15 * * *"
+  schedule: "55 8 * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
