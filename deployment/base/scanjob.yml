@@ -182,7 +182,7 @@ spec:
 
           skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}"
           layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
-          if [ "${layers} != "null" ] && [ "${layers} != "" ]; then
+          if [ "${layers}" != "null" ] && [ "${layers}" != "" ]; then
             extractionCommand=".layers | .[].digest"
           elif [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ] && [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ]; then
             extractionCommand=".fsLayers | .[].blobSum"
