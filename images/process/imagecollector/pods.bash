@@ -117,7 +117,6 @@ getPods() {
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
           for attributeName in ${configurationsToMap[@]}; do
-            echo "hi $attributeName"
               setAttributes ${attributeName}
               camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
               if [ "${setAttributesValue}" != "" ]; then
@@ -286,7 +285,8 @@ getPods() {
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .image_id|startswith("docker://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
-          if .image_id|startswith("docker-pullable://") then .image_id="\("sha256:")\(.image_id|split(":")[2])" else . end |
+          if .image_id|startswith("docker-pullable://") then if .image|startswith("sha") then .image=(.image_id|split("//"))[1] else  .image_id="\("sha256:")\(.image_id|split(":")[2])" end else . end |
+          if .image_id|startswith("docker-pullable://") then if .image|startswith("sha") then .image=.image_id else  . end else . end |
           if .image_id|startswith("sha256:") then .image_id="\(.image|split(":")[0])\("@sha256:")\(.image_id|split(":")[1])" else . end |
           if .image|test("sha256:") then .image_id=.image else . end |
           if .image_id == null then .image_id=.image else . end ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
