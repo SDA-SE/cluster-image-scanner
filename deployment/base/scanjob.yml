@@ -217,7 +217,8 @@ spec:
             claimName: clusterscanner-images
             readOnly: true
         - name: scandata
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
       outputs:
         artifacts:
           - name: results-distroless
@@ -233,6 +234,7 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/distroless"
         env:
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_distroless }}"
@@ -246,7 +248,8 @@ spec:
             claimName: clusterscanner-images
             readOnly: true
         - name: scandata
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -265,6 +268,7 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/lifetime"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
@@ -284,7 +288,8 @@ spec:
             claimName: clusterscanner-images
             readOnly: true
         - name: scandata
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -303,6 +308,7 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/baseimage-lifetime"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
@@ -329,7 +335,8 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: scandata
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
       outputs:
         artifacts:
           - name: results-runasroot
@@ -345,6 +352,7 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/runasroot"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
@@ -363,7 +371,8 @@ spec:
             claimName: clusterscanner-images
             readOnly: true
         - name: scandata
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
         - name: suppressions
           configMap:
             name: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
@@ -384,6 +393,7 @@ spec:
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
           - name: suppressions
             mountPath: /tmp/suppressions
         env:
@@ -444,16 +454,11 @@ spec:
 
 
     - name: results-collect-generic-findings
-      inputs:
-        artifacts:
-          - name: results-distroless
-            path: /tmp/results/distroless
-          - name: results-lifetime
-            path: /tmp/results/lifetime
-          - name: results-baseimage-lifetime
-            path: /tmp/results/baseimage-lifetime
-          - name: results-runasroot
-            path: /tmp/results/runasroot
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+            readOnly: true
       outputs:
         artifacts:
           - name: results-generic
@@ -462,24 +467,30 @@ spec:
             path: /tmp/findings.csv
       script:
         image: quay.io/sdase/clusterscanner-base:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /tmp/results
+            subPath: "results/{{ workflow.parameters.image_id }}/generic"
         command: [/bin/bash]
         source: |
+          set -e
           JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           for j in /tmp/results/**/*.json; do
             echo "Collecting ${j}"
+            echo "${JSON_RESULT}" # TODOs
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
           done
           echo "${JSON_RESULT}" > /tmp/result.json
           echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
           cat /tmp/results/**/*.csv >> /tmp/findings.csv
           DATE=$(date +%m/%d/%Y)
-          echo "Will change IMAGE {{ workflow.parameters.image }}"
+          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.csv and /tmp/result.json"
           sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
           sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
-          echo "Will change CLUSTER"
+          echo "Will replace placeholder CLUSTER in /tmp/findings.csv and /tmp/result.json"
           sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
           sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
-          echo "Will change NAMESPACE"
+          echo "Will replace placeholder NAMESPACE in /tmp/findings.csv and /tmp/result.json"
           sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
           sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
           sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv

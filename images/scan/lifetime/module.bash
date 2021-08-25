@@ -12,8 +12,9 @@ set -e
 source /clusterscanner/scan-common.bash
 
 scan_result_pre
+
 echo "Analysing IMAGE_BY_HASH: ${IMAGE_BY_HASH}"
-skopeo inspect docker://"${IMAGE_BY_HASH}" > /dev/null || exit=true
+skopeo inspect "docker://${IMAGE_BY_HASH}" > /dev/null || exit=true
 if [ "${exit}" == "true" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
@@ -87,3 +88,4 @@ fi
 scan_result_post
 
 exit  0
+
