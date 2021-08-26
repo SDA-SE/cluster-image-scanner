@@ -54,6 +54,7 @@ buildah config \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env 'MAX_IMAGE_LIFETIME_IN_DAYS=14' \
   --env 'IS_BASE_IMAGE_LIFETIME_SCAN=false' \
+  --env 'RESULT_CACHING_HOURS=168' \
   "${ctr}"
 
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=

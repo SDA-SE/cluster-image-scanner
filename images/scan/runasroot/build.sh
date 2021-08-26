@@ -52,6 +52,7 @@ buildah config \
   --label "${oci_prefix}.title=Clusterscanner Scanner run as root" \
   --label "${oci_prefix}.description=${descr}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
+  --env 'RESULT_CACHING_HOURS=168' \
   "${ctr}"
 
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
