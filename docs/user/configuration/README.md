@@ -55,7 +55,7 @@ This is a recomended configuration including ISO 27001 asset catalog compliance,
 contact.sdase.org/team: "the-fellowship-of-the-ring"
 sdase.org/description: "My service description" # optional
 ```
-Labels
+### Labels
 ```
 app.kubernetes.io/name: "ring-calling-service" # defaults to image
 ```
