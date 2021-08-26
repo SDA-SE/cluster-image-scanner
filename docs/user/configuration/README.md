@@ -9,7 +9,7 @@ As a team, **annotations** can be set in the following way to enable/disable sca
 ```
 # Notification configuration (namespace/object)
 contact.sdase.org/email: "clusterscannertest@sda.se"
-contact.sdase.org/team: "The Fellowship of the Ring"
+contact.sdase.org/team: "the-fellowship-of-the-ring"
 contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/pod: derived from as <team>-security
 sdase.org/description: "My service description" # optional
 
@@ -42,8 +42,22 @@ You might use `sdase.org/description` to describe the services in all namespaces
 Additionally, the following **labels** can be used:
 
 ```
-app.kubernetes.io/name: "consent-service" # defaults to image
+app.kubernetes.io/name: "ring-calling-service" # defaults to image
 app.kubernetes.io/version: "3.42.0" # defaults to image tag
+```
+
+
+## Sample configuration which also establishes compliance
+This is a recomended configuration including ISO 27001 asset catalog compliance, in case the standards (slack channel naming and scan-configurations) are adjusted to your needs, already.
+
+### Annotations
+```
+contact.sdase.org/team: "the-fellowship-of-the-ring"
+sdase.org/description: "My service description" # optional
+```
+Labels
+```
+app.kubernetes.io/name: "ring-calling-service" # defaults to image
 ```
 
 # Inheritance of annotations.
