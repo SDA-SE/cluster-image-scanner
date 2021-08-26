@@ -7,7 +7,6 @@ resources:
   - configmap.yaml
   - cronjob.yaml
   - service-account-authorization.yaml
-  - keyfile.yaml
 
 patches:
   - secret-volume.yaml

@@ -139,6 +139,6 @@ echo "reverting secret changes"
 #git checkout suppressions.xml || true
 
 cd ./cluster-image-scanner-image-collector/
-.minikube-setup.bash
+./minikube-setup.bash
 cd ..
 
