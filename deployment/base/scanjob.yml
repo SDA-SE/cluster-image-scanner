@@ -475,6 +475,7 @@ spec:
         source: |
           set -e
           JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+          find /tmp/results
           for j in /tmp/results/**/*.json; do
             echo "Collecting ${j}"
             echo "${JSON_RESULT}" # TODOs
@@ -482,7 +483,7 @@ spec:
           done
           echo "${JSON_RESULT}" > /tmp/result.json
           echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
-          cat /tmp/results/**/*.csv >> /tmp/findings.csv
+          cat /tmp/results/**/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given"
           DATE=$(date +%m/%d/%Y)
           echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.csv and /tmp/result.json"
           sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
