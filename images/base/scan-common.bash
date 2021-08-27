@@ -15,7 +15,7 @@ function scan_result_pre {
   RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
   if [ -f "${RESULT_FILE}" ] && [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print) ]]; then
     echo "Scan has been performed, already, using old result"
-    JSON_RESULT=$(cat "${RESULT_FILE}")
+    JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
     scan_result_post
     exit 0
   fi
