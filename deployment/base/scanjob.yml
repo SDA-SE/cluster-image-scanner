@@ -379,7 +379,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-new-version:merge
+        image: quay.io/sdase/cluster-image-scanner-scan-new-version:2
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -417,7 +417,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-malware:merge
+        image: quay.io/sdase/cluster-image-scanner-scan-malware:2
         imagePullPolicy: Always
         volumeMounts:
           - name: images

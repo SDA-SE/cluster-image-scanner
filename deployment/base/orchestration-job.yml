@@ -86,7 +86,7 @@ spec:
             path: /clusterscanner/imageList.json
             mode: 0444
       container:
-        image: quay.io/sdase/clusterscanner-workflow-runner:merge
+        image: quay.io/sdase/clusterscanner-workflow-runner:2
         imagePullPolicy: Always
         env:
           - name: SCAN_ID
