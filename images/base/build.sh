@@ -105,7 +105,7 @@ buildah config \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
-  --label "${oci_prefix}.title=Clusterscan imagefetcher" \
+  --label "${oci_prefix}.title=ClusterImageScanner Base" \
   --label "${oci_prefix}.description=${descr}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env "IMAGE_TAR_FOLDER_PATH=/clusterscanner/images" \

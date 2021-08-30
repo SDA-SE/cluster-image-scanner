@@ -52,9 +52,14 @@ spec:
         value: "###is_scan_dependency_check###"
       - name: is_scan_runasroot
         value: "###is_scan_runasroot###"
+      - name: is_scan_new_version
+        value: "###is_scan_new_version###"
       - name: scan_lifetime_max_days
         value: "###scan_lifetime_max_days###"
       - name: dependencyCheckSuppressionsConfigMapName
         value: "###dependencyCheckSuppressionsConfigMapName###"
+      - name: new_version_image_filter
+        value: "###new_version_image_filter###"
+
   workflowTemplateRef:
     name: scan-image-job

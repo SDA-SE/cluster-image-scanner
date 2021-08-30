@@ -95,15 +95,15 @@ sleep 60
 kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}]' --type json
 sleep 50
 for i in $(ps -ef | grep port-forward | grep svc/argocd-server | grep -v grep | awk '{print $2}'); do kill $i;done
-kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+kubectl port-forward svc/argocd-server -n argocd 8085:443 &
 sleep 20
-argocd proj --server localhost:8080 --insecure create clusterscanner -d https://kubernetes.default.svc,clusterscanner
-argocd proj --server localhost:8080 --insecure add-source clusterscanner "*"
-argocd proj --server localhost:8080 --insecure allow-cluster-resource clusterscanner '*' '*'
-argocd proj --server localhost:8080 --insecure deny-namespace-resource "clusterscanner" '*' '*' # needed for add
-argocd proj --server localhost:8080 --insecure allow-namespace-resource  clusterscanner '*' '*'
+argocd proj --server localhost:8085 --insecure create clusterscanner -d https://kubernetes.default.svc,clusterscanner
+argocd proj --server localhost:8085 --insecure add-source clusterscanner "*"
+argocd proj --server localhost:8085 --insecure allow-cluster-resource clusterscanner '*' '*'
+argocd proj --server localhost:8085 --insecure deny-namespace-resource "clusterscanner" '*' '*' # needed for add
+argocd proj --server localhost:8085 --insecure allow-namespace-resource  clusterscanner '*' '*'
 sleep 1
-#argocd repo --server localhost:8080 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
+#argocd repo --server localhost:8085 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
 echo "Applying argoworkflow.yml"
 kubectl apply -f ./argoworkflow.yml
 sleep 20

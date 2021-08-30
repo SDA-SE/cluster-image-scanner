@@ -19,6 +19,7 @@ nav:
       - Image Lifetime: user/scans/image-lifetime.md
       - Known Vulnerabilities: user/scans/known-vulnerabilities.md
       - Malware: user/scans/malware.md
+      - New-Version: user/scans/new-version.md
       - Root-User: user/scans/run-as-root.md
   - Architecture:
       - Overview: architecture/README.md
