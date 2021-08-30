@@ -12,6 +12,7 @@ while read -r line; do
     continue
   fi
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
+  IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
   cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
@@ -34,7 +35,10 @@ while read -r line; do
   sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /clusterscanner/template.yml
+  sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /clusterscanner/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
+  sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /clusterscanner/template.yml
+
 
 
   cat /clusterscanner/template.yml

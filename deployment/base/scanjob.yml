@@ -34,6 +34,8 @@ spec:
       - name: is_scan_dependency_check
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
+      - name: is_scan_new_version
+      - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
   templates:
     - name: main
@@ -56,6 +58,12 @@ spec:
           - name: scan-runasroot
             depends: imagefetcher
             template: scan-runasroot
+          - name: scan-malware
+            depends: imagefetcher
+            template: scan-malware
+          - name: scan-new-version
+            depends: imagefetcher
+            template: scan-new-version
 
           - name: results-dependency-check-dd-upload
             #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
@@ -67,18 +75,8 @@ spec:
                   from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
 
           - name: results-collect-generic-findings
-            depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded)
+            depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
-            arguments:
-              artifacts:
-                - name: results-distroless
-                  from: "{{ tasks.scan-distroless.outputs.artifacts.results-distroless }}"
-                - name: results-baseimage-lifetime
-                  from: "{{ tasks.scan-baseimage-lifetime.outputs.artifacts.results-baseimage-lifetime }}"
-                - name: results-lifetime
-                  from: "{{ tasks.scan-lifetime.outputs.artifacts.results-lifetime }}"
-                - name: results-runasroot
-                  from: "{{ tasks.scan-runasroot.outputs.artifacts.results-runasroot }}"
 
           - name: results-generic-dd-upload
             depends: results-collect-generic-findings
@@ -89,7 +87,7 @@ spec:
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
 
           - name: results-aggregate
-            depends: results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded
+            depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
@@ -363,6 +361,83 @@ spec:
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_runasroot }}"
 
+    - name: scan-new-version
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      outputs:
+        artifacts:
+          - name: results-runasroot
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/cluster-image-scanner-scan-new-version:merge
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/new-version"
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: IMAGE
+            value: "{{ workflow.parameters.image }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_new_version }}"
+          - name: IMAGE_SCAN_POSITIVE_FILTER
+            value: "{{ workflow.parameters.new_version_image_filter }}"
+
+    - name: scan-malware
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: clusterscanner-images
+            readOnly: true
+        - name: registry-creds
+          secret:
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+      outputs:
+        artifacts:
+          - name: results-runasroot
+            path: /clusterscanner/data
+            archiveLogs: true
+      container:
+        image: quay.io/sdase/cluster-image-scanner-scan-malware:merge
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/generic/malware"
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
+        env:
+          - name: IMAGE_BY_HASH
+            value: "{{ workflow.parameters.image_id }}"
+          - name: IMAGE
+            value: "{{ workflow.parameters.image }}"
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_malware }}"
 
     - name: scan-dependency-check
       volumes:

@@ -25,6 +25,7 @@ spec:
       - workflow.parameters.slackTokenSecretName
       - workflow.parameters.emailSecretName
       - workflow.parameters.enforceSlackChannel
+      - workflow.parameters.newVersionImageFilter
       - workflow.parameters.dependencyCheckSuppressionsConfigMapName
   templates:
     - name: main
@@ -85,7 +86,7 @@ spec:
             path: /clusterscanner/imageList.json
             mode: 0444
       container:
-        image: quay.io/sdase/clusterscanner-workflow-runner:2
+        image: quay.io/sdase/clusterscanner-workflow-runner:merge
         imagePullPolicy: Always
         env:
           - name: SCAN_ID
@@ -102,6 +103,8 @@ spec:
             value: "13"
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
+          - name: NEW_VERSION_IMAGE_FIILTER
+            value: "{{ workflow.parameters.newVersionImageFilter }}"
 
     - name: notify-teams
       volumes:

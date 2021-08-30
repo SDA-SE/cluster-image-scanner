@@ -14,7 +14,7 @@ spec:
   arguments:
     parameters:
       - name: scanId
-        value: "20210811-071357" # fetch from wait log after first run of argo-main.yml in notifier (top, attribute "subpath")
+        value: "20210816-230000-sda" # fetch from wait log after first run of argo-main.yml in notifier (top, attribute "subpath")
       - name: gitSecretName
         value: "github"
       - name: imageSourceListConfigMapName
@@ -30,7 +30,7 @@ spec:
       - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
         value: "dependency-check-db"
       - name: enforceSlackChannel
-        value: "#security-notifications-test"
+        value: "" # "#security-notifications-test"
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions"
   templates:

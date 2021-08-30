@@ -30,7 +30,9 @@ spec:
       - name: dependencyCheckDbConfigMapName
         value: "dependency-check-db"
       - name: enforceSlackChannel
-        value: "#securiity-notifications-test"
+        value: "#security-notifications-test"
+      - name: newVersionImageFilter
+        value: "quay.io/sdase/|swaggerapi/petstore"
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions-sda"
 
