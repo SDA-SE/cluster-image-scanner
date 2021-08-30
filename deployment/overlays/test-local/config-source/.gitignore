@@ -1,8 +1,1 @@
-defectdojo.env
-depcheck.env
-email.env
-github.env
-github_private_key.pem
-repolist.env
-s3.env
-slack.env
+*
