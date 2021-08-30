@@ -28,6 +28,7 @@ fi
     --dbPassword "${DEPSCAN_DB_PASSWORD}" \
     --noupdate \
     --disableCentralCache \
+    --disableAssembly	\
     --connectionString "${DEPSCAN_DB_CONNECTSRING}" \
     $suppressions \
     >> "${ARTIFACTS_PATH}/depScan.log" || true
