@@ -16,7 +16,7 @@ DEPLOYMENT_PATH=../deployment
 
 kubectl create namespace argocd || true
 kubectl create namespace clusterscanner || true
-
+git update-index --skip-worktree  deployment/overlays/test-local/config-source/
 sed -i "s#ACCESS_KEY#${ACCESS_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#SECRET_KEY#$SECRET_KEY#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#DD_TOKEN_SECRET#$DD_TOKEN_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.env
