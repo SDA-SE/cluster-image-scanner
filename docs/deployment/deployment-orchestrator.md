@@ -60,3 +60,6 @@ By having multiple clusters (e.g. due to multiple customers):
 ![multitenant](multitenant.png)
 The following figure shows the ArgoWorkflows workflow structure:
 ![multitenant](multitenant-impl.png)
+
+## Slack Token
+In case slack is used, a Bot should be , invited into the corresponding slack channels and a token via https://my.slack.com/apps/manage/custom-integrations extracted and deployed to kubernetes.
