@@ -120,6 +120,7 @@ buildah config \
   --env DEFAULT_SCAN_RUNASROOT="true" \
   --env DEFAULT_SCAN_LIFETIME_MAX_DAYS="14" \
   --env DEFAULT_SCAN_BASEIMAGE_LIFETIME="true" \
+  --env DEFAULT_SCAN_NEW_VERSION="true" \
   --env SCAN_LIFETIME_MAX_DAYS_ANNOTATION="clusterscanner.sdase.org/max-lifetime" \
   --env SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime" \
   --env SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless" \
@@ -128,6 +129,7 @@ buildah config \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
   --env IS_SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \
   --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \
+  --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="[]" \

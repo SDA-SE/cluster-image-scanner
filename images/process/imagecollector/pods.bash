@@ -98,8 +98,10 @@ getPods() {
       isScanMalware=""
       isScanDependencyCheck=""
       isScanRunasroot=""
+      isScanNewVersion=""
       scanLifetimeMaxDays=""
       scanLifetimeMaxDays=""
+
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
       if [ "$(echo "${namespaceAnnotations}" | grep -c "NotFound")" -gt 0 ]; then
@@ -206,12 +208,19 @@ getPods() {
       if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
         isScanRunasroot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
+      if [ "${isScanNewVersion}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
+        isScanNewVersion=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_NEW_VERSION_ANNOTATION}\"]")
+      fi
+      if [ "${isScanNewVersion}" == "" ] || [ "${isScanNewVersion}" == "null" ]; then
+        isScanNewVersion="${DEFAULT_SCAN_IS_NEW_VERSIION}"
+      fi
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
       fi
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
+
 
       # TODO in the future maybe not only running pods
       pods=$(kubectl get pods --namespace=${namespace} --field-selector=status.phase=Running --output json)
@@ -236,6 +245,7 @@ getPods() {
           "is_scan_malware": .metadata.annotations["'${SCAN_MALWARE_ANNOTATION}'"],
           "is_scan_dependency_check": .metadata.annotations["'${SCAN_DEPENDENCY_CHECK_ANNOTATION}'"],
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
+          "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
@@ -292,6 +302,7 @@ getPods() {
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
+          if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end
