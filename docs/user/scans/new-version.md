@@ -1,4 +1,4 @@
-# Scan Maleware (in development)
+# New Malware (in development)
 The new version scan tests for a new version in the defined registry for the defined filter (e.g. an organization in quay.io).
 
 ##  Relevance
