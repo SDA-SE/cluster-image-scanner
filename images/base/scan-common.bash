@@ -17,19 +17,20 @@ function scan_result_pre {
   RESULT_CACHING_MIN=$( expr ${RESULT_CACHING_HOURS} \* 60)
 
   RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
-  lastStatus=$(cat "${RESULT_FILE}" | jq -r ".${MODULE_NAME} | .status" || true)
-  if [ "${lastStatus}" == "skipped" ] && [ "${IS_SCAN}" == "true" ]; then
-    echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
-    rm "${RESULT_FILE}"
+  if [ -f "${RESULT_FILE}" ]; then
+    lastStatus=$(cat "${RESULT_FILE}" | jq -r ".${MODULE_NAME} | .status" || true)
+    if [ "${lastStatus}" == "skipped" ] && [ "${IS_SCAN}" == "true" ]; then
+      echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
+      rm "${RESULT_FILE}"
+    fi
+    if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print) ]]; then
+      echo "Scan has been performed, already, using old result"
+      IS_USE_CACHE=true
+      JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
+      scan_result_post
+      exit 0
+    fi
   fi
-  if [ -f "${RESULT_FILE}" ] && [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print) ]]; then
-    echo "Scan has been performed, already, using old result"
-    IS_USE_CACHE=true
-    JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
-    scan_result_post
-    exit 0
-  fi
-
   JSON_RESULT=$(echo "{}" | jq -Sc ".+= {\"startedAt\": \"$(date --rfc-3339=ns)\"}")
   echo "mkdir ${ARTIFACTS_PATH}"
   mkdir -p "${ARTIFACTS_PATH}" || true
