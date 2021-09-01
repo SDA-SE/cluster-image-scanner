@@ -71,7 +71,7 @@ echo "dDiff: ${dDiff}"
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
-    infoText="${IMAGE_TYPE} is too old"
+    infoText="${IMAGE_TYPE} is ${dDiff} days too old"
     if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
       infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
