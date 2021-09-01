@@ -33,9 +33,9 @@ sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#$DEPSCAN_DB_PASSWORD_PLACEHOLDER#" ${D
 sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#$DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 
 sed -i "s#smtp_SECRET#$smtp_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth_SECRET#$smtp_auth_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth-user_SECRET#$smtp_auth_user_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-sed -i "s#smtp-auth-password_SECRET#$smtp_auth_password_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp_auth_SECRET#$smtp_auth_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp_auth-user_SECRET#$smtp_auth_user_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
+sed -i "s#smtp_auth-password_SECRET#$smtp_auth_password_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 
 cp ${HOME}/.clusterscanner/suppressions.xml .
 
