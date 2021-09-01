@@ -269,6 +269,7 @@ getPods() {
 
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
+          imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*/##')
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
@@ -304,6 +305,7 @@ getPods() {
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
+          if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${imageBase}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end
           ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
