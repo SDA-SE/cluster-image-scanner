@@ -31,8 +31,7 @@ base_image="quay.io/sdase/clusterscanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
-cp module.bash "${mnt}/clusterscanner/"
-cp env.bash "${mnt}/clusterscanner/"
+cp -a *.bash "${mnt}/clusterscanner/"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
