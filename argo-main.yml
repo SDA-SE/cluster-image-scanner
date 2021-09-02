@@ -35,6 +35,8 @@ spec:
         value: "quay.io/sdase/|swaggerapi/petstore"
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions-sda"
+      - name: allResultsGitTarget
+        value: "github.com/pagel-pro/cluster-image-scanner-all-results.git"
 
   templates:
     - name: main

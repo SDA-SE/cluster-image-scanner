@@ -40,6 +40,8 @@ spec:
                   from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
         - - name: notify-teams
             template: notify-teams
+        - - name: git-upload-report
+            template: git-upload-report
 
     - name: fetch-image-list
       outputs:
@@ -87,7 +89,7 @@ spec:
             mode: 0444
       container:
         image: quay.io/sdase/clusterscanner-workflow-runner:2
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
@@ -252,3 +254,54 @@ spec:
               done
             done
           done
+
+    - name: git-upload-report
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: clusterscanner-scandata
+        - name: "{{ workflow.parameters.gitSecretName }}"
+          secret:
+            secretName: "{{ workflow.parameters.gitSecretName }}"
+      script:
+        image: quay.io/sdase/clusterscanner-imagecollector:2
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "{{ workflow.parameters.scanId }}"
+          - name: "{{ workflow.parameters.gitSecretName }}"
+            mountPath: /clusterscanner/github/github_private_key.pem
+            subPath: github_private_key.pem
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SCAN_ID
+            value: "{{ workflow.parameters.scanId }}"
+          - name: GITHUB_KEY_FILE_PATH
+            value: "/clusterscanner/github/github_private_key.pem"
+          - name: GITHUB_REPOSITORY
+            value: "{{ workflow.parameters.allResultsGitTarget }}"
+        envFrom:
+          - secretRef:
+              name: "{{ workflow.parameters.gitSecretName }}"
+        command: [/bin/bash]
+        source: |
+          set -e
+
+          source auth.bash # > /dev/null 2>&1
+          source git.bash # > /dev/null 2>&1
+
+          if [ "${RESULT_PATH}" == "" ]; then
+            RESULT_PATH=/clusterscanner/data
+          fi
+
+          gitAuth
+          echo "gitFetch"
+          gitFetch
+
+          mkdir /tmp/clusterscanner-remote/${SCAN_ID} || true
+          cp -a "${RESULT_PATH}"/* /tmp/clusterscanner-remote/${SCAN_ID}
+          cd /tmp/clusterscanner-remote/${SCAN_ID}
+          git add * || true
+          git commit -m "add" || true
+
+          git push -f origin master || true
