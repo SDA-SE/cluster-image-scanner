@@ -52,8 +52,6 @@ rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
 curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack --output "${mnt}/bin/slack"
 chmod +x "${mnt}/bin/slack"
 
-cp module.bash "${mnt}/clusterscanner/"
-cp inform.bash "${mnt}/clusterscanner/"
 echo "" >"${mnt}/clusterscanner/cache.bash" # "check for existing in module.bash
 
 # Get a bill of materials
