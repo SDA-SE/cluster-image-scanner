@@ -52,7 +52,6 @@ mkdir -p "${mnt}/home/code" || true
 rsync -a bin/jq "${mnt}/usr/local/bin/jq"
 rsync -a bin/kubectl "${mnt}/usr/local/bin/kubectl"
 rsync -a entrypoint.bash "${mnt}/home/code/entrypoint.bash"
-rsync -a git.bash "${mnt}/home/code/git.bash"
 rsync -a pods.bash "${mnt}/home/code/pods.bash"
 rsync -a build.sh "${mnt}/home/code/build.sh # for sha1"
 rsync -a .gitconfig "${mnt}/home/code/.gitconfig"
