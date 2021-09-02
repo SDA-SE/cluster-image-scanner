@@ -29,8 +29,8 @@ cleanup() {
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$( buildah from --pull --quiet ${base_image} )"
 
-target_image="scratch"
-ctr="$( buildah from --pull --quiet $target_image)"
+target_image="quay.io/sdase/clusterscanner-base:2"
+ctr="$( buildah from --pull --quiet ${target_image})"
 mnt="$( buildah mount "${ctr}" )"
 
 
@@ -135,12 +135,12 @@ buildah config \
   --cmd "/home/code/entrypoint.bash" \
   --user 1001 \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
-  --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-imagecollector" \
+  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner" \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
-  --label "${oci_prefix}.title=Cluster Scan Collector" \
+  --label "${oci_prefix}.title=ClusterImageScanner Collector" \
   --label "${oci_prefix}.description=Collect images from cluster with kubectl" \
   --label "io.sda-se.image.bill-of-materials-hash=$( \
     echo "${bill_of_materials_hash}" )" \
