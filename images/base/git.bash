@@ -2,7 +2,9 @@
 set -e
 
 createJWT() {
-  GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
+  if [ "${GITHUB_KEY_FILE_PATH}" == "" ]; then
+    export GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
+  fi
   if [ ! -e "${GITHUB_KEY_FILE_PATH}" ] || [ "$(wc -l "${GITHUB_KEY_FILE_PATH}")" == "" ]; then
     echo "${GITHUB_KEY_FILE_PATH} is empty"
     exit 45
