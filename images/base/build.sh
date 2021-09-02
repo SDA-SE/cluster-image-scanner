@@ -83,6 +83,9 @@ touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
 mkdir -p "${mnt}/clusterscanner" || true
 cp ./*.bash "${mnt}/clusterscanner"
 
+echo "removing ${mnt}/etc/yum.repos.d ${mnt}/etc/yum/repos.d ${mnt}/etc/distro.repos.d"
+rm -Rf ${mnt}/etc/yum.repos.d ${mnt}/etc/yum/repos.d ${mnt}/etc/distro.repos.d || true
+
 # Get a bill of materials
 bill_of_materials="$(buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/rpm \
   --query \
