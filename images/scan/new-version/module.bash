@@ -20,7 +20,7 @@ function testNewImageAndReport {
   echo "setting infoText"
   sed -i "s|###INFOTEXT###|${infoText}|g" "${ARTIFACTS_PATH}/new-version.csv"
   echo "setting SEVERITY"
-  sed -i "s/###SEVERITY###/Low/g" "${ARTIFACTS_PATH}/new-version.csv" # TODO Low for testing mode, later high
+  sed -i "s/###SEVERITY###/High/g" "${ARTIFACTS_PATH}/new-version.csv" # TODO Low for testing mode, later high
   echo "scan_result_post"
   scan_result_post
   exit 0
