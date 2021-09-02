@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-
+git config --global user.email ""
+git config --global user.name "ClusterImageScanner"
 createJWT() {
   if [ "${GITHUB_KEY_FILE_PATH}" == "" ]; then
     export GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
