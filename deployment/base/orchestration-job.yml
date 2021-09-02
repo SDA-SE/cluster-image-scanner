@@ -27,6 +27,7 @@ spec:
       - workflow.parameters.enforceSlackChannel
       - workflow.parameters.newVersionImageFilter
       - workflow.parameters.dependencyCheckSuppressionsConfigMapName
+      - workflow.parameters.allResultsGitTarget
   templates:
     - name: main
       steps:
@@ -42,6 +43,7 @@ spec:
             template: notify-teams
         - - name: git-upload-report
             template: git-upload-report
+            when: "{{ workflow.parameters.allResultsGitTarget }}" != ""
 
     - name: fetch-image-list
       outputs:
