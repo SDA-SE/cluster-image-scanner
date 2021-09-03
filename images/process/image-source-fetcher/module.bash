@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
-source auth.bash # > /dev/null 2>&1
-sp_authorize #> /dev/null 2>&1
+if [ -z "${GITHUB_APP_ID}" ] || [ -z "${GITHUB_INSTALLATION_ID}" ]; then
+  source auth.bash # > /dev/null 2>&1
+  sp_authorize #> /dev/null 2>&1
+else
+  echo "GITHUB_APP_ID and GITHUB_INSTALLATION_ID are not set. Assuming the image-source-repo is accessible by anonymous."
+fi
 mkdir -p /clusterscanner/out/tmp
 i=0
 for repofile in /clusterscanner/image-source-list/*; do
