@@ -128,7 +128,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
       script:
-        image: quay.io/sdase/clusterscanner-base:2
+        image: quay.io/sdase/cluster-image-scanner-base:2
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -223,7 +223,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/clusterscanner-scan-distroless:2
+        image: quay.io/sdase/cluster-image-scanner-scan-distroless:2
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: images
@@ -257,7 +257,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/clusterscanner-scan-lifetime:2
+        image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -297,7 +297,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/clusterscanner-scan-lifetime:2
+        image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -341,7 +341,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/clusterscanner-scan-runasroot:2
+        image: quay.io/sdase/cluster-image-scanner-scan-runasroot:2
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: images
@@ -459,7 +459,7 @@ spec:
           - name: results-dependency-check-report
             path: /clusterscanner/data
       container:
-        image: quay.io/sdase/clusterscanner-scan-dependency-check:2
+        image: quay.io/sdase/cluster-image-scanner-scan-dependency-check:2
         imagePullPolicy: Always # TODO
         volumeMounts:
           - name: images
@@ -541,7 +541,7 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.csv
       script:
-        image: quay.io/sdase/clusterscanner-base:2
+        image: quay.io/sdase/cluster-image-scanner-base:2
         volumeMounts:
           - name: scandata
             mountPath: /tmp/results
@@ -649,7 +649,7 @@ spec:
           persistentVolumeClaim:
             claimName: clusterscanner-scandata
       script:
-        image: quay.io/sdase/clusterscanner-base:2
+        image: quay.io/sdase/cluster-image-scanner-base:2
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data

@@ -22,7 +22,7 @@ spec:
                 runAsNonRoot: true
                 allowPrivilegeEscalation: false
                 runAsUser: 1001
-              image: quay.io/sdase/clusterscanner-imagecollector:2.0
+              image: quay.io/sdase/cluster-image-scanner-imagecollector:2.0
               imagePullPolicy: Always
               env:
                 - name: CLUSTER_NAME

@@ -77,7 +77,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/base
-          image-name: clusterscanner-base
+          image-name: cluster-image-scanner-base
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -96,7 +96,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/process/imagecollector
-          image-name: clusterscanner-imagecollector
+          image-name: cluster-image-scanner-imagecollector
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -115,7 +115,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/process/image-source-fetcher
-          image-name: clusterscanner-image-source-fetcher
+          image-name: cluster-image-scanner-image-source-fetcher
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -134,7 +134,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/process/workflow-runner
-          image-name: clusterscanner-workflow-runner
+          image-name: cluster-image-scanner-workflow-runner
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -153,7 +153,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/scan/dependency-check
-          image-name: clusterscanner-scan-dependency-check
+          image-name: cluster-image-scanner-scan-dependency-check
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -172,7 +172,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/scan/distroless
-          image-name: clusterscanner-scan-distroless
+          image-name: cluster-image-scanner-scan-distroless
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -191,7 +191,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/scan/lifetime
-          image-name: clusterscanner-scan-lifetime
+          image-name: cluster-image-scanner-scan-lifetime
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -210,7 +210,7 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/scan/runasroot
-          image-name: clusterscanner-scan-runasroot
+          image-name: cluster-image-scanner-scan-runasroot
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
@@ -267,6 +267,6 @@ jobs:
       - uses: ./.github/actions/build_image
         with:
           image-path: images/process/notifier
-          image-name: clusterscanner-notifier
+          image-name: cluster-image-scanner-notifier
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}

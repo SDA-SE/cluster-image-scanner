@@ -32,7 +32,7 @@ build_dir="${dir}/build"
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
 
-base_image="quay.io/sdase/clusterscanner-base:2"
+base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$(buildah from --pull --quiet $base_image)"
 mnt="$(buildah mount "${ctr}")"
 
@@ -64,7 +64,7 @@ bill_of_materials_hash="$( (
 ) | sha256sum | awk '{ print $1 }')"
 echo "bill_of_materials: $bill_of_materials_hash"
 buildah config \
-  --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-notifier" \
+  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner-notifier" \
   --label "${oci_prefix}.source=https://github.com/sdase/clusterscanner-notifier" \
   --label "${oci_prefix}.revision=$(git rev-parse HEAD)" \
   --label "${oci_prefix}.version=${VERSION}" \

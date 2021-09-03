@@ -103,8 +103,8 @@ bill_of_materials_hash="$( ( cat "${0}";
 
 buildah config \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
-  --label "${oci_prefix}.url=https://quay.io/sdase/clusterscan-base" \
-  --label "${oci_prefix}.source=https://github.com/sdase/clusterscan-base" \
+  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner-base" \
+  --label "${oci_prefix}.source=https://github.com/sdase/cluster-image-scanner-base" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \

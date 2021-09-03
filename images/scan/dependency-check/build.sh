@@ -33,7 +33,7 @@ base_image="quay.io/sdase/owasp-dependency-check:6"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
-base_image_base="quay.io/sdase/clusterscanner-base:2"
+base_image_base="quay.io/sdase/cluster-image-scanner-base:2"
 ctr_base="$( buildah from --pull --quiet $base_image_base )"
 mnt_base="$( buildah mount "${ctr_base}" )"
 
@@ -51,7 +51,7 @@ bill_of_materials_hash="$( ( cat "${0}";
   ) | sha256sum | awk '{ print $1 }' )"
 echo "bill_of_materials: $bill_of_materials_hash";
 buildah config \
-  --label "${oci_prefix}.url=https://quay.io/sdase/clusterscanner-scan-dependency-check" \
+  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner-scan-dependency-check" \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-scan-dependency-check" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.version=${VERSION}" \

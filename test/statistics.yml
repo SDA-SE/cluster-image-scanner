@@ -25,7 +25,7 @@ spec:
           persistentVolumeClaim:
             claimName: clusterscanner-images
       script:
-        image: quay.io/sdase/clusterscanner-base:2
+        image: quay.io/sdase/cluster-image-scanner-base:2
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data

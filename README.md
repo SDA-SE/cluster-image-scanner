@@ -1,6 +1,5 @@
-# Cluster Scanner
+# ClusterImageScanner
 ![Logo](docs/images/logo.png "Logo")
-
 
 Discover vulnerabilities and container image misconfiguration in production environments.
 
@@ -30,18 +29,20 @@ The following steps are conducted.
 # Images
 Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 
-- `quay.io/sdase/clusterscanner-scan-dependency-check`
-- `quay.io/sdase/clusterscanner-scan-runasroot`
-- `quay.io/sdase/clusterscanner-scan-distroless`
-- `quay.io/sdase/clusterscanner-scan-lifetime`
-- `quay.io/sdase/clusterscanner-imagefetcher`
-- `quay.io/sdase/clusterscanner-notifier`
-- `quay.io/sdase/clusterscanner-imagecollector`
-- `quay.io/sdase/clusterscanner-image-source-fetcher`
-- `quay.io/sdase/clusterscanner-workflow-runner`
+- `cluster-image-scanner-scan-dependency-check`
+- `cluster-image-scanner-scan-runasroot`
+- `cluster-image-scanner-scan-distroless`
+- `cluster-image-scanner-scan-lifetime`
+- `cluster-image-scanner-scan-malware`
+- `cluster-image-scanner-scan-new-version`  
+- `cluster-image-scanner-imagefetcher`
+- `cluster-image-scanner-notifier`
+- `cluster-image-scanner-imagecollector`
+- `cluster-image-scanner-image-source-fetcher`
+- `cluster-image-scanner-workflow-runner`
 - [quay.io/sdase/defectdojo-client](https://github.com/SDA-SE/defectdojo-client)
 
-`quay.io/sdase/clusterscanner-base` is the base for all `quay.io/sdase/clusterscanner-*` images.
+`cluster-image-scanner-base` is the base for all `cluster-image-scanner-*` images.
 
 Images are build with [buildah](https://buildah.io/). The env. parameters the image can be started with are documented via --config within the _build.sh_ scripts within the [images](images/).
 
@@ -53,7 +54,7 @@ The [SECURITY.md](SECURITY.md) includes information on responsible disclosure an
 
 # Legal Notice
 The purpose of the ClusterImageScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
-The ClusterScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
+The ClusterImageScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
 
 # Author Information
 This project is developed by [Signal Iduna](https://www.signal-iduna.de) and [SDA SE](https://sda.se/). 
