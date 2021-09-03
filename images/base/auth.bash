@@ -35,8 +35,10 @@ sp_authorize() {
     createdGithubToken=true
     GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GITHUB_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
     if ${createdGithubToken} ]; then
+      echo "Couldn't create GITHUB_TOKEN"
       return 1
     else
+      echo "Created GITHUB_TOKEN"
       return 0
     fi
 }
