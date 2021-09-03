@@ -11,7 +11,7 @@ i=0
 for repofile in /clusterscanner/image-source-list/*; do
   repourl=$(cat "${repofile}")
   echo "${i}: ${repofile} ${repourl}"
-  if [ "$(echo "${repourl}" | grep -c "json$")" -eq 1 ]; then
+  if [ "$(echo "${repourl}" | grep -c "json")" -eq 1 ]; then # do not check for end because the branch might be in the URL
     sp_getfile "${repourl}" "/clusterscanner/out/${i}.json" #> /dev/null 2>&1#
     if [ "$(grep -c 'image' "/clusterscanner/out/${i}.json")" -eq 0 ]; then
       echo "Could not get repo ${repourl} from (${repofile}) or the repos doesn't include images"
