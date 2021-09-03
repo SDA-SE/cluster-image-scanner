@@ -23,7 +23,10 @@ clusterscanner.sdase.org/skip: "false" # Boolean,  to scan all images in the nam
 clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for development clusters with development and production components in one namespace
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
-
+scm.sdase.org/source_url="https://github.com/cluster-image-scanner"
+scm.sdase.org/source_branch="master"
+scm.sdase.org/release="1.0.0" # see also labels
+  
 # Adjust scans on object or namespace
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
