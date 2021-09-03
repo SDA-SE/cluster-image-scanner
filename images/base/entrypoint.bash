@@ -21,5 +21,5 @@ fi
 
 source "${HOME}/cache.bash"
 
-echo "Run module"
+echo "Run module ${MODULE_NAME}"
 source "${HOME}/module.bash"
