@@ -67,7 +67,7 @@ spec:
           emptyDir: {}
       container:
         image: quay.io/sdase/cluster-image-scanner-image-source-fetcher:2
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: /clusterscanner/github/github_private_key.pem
