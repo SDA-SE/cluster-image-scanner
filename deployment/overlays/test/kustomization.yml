@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - ../../base-templates
+  - ../../base-template
   - artifacts.yml
   - github.yml
   - registry.yml
