@@ -21,8 +21,6 @@ resources:
   - repolist.yml
   - email.yml
   - synchronization.cm.yml
-  - scanjob.yml
-  - orchestration-job.yml
   - cleanup.yml
 
 configMapGenerator:
