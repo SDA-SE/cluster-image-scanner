@@ -32,7 +32,13 @@ EOF
 
 sp_authorize() {
     createJWT
-    GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GITHUB_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \")
+    createdGithubToken=true
+    GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GITHUB_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
+    if ${createdGithubToken} ]; then
+      return 1
+    else
+      return 0
+    fi
 }
 
 sp_getfile() {
