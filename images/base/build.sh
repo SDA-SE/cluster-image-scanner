@@ -115,7 +115,7 @@ buildah config \
   --env "IMAGE_TAR_PATH=/clusterscanner/images/image.tar" \
   --env "ARTIFACTS_PATH=/clusterscanner/data" \
   --env "CACHE_TIME_SECONDS=14400" \
-  --env "IMAGE_UNPACKED_DIRECTORY=/image-unpacked" \
+  --env "IMAGE_UNPACKED_DIRECTORY=/clusterscanner/images/image-unpacked" \
   --env "REGISTRY_AUTH_FILE=/run/containers/auth.json" \
   --user clusterscanner \
   --workingdir "/clusterscanner" \
