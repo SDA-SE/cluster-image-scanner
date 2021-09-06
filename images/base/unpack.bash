@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ -e "${IMAGE_UNPACKED_DIRECTORY}" ]; then
+if [ -d "${IMAGE_UNPACKED_DIRECTORY}" ]; then
   echo "IMAGE_UNPACKED_DIRECTORY ${IMAGE_UNPACKED_DIRECTORY} exists"
 else
   echo "Unpacking ${IMAGE_TAR_PATH} to ${IMAGE_UNPACKED_DIRECTORY}"
