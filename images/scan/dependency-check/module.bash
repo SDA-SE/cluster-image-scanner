@@ -13,7 +13,8 @@ if [ -e ${suppressionsPath} ]; then
 else
   echo "${suppressionsPath} doesn't exists"
 fi
-
+echo "IMAGE_UNPACKED_DIRECTORY ${IMAGE_UNPACKED_DIRECTORY}/"
+ls -la  ${IMAGE_UNPACKED_DIRECTORY}/
 /usr/share/dependency-check/bin/dependency-check.sh \
     --project "test" \
     --disableRetireJS \
