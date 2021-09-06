@@ -67,7 +67,6 @@ buildah config \
   --env "ARTIFACTS_PATH=/clusterscanner/data" \
   --env "CACHE_TIME_SECONDS=14400" \
   --env "SCAN_ID=2021-01-29" \
-  --env "IMAGE_UNPACKED_DIRECTORY=/tmp/image-unpacked" \
   --env 'RESULT_CACHING_HOURS=4' \
   --entrypoint "/clusterscanner/entrypoint.bash" \
   --user clusterscanner \
