@@ -204,6 +204,9 @@ spec:
           rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
           cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
+          echo "Moving ${unpack_dir} ${IMAGE_UNPACKED_DIRECTORY}"
+          mv "${unpack_dir}" "${IMAGE_UNPACKED_DIRECTORY}"
+
           echo "Cleaning up"
           rm -rf "${tmp_dir}"
 
