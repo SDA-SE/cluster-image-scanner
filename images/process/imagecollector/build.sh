@@ -30,7 +30,7 @@ base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have use
 ctr_tools="$( buildah from --pull --quiet ${base_image} )"
 
 tools_image="quay.io/sdase/cluster-image-scanner-base:2"
-tools_ctr="$( buildah from --pull --quiet ${target_image})"
+tools_ctr="$( buildah from --pull --quiet ${tools_image})"
 tools_mnt="$( buildah mount "${ctr}" )"
 
 target_image="scratch"
