@@ -227,7 +227,7 @@ spec:
             archiveLogs: true
       container:
         image: quay.io/sdase/cluster-image-scanner-scan-distroless:2
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
