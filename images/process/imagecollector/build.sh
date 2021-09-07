@@ -31,10 +31,10 @@ ctr_tools="$( buildah from --pull --quiet ${base_image} )"
 
 tools_image="quay.io/sdase/cluster-image-scanner-base:2"
 tools_ctr="$( buildah from --pull --quiet ${tools_image})"
-tools_mnt="$( buildah mount "${ctr}" )"
+tools_mnt="$( buildah mount "${tools_ctr}" )"
 
 target_image="scratch"
-ctr="$( buildah from --pull --quiet $target_image)"
+ctr="$( buildah from --pull --quiet ${target_image})"
 mnt="$( buildah mount "${ctr}" )"
 
 
