@@ -29,9 +29,15 @@ cleanup() {
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$( buildah from --pull --quiet ${base_image} )"
 
-target_image="quay.io/sdase/cluster-image-scanner-base:2"
-ctr="$( buildah from --pull --quiet ${target_image})"
+tools_image="quay.io/sdase/cluster-image-scanner-base:2"
+tools_ctr="$( buildah from --pull --quiet ${target_image})"
+tools_mnt="$( buildah mount "${ctr}" )"
+
+target_image="scratch"
+ctr="$( buildah from --pull --quiet $target_image)"
 mnt="$( buildah mount "${ctr}" )"
+
+
 
 
 # Options that are used with every `dnf` command
@@ -56,6 +62,10 @@ rsync -a pods.bash "${mnt}/home/code/pods.bash"
 rsync -a build.sh "${mnt}/home/code/build.sh # for sha1"
 rsync -a .gitconfig "${mnt}/home/code/.gitconfig"
 rsync -a config "${mnt}/home/code/"
+rsync -a "${tools_mnt}/clusterscanner/git.bash" "${mnt}/home/code/"
+rsync -a "${tools_mnt}/clusterscanner/auth.bash" "${mnt}/home/code/"
+
+
 
 # git looks up for a user
 openShiftGroupId=0
