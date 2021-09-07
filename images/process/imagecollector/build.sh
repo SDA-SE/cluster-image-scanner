@@ -124,7 +124,7 @@ buildah config \
   --env NAMESPACE_SKIP_REGEX=="" \
   --env DEFAULT_SCAN_LIFETIME="true" \
   --env DEFAULT_SCAN_DISTROLESS="true" \
-  --env DEFAULT_SCAN_MALWARE="false" \
+  --env DEFAULT_SCAN_MALWARE="true" \
   --env DEFAULT_SCAN_DEPENDENCY_CHECK="true" \
   --env DEFAULT_SCAN_RUNASROOT="true" \
   --env DEFAULT_SCAN_LIFETIME_MAX_DAYS="14" \
@@ -146,7 +146,7 @@ buildah config \
   --user 1001 \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
   --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner" \
-  --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner" \
+  --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner/images/proces/imagecollector" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
