@@ -392,6 +392,10 @@ spec:
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/new-version"
+          - name: registry-creds
+            mountPath: /run/containers/auth.json
+            subPath: auth.json
+            defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
