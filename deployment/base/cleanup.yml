@@ -16,10 +16,10 @@ spec:
         volumes:
           - name: scandata
             persistentVolumeClaim:
-              claimName: clusterscanner-scandata
+              claimName: cluster-image-scanner-scandata
           - name: images
             persistentVolumeClaim:
-              claimName: clusterscanner-images
+              claimName: cluster-image-scanner-images
         script:
           securityContext:
             runAsNonRoot: false

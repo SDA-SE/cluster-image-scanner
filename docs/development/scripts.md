@@ -17,5 +17,4 @@ argo submit --from cronwf/XXX-clusterscanner-main -n clusterscanner
 ## ClusterImageScanner Collector
 ```
 # Re-Start a cluster-scan-collector job
-kubectl get job cluster-scan-collector-1630994400 -n cluster-scan -o json | jq 'del(.spec.selector)' | jq 'del(.spec.template.metadata.labels)' | kubectl replace --force -f -
-```
+kubectl delete job cluster-scan-collector-manual -n cluster-scan; kubectl create job --from=cronjob/cluster-scan-collector  -n cluster-scan cluster-scan-collector-manual```

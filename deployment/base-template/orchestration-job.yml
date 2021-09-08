@@ -114,7 +114,7 @@ spec:
       volumes:
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       script:
         image: quay.io/sdase/cluster-image-scanner-notifier:2
         volumeMounts:
@@ -261,7 +261,7 @@ spec:
       volumes:
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
