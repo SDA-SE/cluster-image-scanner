@@ -121,9 +121,12 @@ spec:
 
     - name: imagefetcher
       volumes:
-        - name: images
+        - name: images-tar
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
+            claimName: cluster-image-scanner-images-tar
+        - name: images-unpacked
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-images-unpacked
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -132,8 +135,12 @@ spec:
         command: [/bin/bash]
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
+          - name: images-tar
+            mountPath: /clusterscanner/images/image-tar
+            subPath: "{{ workflow.parameters.image_id }}"
+            defaultMode: 0777 # to allow the cleanup to delete the folders
+          - name: images-unpacked
+            mountPath: /clusterscanner/images/image-unpacked
             subPath: "{{ workflow.parameters.image_id }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
           - name: registry-creds
@@ -150,10 +157,10 @@ spec:
           set -e
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
-          IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
+          IMAGE_TAR_FOLDER_PATH=/clusterscanner/images/image-tar
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
-          mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
-          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_TAR_FOLDER_PATH}/tmp")
+          mkdir -p "${IMAGE_UNPACKED_DIRECTORY}/tmp" || true
+          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_UNPACKED_DIRECTORY}/tmp")
           rm -Rf "${tmp_dir}" || true
           mkdir -p "${tmp_dir}"
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
@@ -196,7 +203,7 @@ spec:
           find "${unpack_dir}" -type f -exec chmod 644 {} +
           cd "${unpack_dir}"
 
-          echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
+          echo "Packing image to ${IMAGE_TAR_PATH}"
           tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
 
           echo "Copying manifest and config file"
@@ -213,9 +220,9 @@ spec:
 
     - name: scan-distroless
       volumes:
-        - name: images
+        - name: images-tar
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
+            claimName: cluster-image-scanner-images-tar
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
@@ -229,10 +236,10 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-distroless:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
+          - name: images-tar
+            mountPath: /clusterscanner/images/image-tar
             subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
+            defaultMode: 0777 # to allow the cleanup to delete the folders
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/distroless"
@@ -244,10 +251,6 @@ spec:
 
     - name: scan-lifetime
       volumes:
-        - name: images
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
-            readOnly: true
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
@@ -263,10 +266,6 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/lifetime"
@@ -284,10 +283,6 @@ spec:
 
     - name: scan-baseimage-lifetime
       volumes:
-        - name: images
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
-            readOnly: true
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
@@ -303,10 +298,6 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/baseimage-lifetime"
@@ -328,10 +319,6 @@ spec:
 
     - name: scan-runasroot
       volumes:
-        - name: images
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
-            readOnly: true
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -347,10 +334,6 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-runasroot:2
         imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/runasroot"
@@ -366,10 +349,6 @@ spec:
 
     - name: scan-new-version
       volumes:
-        - name: images
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
-            readOnly: true
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -385,10 +364,6 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-new-version:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/new-version"
@@ -408,9 +383,9 @@ spec:
 
     - name: scan-malware
       volumes:
-        - name: images
+        - name: images-unpacked
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
+            claimName: cluster-image-scanner-images-unpacked
             readOnly: true
         - name: registry-creds
           secret:
@@ -427,8 +402,8 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-malware:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images
-            mountPath: /clusterscanner/images
+          - name: images-unpacked
+            mountPath: /clusterscanner/images/image-unpacked
             subPath: "{{ workflow.parameters.image_id }}"
             readOnly: true
           - name: scandata
@@ -448,9 +423,9 @@ spec:
 
     - name: scan-dependency-check
       volumes:
-        - name: images
+        - name: images-unpacked
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
+            claimName: cluster-image-scanner-images-unpacked
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
@@ -470,7 +445,7 @@ spec:
         imagePullPolicy: Always # TODO
         volumeMounts:
           - name: images
-            mountPath: /clusterscanner/images
+            mountPath: /clusterscanner/images/image-unpacked
             subPath: "{{ workflow.parameters.image_id }}"
             readOnly: true
           - name: scandata
