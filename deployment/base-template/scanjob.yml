@@ -130,7 +130,7 @@ spec:
       script:
         image: quay.io/sdase/cluster-image-scanner-base:2
         command: [/bin/bash]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
