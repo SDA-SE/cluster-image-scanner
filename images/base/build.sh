@@ -112,7 +112,7 @@ buildah config \
   --label "${oci_prefix}.description=${descr}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env "IMAGE_TAR_FOLDER_PATH=/clusterscanner/images" \
-  --env "IMAGE_TAR_PATH=/clusterscanner/images/image.tar" \
+  --env "IMAGE_TAR_PATH=/clusterscanner/images/image-tar/image.tar" \
   --env "ARTIFACTS_PATH=/clusterscanner/data" \
   --env "CACHE_TIME_SECONDS=14400" \
   --env "IMAGE_UNPACKED_DIRECTORY=/clusterscanner/images/image-unpacked" \
