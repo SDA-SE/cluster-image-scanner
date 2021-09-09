@@ -444,7 +444,7 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-dependency-check:2
         imagePullPolicy: Always # TODO
         volumeMounts:
-          - name: images
+          - name: images-unpacked
             mountPath: /clusterscanner/images/image-unpacked
             subPath: "{{ workflow.parameters.image_id }}"
             readOnly: true
