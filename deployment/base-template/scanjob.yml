@@ -123,7 +123,7 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -215,11 +215,11 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       outputs:
         artifacts:
           - name: results-distroless
@@ -246,11 +246,11 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -286,11 +286,11 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -330,14 +330,14 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       outputs:
         artifacts:
           - name: results-runasroot
@@ -368,14 +368,14 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       outputs:
         artifacts:
           - name: results-runasroot
@@ -410,14 +410,14 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       outputs:
         artifacts:
           - name: results-runasroot
@@ -450,11 +450,11 @@ spec:
       volumes:
         - name: images
           persistentVolumeClaim:
-            claimName: clusterscanner-images
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
         - name: suppressions
           configMap:
             name: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
@@ -539,7 +539,7 @@ spec:
       volumes:
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
             readOnly: true
       outputs:
         artifacts:
@@ -654,7 +654,7 @@ spec:
       volumes:
         - name: scandata
           persistentVolumeClaim:
-            claimName: clusterscanner-scandata
+            claimName: cluster-image-scanner-scandata
       script:
         image: quay.io/sdase/cluster-image-scanner-base:2
         volumeMounts:
