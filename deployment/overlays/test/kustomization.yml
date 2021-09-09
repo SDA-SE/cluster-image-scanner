@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
   - ../../base-template
-  - ../../base-pvc/pvc.yml
+  - ../../base-pvc
   - artifacts.yml
   - github.yml
   - registry.yml
