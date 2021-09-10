@@ -51,7 +51,7 @@ app.kubernetes.io/version: "3.42.0" # defaults to image tag
 
 
 ## Sample configuration which also establishes compliance
-This is a recomended configuration including ISO 27001 asset catalog compliance, in case the standards (slack channel naming and scan-configurations) are adjusted to your needs, already.
+This is a recommended configuration including ISO 27001 asset catalog compliance, in case the standards (slack channel naming and scan-configurations) are adjusted to your needs, already.
 
 ### Annotations
 ```
