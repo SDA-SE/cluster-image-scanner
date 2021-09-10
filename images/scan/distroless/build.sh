@@ -39,7 +39,7 @@ cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.csv "${mnt}/clusterscanner/distroless.csv"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.csv
 sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/distroless.csv"
-sed -i "s|###TITLE###|Distroless used|" "${mnt}/clusterscanner/distroless.csv"
+sed -i "s|###TITLE###|No distroless used|" "${mnt}/clusterscanner/distroless.csv"
 sed -i "s|###INFOTEXT###|${infoText}|" "${mnt}/clusterscanner/distroless.csv"
 
 # Get a bill of materials
