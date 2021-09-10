@@ -56,7 +56,7 @@ This is a recommended configuration including ISO 27001 asset catalog compliance
 ### Annotations
 ```
 contact.sdase.org/team: "the-fellowship-of-the-ring"
-sdase.org/description: "My service description" # optional
+sdase.org/description: "My service description"
 ```
 ### Labels
 ```
