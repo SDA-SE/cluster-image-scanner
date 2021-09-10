@@ -56,11 +56,11 @@ This is a recommended configuration including ISO 27001 asset catalog compliance
 ### Annotations
 ```
 contact.sdase.org/team: "the-fellowship-of-the-ring"
-sdase.org/description: "My service description"
+sdase.org/description: "My broad application description"
 ```
 ### Labels
 ```
-app.kubernetes.io/name: "ring-calling-service" # defaults to image
+app.kubernetes.io/name: "ring-calling-application" # defaults to image
 ```
 
 # Inheritance of annotations.
