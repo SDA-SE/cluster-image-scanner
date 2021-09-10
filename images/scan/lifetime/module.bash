@@ -76,7 +76,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
       infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
-    cp /clusterscanner/ddTemplate.csv "${ARTIFACTS_PATH}/lifetime.csv"
+    cp /clusterscanner/lifetime.csv "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###INFOTEXT###/${infoText}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###SEVERITY###/High/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"

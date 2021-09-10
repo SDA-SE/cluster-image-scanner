@@ -1,5 +1,0 @@
-###DATE###,Image has a new version,0,,###SEVERITY###,"
-###INFOTEXT###
-Image ###IMAGE###
-Cluster ###CLUSTER###
-Namespace ###NAMESPACE###","Deploy the new(est) image version.","Vulnerabilities in images of running containers stay for too long and might get exploited. New versions might include security patches.",,TRUE,FALSE

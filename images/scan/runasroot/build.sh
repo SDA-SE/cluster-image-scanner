@@ -34,7 +34,12 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ddTemplate.csv "${mnt}/clusterscanner/"
+
+cp ../ddTemplate.csv "${mnt}/clusterscanner/runAsRoot.csv"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Relevance ${mnt}/clusterscanner/runAsRoot.csv
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Response ${mnt}/clusterscanner/runAsRoot.csv
+sed -i "s/###SEVERITY###/High/" "${mnt}/clusterscanner/runAsRoot.csv"
+
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
