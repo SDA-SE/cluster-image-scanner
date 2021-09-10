@@ -20,6 +20,7 @@ MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
 oci_prefix="org.opencontainers.image"
 descr="Clusterscan Scanner Distroless"
 
+source env.bash
 
 trap cleanup INT EXIT
 cleanup() {
@@ -35,7 +36,11 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ddTemplate.csv "${mnt}/clusterscanner/"
+cp ../ddTemplate.csv "${mnt}/clusterscanner/distroless.csv"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.csv
+sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/distroless.csv"
+sed -i "s|###TITLE###|Distroless used|" "${mnt}/clusterscanner/distroless.csv"
+sed -i "s|###INFOTEXT###|${infoText}|" "${mnt}/clusterscanner/distroless.csv"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

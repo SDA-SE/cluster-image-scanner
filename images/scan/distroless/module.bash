@@ -27,9 +27,8 @@ done
 if [[ ${_shell_found} -eq 1 ]]; then
     infoText="Image has shell executables and therefore most likely is not distroless"
     cp /clusterscanner/ddTemplate.csv "${ARTIFACTS_PATH}/distroless.csv"
-    sed -i "s/###SEVERITY###/High/" "${ARTIFACTS_PATH}/distroless.csv"
-    sed -i "s|###INFOTEXT###||" "${ARTIFACTS_PATH}/distroless.csv"
-    sed -i "s|###TITLE###|${infoText}|" "${ARTIFACTS_PATH}/distroless.csv"
+    sed -i "s|###INFOTEXT###|${infoText}|" "${ARTIFACTS_PATH}/distroless.csv"
+
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
