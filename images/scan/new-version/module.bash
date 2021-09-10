@@ -16,7 +16,7 @@ function testNewImageAndReport {
 
   infoText="Image has a new tag, at least ${imageToTest}"
   JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\", \"newVersion\": \"${imageToTest}\"}")
-  cp /clusterscanner/malware.csv "${ARTIFACTS_PATH}/new-version.csv"
+  cp /clusterscanner/new-version.csv "${ARTIFACTS_PATH}/new-version.csv"
   sed -i "s|###INFOTEXT###|${infoText}|g" "${ARTIFACTS_PATH}/new-version.csv"
   sed -i "s/###TITLE###/Image Has a New Version/" "${ARTIFACTS_PATH}/new-version.csv"
 
