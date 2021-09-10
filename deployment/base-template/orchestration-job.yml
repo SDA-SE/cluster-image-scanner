@@ -274,7 +274,7 @@ spec:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: /clusterscanner/github/github_private_key.pem
             subPath: github_private_key.pem
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
