@@ -39,6 +39,7 @@ cp ../ddTemplate.csv "${mnt}/clusterscanner/runAsRoot.csv"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Relevance ${mnt}/clusterscanner/runAsRoot.csv
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Response ${mnt}/clusterscanner/runAsRoot.csv
 sed -i "s/###SEVERITY###/High/" "${mnt}/clusterscanner/runAsRoot.csv"
+sed -i "s/###TITLE###/Image Potentially Running as Root/" "${mnt}/clusterscanner/runAsRoot.csv"
 
 
 # Get a bill of materials
