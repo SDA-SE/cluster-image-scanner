@@ -36,7 +36,7 @@ cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.csv "${mnt}/clusterscanner/lifetime.csv"
 
-sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/distroless.csv"
+sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/lifetime.csv"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/lifetime.md Relevance ${mnt}/clusterscanner/lifetime.csv
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/lifetime.md Response ${mnt}/clusterscanner/lifetime.csv
 
