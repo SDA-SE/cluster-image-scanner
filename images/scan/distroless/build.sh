@@ -38,6 +38,8 @@ cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.csv "${mnt}/clusterscanner/distroless.csv"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.csv
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response ${mnt}/clusterscanner/distroless.csv
+
 sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/distroless.csv"
 sed -i "s|###TITLE###|No distroless used|" "${mnt}/clusterscanner/distroless.csv"
 sed -i "s|###INFOTEXT###|${infoText}|" "${mnt}/clusterscanner/distroless.csv"
