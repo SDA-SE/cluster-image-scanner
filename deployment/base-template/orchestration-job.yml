@@ -198,7 +198,7 @@ spec:
               echo "Hint: email not set"
             fi
           }
-
+          errors=""
           for file in "${RESULT_PATH}"/**/*.json; do
             echo "found file ${file}"
             item=$(cat "${file}")
@@ -244,7 +244,7 @@ spec:
                     echo "${output}"
                     if [ "$(echo "${output}" | grep -c '"ok": false')" -gt 0 ]; then
                       echo "error in slack"
-                      exit 1;
+                      errors="${error}\n${output}"
                     fi
                     if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
                       sleep 120 # wait for rate limt
@@ -256,6 +256,7 @@ spec:
               done
             done
           done
+          echo "${errors}"
 
     - name: git-upload-report
       volumes:
