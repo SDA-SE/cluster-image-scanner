@@ -10,7 +10,7 @@ function setAttributes {
   camelCaseVariableName=$(echo "${snakeCaseVariableName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
 
   value=$(echo $mapping | jq -r ".${snakeCaseVariableName}");
-  echo "camelCaseVariableName: $camelCaseVariableName, ${value}"
+  #echo "camelCaseVariableName: $camelCaseVariableName, ${value}"
   if [ "${value}" != "" ] && [ "${value}" != "null" ]; then
     setAttributesValue=${value}
   else
@@ -212,7 +212,7 @@ getPods() {
         isScanNewVersion=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_NEW_VERSION_ANNOTATION}\"]")
       fi
       if [ "${isScanNewVersion}" == "" ] || [ "${isScanNewVersion}" == "null" ]; then
-        isScanNewVersion="${DEFAULT_SCAN_IS_NEW_VERSIION}"
+        isScanNewVersion="${DEFAULT_SCAN_IS_NEW_VERSION}"
       fi
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
