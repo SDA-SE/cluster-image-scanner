@@ -4,7 +4,7 @@ metadata:
   name: orchestration-job-template
   namespace: clusterscanner
 spec:
-  activeDeadlineSeconds: 3600
+  activeDeadlineSeconds: 21600 # 6h
   entrypoint: main # Entry point for job execution
   workflowSpec:
     serviceAccountName: clusterscanner
