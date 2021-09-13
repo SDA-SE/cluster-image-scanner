@@ -57,7 +57,7 @@ let majorPlusOne=${MAJOR}+1
 testNewImageAndReport "${IMAGE_WITHOUT_TAG}:${majorPlusOne}.0.0"
 
 echo "No new version available"
-JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}"
+JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 
 scan_result_post
 
