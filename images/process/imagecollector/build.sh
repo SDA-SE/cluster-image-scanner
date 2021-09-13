@@ -15,8 +15,8 @@ REGISTRY_USER=$5
 REGISTRY_TOKEN=$6
 BUILD_EXPORT_OCI_ARCHIVES=$7
 
-MAJOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 1p)
-MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
+MAJOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 1p)
+MINOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 2p)
 
 trap cleanup INT EXIT
 
@@ -24,21 +24,16 @@ cleanup() {
   test -n "${ctr}" && buildah rm "${ctr}" || true
 }
 
-
-
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
-ctr_tools="$( buildah from --pull --quiet ${base_image} )"
+ctr_tools="$(buildah from --pull --quiet ${base_image})"
 
 tools_image="quay.io/sdase/cluster-image-scanner-base:2"
-tools_ctr="$( buildah from --pull --quiet ${tools_image})"
-tools_mnt="$( buildah mount "${tools_ctr}" )"
+tools_ctr="$(buildah from --pull --quiet ${tools_image})"
+tools_mnt="$(buildah mount "${tools_ctr}")"
 
 target_image="scratch"
-ctr="$( buildah from --pull --quiet ${target_image})"
-mnt="$( buildah mount "${ctr}" )"
-
-
-
+ctr="$(buildah from --pull --quiet ${target_image})"
+mnt="$(buildah mount "${ctr}")"
 
 # Options that are used with every `dnf` command
 dnf_opts=(
@@ -65,13 +60,11 @@ rsync -a config "${mnt}/home/code/"
 rsync -a "${tools_mnt}/clusterscanner/git.bash" "${mnt}/home/code/"
 rsync -a "${tools_mnt}/clusterscanner/auth.bash" "${mnt}/home/code/"
 
-
-
 # git looks up for a user
 openShiftGroupId=0
-echo "nonroot:x:1001:${openShiftGroupId}:nonroot:/home/code:/sbin/nologin" >> "${mnt}/etc/passwd"
-echo "nobody:x:1001:" >> "${mnt}/etc/group"
-echo "openshift:x:5555:" >> "${mnt}/etc/group"
+echo "nonroot:x:1001:${openShiftGroupId}:nonroot:/home/code:/sbin/nologin" >>"${mnt}/etc/passwd"
+echo "nobody:x:1001:" >>"${mnt}/etc/group"
+echo "openshift:x:5555:" >>"${mnt}/etc/group"
 chgrp "${openShiftGroupId}" "${mnt}/etc/passwd" # openShift 3.X specifc, https://docs.openshift.com/container-platform/3.3/creating_images/guidelines.html
 chmod g=u "${mnt}/etc/passwd"
 chmod o=u "${mnt}/etc/passwd"
@@ -91,13 +84,14 @@ bill_of_materials="$(buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/b
   --query \
   --all \
   --queryformat "%{NAME} %{VERSION} %{RELEASE} %{ARCH}" \
-  --dbpath="/mnt/var/lib/rpm" \
-  | sort )"
-echo "bill_of_materials: ${bill_of_materials}";
-bill_of_materials_hash="$( ( cat "${0}";
-  echo "${bill_of_materials}"; \
-  cat ./*;
-  ) | sha256sum | awk '{ print $1 }' )"
+  --dbpath="/mnt/var/lib/rpm" |
+  sort)"
+echo "bill_of_materials: ${bill_of_materials}"
+bill_of_materials_hash="$( (
+  cat "${0}"
+  echo "${bill_of_materials}"
+  cat ./*
+) | sha256sum | awk '{ print $1 }')"
 
 oci_prefix="org.opencontainers.image"
 buildah config \
@@ -107,7 +101,7 @@ buildah config \
   --env GIT_REPOSITORY_PATH="SET-ME" \
   --env CLUSTER_NAME="DEPRECATED" \
   --env ENVIRONMENT_NAME="SET_ME" \
-  --env CONTACT_ANNOTATION_PREFIX="contact.sdase.org"  \
+  --env CONTACT_ANNOTATION_PREFIX="contact.sdase.org" \
   --env SKIP_ANNOTATION="clusterscanner.sdase.org/skip" \
   --env TEAM_ANNOTATION="contact.sdase.org/team" \
   --env DEFAULT_TEAM_NAME="nobody" \
@@ -141,25 +135,25 @@ buildah config \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env IS_FETCH_DESCRIPTION="true" \
-  --env NAMESPACE_MAPPINGS="[]" \
+  --env NAMESPACE_MAPPINGS="" \
   --cmd "/home/code/entrypoint.bash" \
   --user 1001 \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
   --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner" \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner/images/proces/imagecollector" \
   --label "${oci_prefix}.version=${VERSION}" \
-  --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
+  --label "${oci_prefix}.revision=$(git rev-parse HEAD)" \
   --label "${oci_prefix}.vendor=SDA SE Open Industry Solutions" \
   --label "${oci_prefix}.title=ClusterImageScanner Collector" \
   --label "${oci_prefix}.description=Collect images from cluster with kubectl" \
-  --label "io.sda-se.image.bill-of-materials-hash=$( \
-    echo "${bill_of_materials_hash}" )" \
+  --label "io.sda-se.image.bill-of-materials-hash=$(
+    echo "${bill_of_materials_hash}"
+  )" \
   "${ctr}"
 
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
 
-if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]
-then
+if [ -n "${BUILD_EXPORT_OCI_ARCHIVES}" ]; then
   image="docker://${REGISTRY}/${ORGANIZATION}/${IMAGE_NAME}:${VERSION}"
   buildah push --quiet --creds "${REGISTRY_USER}:${REGISTRY_TOKEN}" "${IMAGE_NAME}:${VERSION}" "${image}"
 
