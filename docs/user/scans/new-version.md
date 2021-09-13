@@ -1,5 +1,6 @@
-# New Malware (in development)
+# Scan New Version
 The new version scan tests for a new version in the defined registry for the defined filter (e.g. an organization in quay.io).
+It searches for (simple) a new image in the registry. (simple) semantic versioning (e.g. 1.1.1 or v1.1.1) must be used by the repository.
 
 ##  Relevance
 A new version might fix security issues, even without announcing it.
