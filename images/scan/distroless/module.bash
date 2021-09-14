@@ -14,6 +14,7 @@ scan_result_pre
 
 _shell_found=0
 potentialBashs=("bin/sh" "bin/bash" "bin/dash" "bin/zsh" "bin/ash")
+echo ${IMAGE_UNPACKED_DIRECTORY}
 ls -la ${IMAGE_UNPACKED_DIRECTORY}
 for sh in ${potentialBashs[@]}; do
     if [[ -e "${IMAGE_UNPACKED_DIRECTORY}/${sh}" ]]; then
