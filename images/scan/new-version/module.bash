@@ -56,7 +56,7 @@ testNewImageAndReport "${IMAGE_WITHOUT_TAG}:${MAJOR}.${minorPlusOne}.0"
 if [[ "${MAJOR}" =~ ^v ]]; then
   let majorPlusOne=$(echo ${MAJOR} | sed 's#v##g')+1
   majorPlusOne="v${majorPlusOne}"
-else let majorPlusOne=${MAJOR} | sed 's#v##g')+1
+else let majorPlusOne=${MAJOR}+1
 fi
 
 
