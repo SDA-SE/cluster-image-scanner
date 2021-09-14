@@ -18,8 +18,8 @@ So that images for apps are grouped. For source code (repos) annotations can be 
 scm.sdase.org/source_branch="master"
 scm.sdase.org/release="1.0.0"
 ```
-I am using the ClusterImageScanner Collector for that https://github.com/SDA-SE/cluster-image-scanner/blob/master/docs/deployment/clusterscanner-image-collector.md
-I also use the annoation `sdase.org/description` to get a brief description (might be useful for an auditor who wants to understand what it is used for).
+We are using the ClusterImageScanner Collector for that https://github.com/SDA-SE/cluster-image-scanner/blob/master/docs/deployment/clusterscanner-image-collector.md
+We also use the annoation `sdase.org/description` to get a brief description (might be useful for an auditor who wants to understand what it is used for).
 
 The outcome is stored in github, here is an example https://github.com/SDA-SE/cluster-scan-test-images/blob/master/output.json.
 
