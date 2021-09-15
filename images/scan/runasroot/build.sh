@@ -36,9 +36,10 @@ cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 
 cp ../ddTemplate.csv "${mnt}/clusterscanner/runAsRoot.csv"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Relevance ${mnt}/clusterscanner/runAsRoot.csv
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/runAsRoot.md Response ${mnt}/clusterscanner/runAsRoot.csv
-sed -i "s/###SEVERITY###/High/" "${mnt}/clusterscanner/runAsRoot.csv"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance ${mnt}/clusterscanner/runAsRoot.csv
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response ${mnt}/clusterscanner/runAsRoot.csv
+sed -i "s/###INFOTEXT###//" "${mnt}/clusterscanner/runAsRoot.csv"
+sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/runAsRoot.csv"
 sed -i "s/###TITLE###/Image Potentially Running as Root/" "${mnt}/clusterscanner/runAsRoot.csv"
 
 
