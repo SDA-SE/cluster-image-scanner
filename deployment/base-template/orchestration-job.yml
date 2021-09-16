@@ -104,7 +104,7 @@ spec:
           - name: DEFECTDOJO_SECRETS
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
           - name: MAX_RUNNING_JOBS_IN_QUEUE
-            value: "13"
+            value: "8"
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: NEW_VERSION_IMAGE_FIILTER
