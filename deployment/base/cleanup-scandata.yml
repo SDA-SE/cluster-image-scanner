@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: cleanup-pvc-wf
+  name: cleanup-pvc-wf-scandata
   namespace: clusterscanner
 spec:
   schedule: "0 12 * * *"
@@ -12,7 +12,7 @@ spec:
   workflowSpec:
     entrypoint: pvc-cleanup
     templates:
-      - name: pvc-cleanup
+      - name: pvc-cleanup-scandata
         volumes:
           - name: scandata
             persistentVolumeClaim:
@@ -20,9 +20,6 @@ spec:
           - name: images-unpacked
             persistentVolumeClaim:
               claimName: cluster-image-scanner-images-unpacked
-          - name: images-tar
-            persistentVolumeClaim:
-              claimName: cluster-image-scanner-images-tar
         script:
           securityContext:
             runAsNonRoot: false
@@ -31,10 +28,6 @@ spec:
           volumeMounts:
             - name: scandata
               mountPath: /clusterscanner/data
-            - name: images-unpacked
-              mountPath: /clusterscanner/images/unpacked
-            - name: images-tar
-              mountPath: /clusterscanner/images/tar
           imagePullPolicy: Always
           command: [bash]
           env:
@@ -43,15 +36,7 @@ spec:
           source: |
             set -e
             /usr/bin/whoami
-            du -sh /clusterscanner/images/unpacked || true
-            du -sh /clusterscanner/images/tar || true
-            du -sh /clusterscanner/data/ || true
-
-            for cleanupPath in $(find /clusterscanner/images/* -maxdepth 2 -mindepth 2 -mtime +${MAX_DAYS}); do
-                echo "Removing ${cleanupPath}"
-                rm -Rf ${cleanupPath} || true # folders have owner rights issues
-            done
-            find /clusterscanner/images/ -maxdepth 2 -empty -type d -delete
+            du -sh /clusterscanner/images/data || true
 
             for cleanupPath in $(find /clusterscanner/data/ -name *.json -mtime +${MAX_DAYS}); do
                 echo "Removing ${cleanupPath}"

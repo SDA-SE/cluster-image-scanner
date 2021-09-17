@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: cleanup-pvc-wf-images
+  namespace: clusterscanner
+spec:
+  schedule: "0 15 * * *"
+  concurrencyPolicy: "Forbid"
+  startingDeadlineSeconds: 0
+  timezone: Europe/Berlin
+  activeDeadlineSeconds: 3600
+  workflowSpec:
+    entrypoint: pvc-cleanup-images
+    templates:
+      - name: pvc-cleanup
+        volumes:
+          - name: images-unpacked
+            persistentVolumeClaim:
+              claimName: cluster-image-scanner-images-unpacked
+        script:
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+          image: quay.io/sdase/cluster-image-scanner-base:2
+          volumeMounts:
+            - name: images-unpacked
+              mountPath: /clusterscanner/images/unpacked
+          imagePullPolicy: Always
+          command: [bash]
+          env:
+            - name: MAX_DAYS
+              value: "7"
+          source: |
+            set -e
+            /usr/bin/whoami
+            du -sh /clusterscanner/images/unpacked || true
+
+            for cleanupPath in $(find /clusterscanner/images/* -maxdepth 2 -mindepth 2 -mtime +${MAX_DAYS}); do
+                echo "Removing ${cleanupPath}"
+                rm -Rf ${cleanupPath} || true # folders have owner rights issues
+            done
+            find /clusterscanner/images/ -maxdepth 2 -empty -type d -delete
+
+            echo "done"
+            exit 0
