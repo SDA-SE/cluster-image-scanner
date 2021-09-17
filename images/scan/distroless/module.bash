@@ -5,6 +5,7 @@ set -e
 # by looking for a shell
 #
 # Usage example
+# export IMAGE_TAR_PATH=/path/to/image.tar"
 # export ARTIFACTS_PATH=/path/to/output/dir"
 # ./module.bash
 
@@ -13,14 +14,12 @@ source /clusterscanner/scan-common.bash
 scan_result_pre
 
 _shell_found=0
-potentialBashs=("bin/sh" "bin/bash" "bin/dash" "bin/zsh" "bin/ash")
-echo ${IMAGE_UNPACKED_DIRECTORY}
-ls -la ${IMAGE_UNPACKED_DIRECTORY}
-for sh in ${potentialBashs[@]}; do
-    if [[ -e "${IMAGE_UNPACKED_DIRECTORY}/${sh}" ]]; then
-      echo $sh
-        echo "${sh} found"
-        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".shells += [\"${sh}\"]")
+
+for sh in "bin/sh$" "bin/bash$" "bin/dash$" "bin/zsh$" "bin/ash$"; do
+    if tar -tf "${IMAGE_TAR_PATH}" | grep -q ${sh}; then
+        _sh_name=$(echo "${sh}" | rev | cut -c2- | rev)
+        echo "${_sh_name} found"
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".shells += [\"${_sh_name}\"]")
         _shell_found=1
     fi
 done

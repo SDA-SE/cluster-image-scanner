@@ -62,10 +62,12 @@ buildah config \
   --env "DEPSCAN_DB_USERNAME=owaspreader" \
   --env "DEPSCAN_DB_PASSWORD=TODO" \
   --env "DEPSCAN_DB_CONNECTSRING=TODO" \
+  --env "IMAGE_TAR_FOLDER_PATH=/clusterscanner/images" \
+  --env "IMAGE_TAR_PATH=/clusterscanner/images/image.tar" \
   --env "ARTIFACTS_PATH=/clusterscanner/data" \
   --env "CACHE_TIME_SECONDS=14400" \
   --env "SCAN_ID=2021-01-29" \
-  --env "IMAGE_UNPACKED_DIRECTORY=/clusterscanner/images/image-unpacked" \
+  --env "IMAGE_UNPACKED_DIRECTORY=/tmp/image-unpacked" \
   --env 'RESULT_CACHING_HOURS=4' \
   --entrypoint "/clusterscanner/entrypoint.bash" \
   --user clusterscanner \
