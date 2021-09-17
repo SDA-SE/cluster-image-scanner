@@ -267,7 +267,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: quay.io/sdase/cluster-image-scanner-imagecollector:2
+        image: quay.io/sdase/cluster-image-scanner-scan-base:2
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -275,7 +275,7 @@ spec:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: /clusterscanner/github/github_private_key.pem
             subPath: github_private_key.pem
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
