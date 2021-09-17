@@ -104,7 +104,7 @@ spec:
           - name: DEFECTDOJO_SECRETS
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
           - name: MAX_RUNNING_JOBS_IN_QUEUE
-            value: "8"
+            value: "6" # too many jobs create disk pressure
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: NEW_VERSION_IMAGE_FIILTER

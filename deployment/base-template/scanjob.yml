@@ -121,19 +121,19 @@ spec:
 
     - name: imagefetcher
       volumes:
-        - name: images-unpacked
+        - name: images
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images-unpacked
+            claimName: cluster-image-scanner-images
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
       script:
         image: quay.io/sdase/cluster-image-scanner-base:2
         command: [/bin/bash]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: images-unpacked
-            mountPath: /clusterscanner/images/
+          - name: images
+            mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
           - name: registry-creds
@@ -150,10 +150,10 @@ spec:
           set -e
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
-          #IMAGE_TAR_FOLDER_PATH=/clusterscanner/images/image-tar
-          #mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
-          mkdir -p "${IMAGE_UNPACKED_DIRECTORY}/tmp" || true
-          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_UNPACKED_DIRECTORY}/tmp")
+          IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
+          mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
+          mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
+          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_TAR_FOLDER_PATH}/tmp")
           rm -Rf "${tmp_dir}" || true
           mkdir -p "${tmp_dir}"
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
@@ -167,7 +167,7 @@ spec:
           # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
           skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
           ls -la "${config_dir}/config.json"
-          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_UNPACKED_DIRECTORY}/config.json" ; then
+          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" ; then
             echo "Already got image with identical config manifest, skipping"
             # touch on folder to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
             touch "${IMAGE_TAR_PATH}"
@@ -196,16 +196,13 @@ spec:
           find "${unpack_dir}" -type f -exec chmod 644 {} +
           cd "${unpack_dir}"
 
-          #echo "Packing image to ${IMAGE_TAR_PATH}"
-          #tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
+          echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
+          tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
 
           echo "Copying manifest and config file"
-          cp "${image_copy_dir}/manifest.json" "${IMAGE_UNPACKED_DIRECTORY}/manifest.json"
+          cp "${image_copy_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
           rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
-          cp "${config_dir}/config.json" "${IMAGE_UNPACKED_DIRECTORY}/config.json"
-
-          echo "Moving ${unpack_dir} ${IMAGE_UNPACKED_DIRECTORY}"
-          mv "${unpack_dir}" "${IMAGE_UNPACKED_DIRECTORY}/image-unpacked"
+          cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
           echo "Cleaning up"
           rm -rf "${tmp_dir}"
@@ -213,9 +210,9 @@ spec:
 
     - name: scan-distroless
       volumes:
-        - name: images-unpacked
+        - name: images
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images-unpacked
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
@@ -229,9 +226,10 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-distroless:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images-unpacked
-            mountPath: /clusterscanner/images/
+          - name: images
+            mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/distroless"
@@ -375,9 +373,9 @@ spec:
 
     - name: scan-malware
       volumes:
-        - name: images-unpacked
+        - name: images
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images-unpacked
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: registry-creds
           secret:
@@ -394,8 +392,8 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-malware:2
         imagePullPolicy: Always
         volumeMounts:
-          - name: images-unpacked
-            mountPath: /clusterscanner/images/
+          - name: images
+            mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
             readOnly: true
           - name: scandata
@@ -415,9 +413,9 @@ spec:
 
     - name: scan-dependency-check
       volumes:
-        - name: images-unpacked
+        - name: images
           persistentVolumeClaim:
-            claimName: cluster-image-scanner-images-unpacked
+            claimName: cluster-image-scanner-images
             readOnly: true
         - name: scandata
           persistentVolumeClaim:
@@ -436,8 +434,8 @@ spec:
         image: quay.io/sdase/cluster-image-scanner-scan-dependency-check:2
         imagePullPolicy: Always # TODO
         volumeMounts:
-          - name: images-unpacked
-            mountPath: /clusterscanner/images/
+          - name: images
+            mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
             readOnly: true
           - name: scandata
