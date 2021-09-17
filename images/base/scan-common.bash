@@ -18,6 +18,7 @@ function scan_result_pre {
 
   RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
   if [ -f "${RESULT_FILE}" ]; then
+    cat "${RESULT_FILE}"
     lastStatus=$(cat "${RESULT_FILE}" | jq -r ".${MODULE_NAME} | .status" 2>/dev/null || true)
     if [ "${lastStatus}" != "completed" ] && [ "${IS_SCAN}" == "true" ]; then
       echo "lastStatus: ${lastStatus}"
