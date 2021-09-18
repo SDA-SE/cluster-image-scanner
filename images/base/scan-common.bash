@@ -25,7 +25,7 @@ function scan_result_pre {
       rm "${RESULT_FILE}"
     fi
     if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
-      echo "Scan has been performed, already, using old result"
+      echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
       IS_USE_CACHE=true
       JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
       scan_result_post
