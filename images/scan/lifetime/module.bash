@@ -78,7 +78,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/lifetime.csv "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###INFOTEXT###/${infoText}/" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s/###SEVERITY###/High/" "${ARTIFACTS_PATH}/lifetime.csv"
+    sed -i "s/###SEVERITY###/Medium/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###BUILDDATE###/${dt1}/" "${ARTIFACTS_PATH}/lifetime.csv"
 else
