@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154 # variables come via env, so they are not assigned
 set -e
 
 ls -la
