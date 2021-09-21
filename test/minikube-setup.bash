@@ -115,21 +115,25 @@ if [ "$IS_MINIKUBE" == "true" ]; then
 fi
 
 #kubectl apply -k ${DEPLOYMENT_PATH}/overlays/test-local/
-
+echo "Applying kustomize in $PWD"
 kubectl apply -k .
 # restart pods
 for i in $(kubectl get pods -n clusterscanner | awk '{print $1}' | grep -v NAME); do
   kubectl delete pod $i -n clusterscanner
 done
+echo "Checking pods in namespace clusterscanner"
 while [ $(kubectl get pods -n clusterscanner  | grep "1/1" | wc -l) -ne 2 ]; do
   echo "waiting for 2 ready pods in clusterscanner"
   kubectl get pods -n clusterscanner
   sleep 3
 done
 sleep 2
+echo "removing existing port-forward"
 for i in $(ps -ef | grep port-forward | grep svc/argo-server | grep -v grep | awk '{print $2}'); do kill $i;done
+echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 
+echo "submitting argo-main.yml"
 argo submit ../argo-main.yml  -n clusterscanner
 
 echo "please visit https://localhost:2746/"
