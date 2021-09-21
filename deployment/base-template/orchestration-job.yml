@@ -28,6 +28,16 @@ spec:
       - workflow.parameters.newVersionImageFilter
       - workflow.parameters.dependencyCheckSuppressionsConfigMapName
       - workflow.parameters.allResultsGitTarget
+      - workflow.parameters.baseImageName
+      - workflow.parameters.defectDojoClientImageName
+      - workflow.parameters.imageSourceFetcherImageName
+      - workflow.parameters.workflowRunnerImageName
+      - workflow.parameters.scanDistrolessImageName
+      - workflow.parameters.scanDependencyCheckImageName
+      - workflow.parameters.scanMalwareImageName
+      - workflow.parameters.scanRootImageName
+      - workflow.parameters.scanLifetimeImageName
+      - workflow.parameters.scanNewVersionImageName
   templates:
     - name: main
       steps:
@@ -66,7 +76,7 @@ spec:
         - name: tmp
           emptyDir: {}
       container:
-        image: quay.io/sdase/cluster-image-scanner-image-source-fetcher:2
+        image: "{{ workflow.parameters.imageSourceFetcherImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
@@ -90,7 +100,7 @@ spec:
             path: /clusterscanner/imageList.json
             mode: 0444
       container:
-        image: quay.io/sdase/cluster-image-scanner-workflow-runner:2
+        image: "{{ workflow.parameters.workflowRunnerImageName }}"
         imagePullPolicy: IfNotPresent
         env:
           - name: SCAN_ID
@@ -109,6 +119,24 @@ spec:
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: NEW_VERSION_IMAGE_FIILTER
             value: "{{ workflow.parameters.newVersionImageFilter }}"
+          - name: baseImageName
+            value: "{{ workflow.parameters.baseImageName }}"
+          - name: defectDojoClientImageName
+            value: "{{ workflow.parameters.defectDojoClientImageName }}"
+          - name: scanDistrolessImageName
+            value: "{{ workflow.parameters.scanDistrolessImageName }}"
+          - name: scanDependencyCheckImageName
+            value: "{{ workflow.parameters.scanDependencyCheckImageName }}"
+          - name: scanMalwareImageName
+            value: "{{ workflow.parameters.scanMalwareImageName }}"
+          - name: scanRootImageName
+            value: "{{ workflow.parameters.scanRootImageName }}"
+          - name: scanLifetimeImageName
+            value: "{{ workflow.parameters.scanLifetimeImageName }}"
+          - name: scanNewVersionImageName
+            value: "{{ workflow.parameters.scanNewVersionImageName }}"
+          - name: notifierImageName
+            value: "{{ workflow.parameters.notifierImageName }}"
 
     - name: notify-teams
       volumes:
@@ -116,7 +144,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: quay.io/sdase/cluster-image-scanner-notifier:2
+        image: "{{ workflow.parameters.notifierImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -267,7 +295,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: quay.io/sdase/cluster-image-scanner-base:2
+        image: "{{ workflow.parameters.baseImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data

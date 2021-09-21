@@ -37,6 +37,26 @@ spec:
         value: "suppressions-sda"
       - name: allResultsGitTarget
         value: ""
+      - name: baseImageName
+        value: "quay.io/sdase/cluster-image-scanner-base:2"
+      - name: defectDojoClientImageName
+        value: "{{ workflow.parameters.defectDojoClientImageName }}"
+      - name: scanDistrolessImageName
+        value: "{{ workflow.parameters.scanDistrolessImageName }}"
+      - name: scanDependencyCheckImageName
+        value: "{{ workflow.parameters.scanDependencyCheckImageName }}"
+      - name: scanMalwareImageName
+        value: "{{ workflow.parameters.scanMalwareImageName }}"
+      - name: scanRootImageName
+        value: "{{ workflow.parameters.scanRootImageName }}"
+      - name: scanLifetimeImageName
+        value: "{{ workflow.parameters.scanLifetimeImageName }}"
+      - name: scanNewVersion
+        value: "{{ workflow.parameters.scanNewVersion }}"
+      - name: imageSourceFetcherImageName
+        value: "{{ workflow.parameters.imageSourceFetcherImageName }}"
+      - name: workflowRunnerImageName
+        value: "{{ workflow.parameters.workflowRunnerImageName }}"
 
   templates:
     - name: main
