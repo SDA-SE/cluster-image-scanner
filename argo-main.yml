@@ -40,24 +40,25 @@ spec:
       - name: baseImageName
         value: "quay.io/sdase/cluster-image-scanner-base:2"
       - name: defectDojoClientImageName
-        value: "{{ workflow.parameters.defectDojoClientImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-lifetime:2"
       - name: scanDistrolessImageName
-        value: "{{ workflow.parameters.scanDistrolessImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-distroless:2"
       - name: scanDependencyCheckImageName
-        value: "{{ workflow.parameters.scanDependencyCheckImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-dependency-check:2"
       - name: scanMalwareImageName
-        value: "{{ workflow.parameters.scanMalwareImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-malware:2"
       - name: scanRootImageName
-        value: "{{ workflow.parameters.scanRootImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-runasroot:2"
       - name: scanLifetimeImageName
-        value: "{{ workflow.parameters.scanLifetimeImageName }}"
-      - name: scanNewVersion
-        value: "{{ workflow.parameters.scanNewVersion }}"
+        value: "quay.io/sdase/cluster-image-scanner-scan-lifetime:2"
+      - name: scanNewVersionImageName
+        value: "quay.io/sdase/cluster-image-scanner-scan-new-version:2"
       - name: imageSourceFetcherImageName
-        value: "{{ workflow.parameters.imageSourceFetcherImageName }}"
+        value: "quay.io/sdase/cluster-image-scanner-image-source-fetcher:2"
       - name: workflowRunnerImageName
-        value: "{{ workflow.parameters.workflowRunnerImageName }}"
-
+        value: "quay.io/sdase/cluster-image-scanner-workflow-runner:merge"
+      - name: notifierImageName
+        value: "quay.io/sdase/cluster-image-scanner-notifier:2"
   templates:
     - name: main
       steps:
