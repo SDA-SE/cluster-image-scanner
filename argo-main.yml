@@ -40,7 +40,7 @@ spec:
       - name: baseImageName
         value: "quay.io/sdase/cluster-image-scanner-base:2"
       - name: defectDojoClientImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-lifetime:2"
+        value: "quay.io/sdase/defectdojo-client:3"
       - name: scanDistrolessImageName
         value: "quay.io/sdase/cluster-image-scanner-scan-distroless:2"
       - name: scanDependencyCheckImageName
