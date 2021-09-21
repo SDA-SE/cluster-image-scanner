@@ -3,11 +3,21 @@ Software and infrastructure are potential points of attack. Such attacks can lea
 # Types of Scans
 There are a number of different types of scans that can produce different findings. Each check is introduced by a short summary of the relevance and different response possibilities.
 
+## Misconfigurations
+
 - [Distroless](distroless.md)
+- [Root-User](run-as-root.md)
+
+## Known Vulnerabilities and Malware
+
+- [Known Vulnerabilities](known-vulnerabilities.md)
+- [Malware](malware.md)
+
+## Patch Management
+
 - [BaseImage Lifetime](baseimage-lifetime.md)
 - [Image Lifetime](image-lifetime.md)
-- [Known Vulnerabilities](known-vulnerabilities.md)
-- [Root-User](run-as-root.md)
+- [New version](new-version.md)
 
 # Responses to Findings
 When a finding is detected, the first step is to perform an analysis. The following treatments can be used for this:

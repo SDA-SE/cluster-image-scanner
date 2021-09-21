@@ -37,6 +37,15 @@ spec:
       - name: is_scan_new_version
       - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
+      - name: baseImageName
+      - name: defectDojoClientImageName
+      - name: scanDistrolessImageName
+      - name: scanDependencyCheckImageName
+      - name: scanMalwareImageName
+      - name: scanRootImageName
+      - name: scanLifetimeImageName
+      - name: scanNewVersionImageName
+
   templates:
     - name: main
       dag:
@@ -128,7 +137,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
       script:
-        image: quay.io/sdase/cluster-image-scanner-base:2
+        image: "{{ workflow.parameters.baseImageName }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -223,7 +232,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-distroless:2
+        image: "{{ workflow.parameters.scanDistrolessImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -238,7 +247,6 @@ spec:
             value: "{{ workflow.parameters.is_scan_distroless }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
-
     - name: scan-lifetime
       volumes:
         - name: scandata
@@ -253,7 +261,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
+        image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: scandata
@@ -270,7 +278,6 @@ spec:
             value: "{{ workflow.parameters.scan_lifetime_max_days }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_lifetime }}"
-
     - name: scan-baseimage-lifetime
       volumes:
         - name: scandata
@@ -285,7 +292,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-lifetime:2
+        image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: scandata
@@ -321,7 +328,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-runasroot:2
+        image: "{{ workflow.parameters.scanRootImageName }}"
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: scandata
@@ -351,7 +358,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-new-version:2
+        image: "{{ workflow.parameters.scanNewVersionImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: scandata
@@ -389,7 +396,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-malware:2
+        image: "{{ workflow.parameters.scanMalwareImageName }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -431,7 +438,7 @@ spec:
           - name: results-dependency-check-report
             path: /clusterscanner/data
       container:
-        image: quay.io/sdase/cluster-image-scanner-scan-dependency-check:2
+        image: "{{ workflow.parameters.scanDependencyCheckImageName }}"
         imagePullPolicy: Always # TODO
         volumeMounts:
           - name: images
@@ -467,7 +474,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: quay.io/sdase/defectdojo-client:3
+        image: "{{ workflow.parameters.defectDojoClientImageName }}"
         imagePullPolicy: IfNotPresent
         retryStrategy:
           limit: 10
@@ -515,7 +522,7 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.csv
       script:
-        image: quay.io/sdase/cluster-image-scanner-base:2
+        image: "{{ workflow.parameters.baseImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /tmp/results
@@ -560,7 +567,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: quay.io/sdase/defectdojo-client:3
+        image: "{{ defectDojoClientImageName }}"
         imagePullPolicy: IfNotPresent
         retryStrategy:
           limit: 10
@@ -625,7 +632,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: quay.io/sdase/cluster-image-scanner-base:2
+        image: "{{ workflow.parameters.baseImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
