@@ -6,7 +6,7 @@ setup() {
     export DEPSCAN_DB_DRIVER="org.postgresql.Driver"
     export DEPSCAN_DB_CONNECTSRING="jdbc:postgresql://owasp-dependency-check-db.sda-se.io:5432/owasp?useSSL=false&allowPublicKeyRetrieval=true"
     export DEPSCAN_DB_USERNAME="owaspreader"
-    export DEPSCAN_DB_PASSWORD="uWrhiLsvbXWP2hnBVXA8VM3a"
+    export DEPSCAN_DB_PASSWORD=""
     export CLUSTER_SCAN_BASE_PATH="$(pwd)/../.."
 
     mkdir -p tmp
