@@ -567,7 +567,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: "{{ defectDojoClientImageName }}"
+        image: "{{ workflow.parameters.defectDojoClientImageName }}"
         imagePullPolicy: IfNotPresent
         retryStrategy:
           limit: 10
