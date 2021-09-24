@@ -295,7 +295,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: "{{ workflow.parameters.baseImageName }}"
+        image: "{{ workflow.parameters.imageSourceFetcherImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
