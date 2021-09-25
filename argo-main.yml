@@ -36,11 +36,13 @@ spec:
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions-sda"
       - name: allResultsGitTarget
-        value: ""
+        value: "" # github.com/pagel-pro/cluster-image-scanner-all-results
       - name: baseImageName
         value: "quay.io/sdase/cluster-image-scanner-base:2"
       - name: defectDojoClientImageName
         value: "quay.io/sdase/defectdojo-client:3"
+      - name: imageCollectorImageName
+        value: "quay.io/sdase/cluster-image-scanner-imagecollector:2"
       - name: scanDistrolessImageName
         value: "quay.io/sdase/cluster-image-scanner-scan-distroless:2"
       - name: scanDependencyCheckImageName

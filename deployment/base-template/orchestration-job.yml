@@ -31,6 +31,7 @@ spec:
       - workflow.parameters.baseImageName
       - workflow.parameters.defectDojoClientImageName
       - workflow.parameters.imageSourceFetcherImageName
+      - workflow.parameters.imageCollectorImageName
       - workflow.parameters.workflowRunnerImageName
       - workflow.parameters.scanDistrolessImageName
       - workflow.parameters.scanDependencyCheckImageName
@@ -295,7 +296,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: "{{ workflow.parameters.imageSourceFetcherImageName }}"
+        image: "{{ workflow.parameters.imageCollectorImageName }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -305,6 +306,8 @@ spec:
             subPath: github_private_key.pem
         imagePullPolicy: IfNotPresent
         env:
+          - name: ENVIRNOMENT
+            value: "{{ workflow.parameters.scanId }}"
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
           - name: GITHUB_KEY_FILE_PATH
@@ -317,7 +320,7 @@ spec:
         command: [/bin/bash]
         source: |
           set -e
-
+          cd $HOME
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 

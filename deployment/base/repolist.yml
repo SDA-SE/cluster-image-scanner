@@ -7,5 +7,6 @@ metadata:
 data:
   #cluster0: https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/output-short.json
   #all-tests: https://api.github.com/repos/SDA-SE/cluster-scan-test-images/tarball
+  # new-version: https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/new-version.json
   # further clusters are allowed
   # protected: https://api.github.com/repos/SDA-SE/XXX/contents/output.json
