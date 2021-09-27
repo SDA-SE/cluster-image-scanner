@@ -51,6 +51,7 @@ rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 
 mkdir -p "${mnt}/home/code" || true
 rsync -a bin/jq "${mnt}/usr/local/bin/jq"
+rsync -a ${tools_mnt}/usr/bin/find ${mnt}/usr/bin/find
 rsync -a bin/kubectl "${mnt}/usr/local/bin/kubectl"
 rsync -a entrypoint.bash "${mnt}/home/code/entrypoint.bash"
 rsync -a pods.bash "${mnt}/home/code/pods.bash"
