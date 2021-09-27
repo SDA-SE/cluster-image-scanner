@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ClusterScanner
+  name: ClusterImageScanner
   description: |
     Discover vulnerabilities and container image misconfiguration in production environments.
   tags:
@@ -14,5 +14,5 @@ metadata:
 spec:
   type: service
   owner: security-journey
-  system: clusterscanner
+  system: cluster-image-scanner
   lifecycle: production
