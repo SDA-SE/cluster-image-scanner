@@ -5,7 +5,7 @@ The Root Account scan checks if the user root is found during a scan of the cont
 ## Relevance
 Containers running as root user are running with higher privileges than necessary. Container images are using isolation and do not have the same security level given by virtualization with hypervisor type I.
 
-## Resolution
+## Response
 Use the following treatments on issues:
 
 ### Avoidance
