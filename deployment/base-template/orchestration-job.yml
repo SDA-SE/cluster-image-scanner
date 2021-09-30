@@ -332,9 +332,41 @@ spec:
           echo "gitFetch"
           gitFetch
 
-          mkdir /tmp/clusterscanner-remote/${SCAN_ID} || true
-          cp -a "${RESULT_PATH}"/* /tmp/clusterscanner-remote/${SCAN_ID}
-          cd /tmp/clusterscanner-remote/${SCAN_ID}
+
+          tmpdir=$(mktemp -d)
+          tmpdirBaseImage=$(mktemp -d)
+          #echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
+
+          for result in $(find ${RESULT_PATH} -name *.json); do
+            team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
+            age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
+            baseImageAge=$(cat $result | jq -r '.scanResults[] | .["scan-baseimage-lifetime"].age' | grep -v null || true)
+            environment=$(cat $result | jq -r '.environment' | sed 's/\s//g' || true)
+            if [ "${age}" != "" ]; then
+              echo ${age} >> ${tmpdir}/${environment}_${team}.txt
+            fi
+            if [ "${baseImageAge}" != "" ]; then
+              echo ${baseImageAge} >> ${tmpdirBaseImage}/${environment}_${team}.txt
+            fi
+          done
+
+          date=$(date '+%Y-%m-%d')
+          mkdir /tmp/clusterscanner-remote/${date} || true
+
+          for j in $(ls ${tmpdir}); do
+            result=$(cat ${tmpdir}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
+            filename=$(echo ${j} | sed 's#.txt##g')
+            echo "lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${date}/${filename}_lifetime.txt
+          done
+
+          for j in $(ls ${tmpdirBaseImage}); do
+            result=$(cat ${tmpdirBaseImage}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
+            filename=$(echo ${j} | sed 's#.txt##g')
+            echo "baseimage lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${date}/${filename}_baseimage-lifetime.txt
+          done
+
+          cd /tmp/clusterscanner-remote/${date}
+
           git add * || true
           git commit -m "add" || true
 
