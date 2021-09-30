@@ -6,7 +6,8 @@ on:
       - master
   pull_request:
   schedule:
-    - cron: "0 7 * * *"
+    - cron: "30 6 * * *"
+
 
 jobs:
   shellcheck:
@@ -30,7 +31,7 @@ jobs:
       base: ${{ steps.filter.outputs.base }}
       imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
       imagecollector: ${{ steps.filter.outputs.imagecollector }}
-      notifiier: ${{ steps.filter.outputs.notifier }}
+      notifier: ${{ steps.filter.outputs.notifier }}
       workflowrunner: ${{ steps.filter.outputs.workflowrunner }}
       dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
       distroless: ${{ steps.filter.outputs.distroless }}
@@ -43,6 +44,7 @@ jobs:
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
         id: filter
         with:
+          base: 'master' # ignored in PRs
           filters: |
             base:
               - 'images/base/**'
@@ -71,7 +73,7 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
-    if: "${{ needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}"
+    if: "${{ (github.event_name == 'schedule' && github.ref == 'master') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -87,10 +89,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagecollector == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -106,10 +109,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagesourcefetcher == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -125,10 +129,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.workflowrunner == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -144,10 +149,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.dependencycheck == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -163,10 +169,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.distroless == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -182,10 +189,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.lifetime == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -201,10 +209,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.runasroot == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -220,10 +229,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.new-version == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -239,10 +249,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.malware == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -258,10 +269,11 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: |
-      always() &&
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
       (needs.build_image_base.result == 'success' ||
       (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
-      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
