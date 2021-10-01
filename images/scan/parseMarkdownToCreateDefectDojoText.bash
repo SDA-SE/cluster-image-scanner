@@ -21,8 +21,8 @@ sed -i "/^${heading} [a-Z]/,\$d" ${TEMP_FILE}
 sed -i "s/##/#/g" ${TEMP_FILE}
 sed -i "s/# //g" ${TEMP_FILE}
 sed -i "s/#/\n/g" ${TEMP_FILE}
-extract=$(cat ${TEMP_FILE} | sed 's#|#_#g' | tr '\n' "|")
 
+extract=$(cat ${TEMP_FILE} | sed 's#|#_#g' | tr '\n' "|" | sed 's#\/#\\/#g')
 sed -i -e "s/###${TARGET}###/${extract}/g"  ${TARGET_FILE}
 sed -i -e "s/|/\n/g"  ${TARGET_FILE}
 
