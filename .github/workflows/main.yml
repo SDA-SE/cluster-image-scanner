@@ -302,5 +302,9 @@ jobs:
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: medyagh/setup-minikube@5a9a7104d7322fa40424de8855c84685e89cefd7
+      - name: setup
+        run: |
+          cd test_actions
+          ./setup.bash
       - name: test
         run: kubectl get pods -A

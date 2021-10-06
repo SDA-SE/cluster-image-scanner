@@ -1,0 +1,1692 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    contact.sdase.org/team: security-journey
+    sdase.org/description: The cluster-image-scanner discovers vulnerabilities and
+      container image misconfiguration in production environments.
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: clusterscanner
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: clusterscanner
+  namespace: clusterscanner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: argo-workflow
+  namespace: clusterscanner
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods/log
+  verbs:
+  - get
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: argo-clusterscanner-workflow
+  namespace: clusterscanner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-workflow
+subjects:
+- kind: ServiceAccount
+  name: clusterscanner
+  namespace: clusterscanner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: argo-default-workflow
+  namespace: clusterscanner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-workflow
+subjects:
+- kind: ServiceAccount
+  name: clusterscanner
+  namespace: clusterscanner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: argo-default2-workflow
+  namespace: clusterscanner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-workflow
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  default-v1: |-
+    s3:
+      bucket: sda-clusterscanner-argoworkflow-temp
+      endpoint: s3.eu-central-1.amazonaws.com
+      region: eu-central-1
+      insecure: false
+      accessKeySecret:
+        name: s3-cred
+        key: accesskey
+      secretKeySecret:
+        name: s3-cred
+        key: secretkey
+kind: ConfigMap
+metadata:
+  annotations:
+    workflows.argoproj.io/default-artifact-repository: default-v1
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: artifact-repositories
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  DD_BRANCHES_TO_KEEP: '*'
+  DD_DEDUPLICATION_ON_ENGAGEMENT: "true"
+  DD_IMPORT_TYPE: import
+  DD_IS_MARKED_AS_ACTIVE: "true"
+  DD_IS_MARKED_AS_INACTIVE: "false"
+  DD_LEAD: "4"
+  DD_REPORT_PATH: /tmp/dependency-check-results/dependency-check-report.xml
+  DD_SOURCE_CODE_MANAGEMENT_URI: https://github.com/sda-se
+  DD_URL: http://192.168.178.55:8081/
+  DD_USER: clusterscanner
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: defectdojo
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  DD_BRANCHES_TO_KEEP: '*'
+  DD_DEDUPLICATION_ON_ENGAGEMENT: "true"
+  DD_IMPORT_TYPE: import
+  DD_IS_MARKED_AS_ACTIVE: "true"
+  DD_IS_MARKED_AS_INACTIVE: "false"
+  DD_LEAD: "4"
+  DD_REPORT_PATH: /tmp/dependency-check-results/dependency-check-report.xml
+  DD_SOURCE_CODE_MANAGEMENT_URI: https://github.com/SDA-SE
+  DD_URL: http://192.168.178.55:8081/
+  DD_USER: clusterscanner
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: defectdojo-test
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  DEPSCAN_DB_CONNECTSRING: DEPSCAN_DB_CONNECTSRING_PLACEHOLDER
+  DEPSCAN_DB_DRIVER: DEPSCAN_DB_DRIVER_PLACEHOLDER
+  DEPSCAN_DB_PASSWORD: DEPSCAN_DB_PASSWORD_PLACEHOLDER
+  DEPSCAN_DB_USERNAME: DEPSCAN_DB_USERNAME_PLACEHOLDER
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: dependency-check-db
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  all-tests: https://api.github.com/repos/SDA-SE/cluster-scan-test-images/tarball
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: image-source-list
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  suppressions.xml: |
+    <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    </suppressions>
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: suppressions
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  suppressions.xml: |
+    <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+        <suppress>
+            <notes><![CDATA[
+          sda-commons-* is creating some false positives
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.sdase\.commons.*</packageUrl>
+            <cpe regex="true">^cpe:/a:.*$</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+          sda-commons-* is creating some false positives
+       ]]></notes>
+            <filePath regex="true">^.*/sda-commons-.*.jar$</filePath>
+            <cpe regex="true">^cpe:/a:.*$</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+          h2 databases in SDA SE are only used for testing
+       ]]></notes>
+            <cpe>^cpe:/a:h2database:h2.*</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+        CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description and the dates of the fix (https://github.com/dropwizard/dropwizard/pull/3160, 2020-02-20) and the release (https://github.com/dropwizard/dropwizard/releases/tag/v1.3.20, 2020-02-24). cpe is most likly wrongly mapped.
+       ]]></notes>
+            <filePath regex="true">.*dropwizard.*-1.3.20.jar$</filePath>
+            <cve>CVE-2020-5245</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+        CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description and the dates of the fix (https://github.com/dropwizard/dropwizard/pull/3160, 2020-02-20) and the release (https://github.com/dropwizard/dropwizard/releases/tag/v1.3.20, 2020-02-24). cpe is most likly wrongly mapped.
+       ]]></notes>
+            <filePath regex="true">.*simpleclient_dropwizard-0.8.*.jar$</filePath>
+            <cve>CVE-2020-5245</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+        CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description but this bundle is not part of it due to separate version counting.
+       ]]></notes>
+            <filePath regex="true">.*/hystrix-dropwizard-bundle-0.9.2$</filePath>
+            <cve>CVE-2020-5245</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+        CVE-2020-5245 is fixed in 1.3.20 according to the CVE-description but this jar is not part of it due to separate version counting.
+       ]]></notes>
+            <filePath regex="true">.*/dropwizard-entitymanager-[1-9].*.jar$</filePath>
+            <cve>CVE-2020-5245</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+        file name: jackson-mapper-asl-1.9.13.jar, we assume that the alert of "FasterXML jackson-databind before 2.9.10. " is not in conjunction with the jackson-mapper-asl-1.9.13.jar and therefore this is a false positive
+       ]]></notes>
+            <filePath regex="true">.*/jackson-mapper-asl-*.jar$</filePath>
+            <cve>CVE-2020-5245</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+      file name: jackson-databind-2.10.5.jar
+      This vulnerability only affects XML processing. Since we usually use JSON for our REST services, we mark it as false positive.
+     ]]></notes>
+            <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@2\.10\.5$</packageUrl>
+            <cve>CVE-2020-25649</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: kafka-clients-1.1.1.jar, we assume that ACLs are on server side and therefore this is a false postive
+       file name: kafka-clients-2.2.1.jar based on teams analysis this is a FP
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.apache\.kafka/kafka\-clients@.*$</packageUrl>
+            <cve>CVE-2018-17196</cve>
+            <cve>CVE-2019-12399</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+          netty is not part of sda architecture, please contact the security team in case it is used in your projects
+       ]]></notes>
+            <cpe regex="true">^cpe:/a:netty:netty:.*</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: netty-3.10.5.Final.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/io\.netty/netty@.*$</packageUrl>
+            <vulnerabilityName>CVE-2019-20444</vulnerabilityName>
+            <vulnerabilityName>CVE-2019-20445</vulnerabilityName>
+            <vulnerabilityName>CVE-2019-16869</vulnerabilityName>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+          billing-external-client-dropwizard-* is creating some false positives
+       ]]></notes>
+            <filePath regex="true">^.*/billing-external-client-dropwizard-.*.jar$</filePath>
+            <cpe regex="true">^cpe:/a:.*$</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: proxy-handler-1.0.0.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.codefetti\.proxy/proxy\-handler@.*$</packageUrl>
+            <cpe>cpe:/a:gitlab:gitlab</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       We are using Bouncy Castle in the the morphia module of sda-dropwizard-commons.
+    See  https://github.com/SDA-SE/sda-dropwizard-commons/blob/master/sda-commons-server-morphia/src/main/java/org/sdase/commons/server/morphia/internal/SslUtil.java
+    We are already using a version of Bouncy Castle that doesn't have this issue. However we are only creating temporary Keystores, so we should not have issues with old and broken Keystores.
+    this note applies to all following bouncycastle libs
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2007-6721</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000338</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000339</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000342</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000343</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000344</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000345</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000346</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2016-1000352</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2017-13098</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2018-1000613</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: bcprov-jdk15on-1.64.jar
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcprov\-jdk15on@.*$</packageUrl>
+            <cve>CVE-2018-5382</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+          IBM is responsible for this library and is performing checks by themselves.
+          It is creating false positives for the original bouncy-castle library due to wrong version detection.
+       ]]></notes>
+            <filePath regex="true">^.*/bcprov-jdk15on-ega-.*.jar$</filePath>
+            <cpe regex="true">^cpe:/a:.*$</cpe>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file name: jetty-server-9.4.31.v20200723.jar
+       Teams (e.g. Christopher has analyized it as a FP)
+       ]]></notes>
+            <cpe regex="true">^cpe:/a:.*$</cpe>
+            <cve>CVE-2020-27216</cve>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+     file name: libthrift-0.13.0.jar
+     Team communications analyzed it: First of all we're probably not affected because the CVE relates
+     to Thrift as a server component. As we use thrift as client of our Jaeger tracing we're probably
+     good.
+     Furthermore we're waiting for release 0.14.0 to be published on Maven Central. After that we need
+     a fix release for jaeger-client.
+     ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.apache\.thrift/libthrift@.*$</packageUrl>
+            <vulnerabilityName>CVE-2020-13949</vulnerabilityName>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file names: jetty-http-9.4.37.v20210219.jar + jetty-server-9.4.37.v20210219.jar
+
+       CVE description: In Eclipse Jetty 9.4.32 to 9.4.38, 10.0.0.beta2 to 10.0.1, and 11.0.0.beta2 to 11.0.1, if a user uses a webapps directory that is a symlink, the contents of the webapps directory is deployed as a static webapp, inadvertently serving the webapps themselves and anything else that might be in that directory.
+
+       That does not affect our microservices.
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-.*$</packageUrl>
+            <vulnerabilityName>CVE-2021-28163</vulnerabilityName>
+        </suppress>
+        <suppress>
+            <notes><![CDATA[
+       file names: jetty-http-9.4.37.v20210219.jar + jetty-server-9.4.37.v20210219.jar
+
+       CVE description: In Eclipse Jetty 7.2.2 to 9.4.38, 10.0.0.alpha0 to 10.0.1, and 11.0.0.alpha0 to 11.0.1, CPU usage can reach 100% upon receiving a large invalid TLS frame.
+
+       Our services are not affected because they only use HTTP within the cluster for communication.
+       ]]></notes>
+            <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-.*$</packageUrl>
+            <vulnerabilityName>CVE-2021-28165</vulnerabilityName>
+        </suppress>
+    </suppressions>
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: suppressions-sda
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  workflow: "8"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: synchronization
+  namespace: clusterscanner
+---
+apiVersion: v1
+data:
+  DD_TOKEN: RERfVE9LRU5fU0VDUkVU
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: defectdojo
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+data:
+  DD_TOKEN: RERfVE9LRU5fU0VDUkVU
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: defectdojo-test
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+data:
+  smtp: c210cF9TRUNSRVQ=
+  smtp-auth: c210cF9hdXRoX1NFQ1JFVA==
+  smtp-auth-password: c210cF9hdXRoX3Bhc3N3b3JkX1NFQ1JFVA==
+  smtp-auth-user: c210cF9hdXRoX3VzZXJfU0VDUkVU
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: email
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+data:
+  GITHUB_APP_ID: R0lUSFVCX0FQUF9JRF9QTEFDRUhPTERFUg==
+  GITHUB_APP_LOGIN: R0lUSFVCX0FQUF9MT0dJTl9QTEFDRUhPTERFUg==
+  GITHUB_INSTALLATION_ID: R0lUSFVCX0lOU1RBTExBVElPTl9JRF9QTEFDRUhPTERFUg==
+  github_private_key.pem: ""
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: github
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: registry-test-default
+  namespace: clusterscanner
+stringData:
+  auth.json: e30=
+---
+apiVersion: v1
+data:
+  accesskey: QUNDRVNTX0tFWQ==
+  secretkey: U0VDUkVUX0tFWQ==
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: s3-cred
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+data:
+  SLACK_CLI_TOKEN: U0xBQ0tfQ0xJX1RPS0VOX1NFQ1JFVA==
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: slacktoken
+  namespace: clusterscanner
+type: Secret
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: cluster-image-scanner-images
+  namespace: clusterscanner
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1000Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: cluster-image-scanner-scandata
+  namespace: clusterscanner
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: orchestration-job-template
+  namespace: clusterscanner
+spec:
+  activeDeadlineSeconds: 21600
+  entrypoint: main
+  inputs:
+    parameters:
+    - workflow.parameters.imageSourceListConfigMapName
+    - workflow.parameters.gitSecretName
+    - workflow.parameters.scanId
+    - workflow.parameters.registrySecretName
+    - workflow.parameters.dependencyCheckDbConfigMapName
+    - workflow.parameters.defectDojoConfigMapName
+    - workflow.parameters.slackTokenSecretName
+    - workflow.parameters.emailSecretName
+    - workflow.parameters.enforceSlackChannel
+    - workflow.parameters.newVersionImageFilter
+    - workflow.parameters.dependencyCheckSuppressionsConfigMapName
+    - workflow.parameters.allResultsGitTarget
+    - workflow.parameters.baseImageName
+    - workflow.parameters.defectDojoClientImageName
+    - workflow.parameters.imageSourceFetcherImageName
+    - workflow.parameters.imageCollectorImageName
+    - workflow.parameters.workflowRunnerImageName
+    - workflow.parameters.scanDistrolessImageName
+    - workflow.parameters.scanDependencyCheckImageName
+    - workflow.parameters.scanMalwareImageName
+    - workflow.parameters.scanRootImageName
+    - workflow.parameters.scanLifetimeImageName
+    - workflow.parameters.scanNewVersionImageName
+  templates:
+  - name: main
+    steps:
+    - - name: fetch-image-list
+        template: fetch-image-list
+    - - arguments:
+          artifacts:
+          - from: '{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}'
+            name: imageList
+        name: run-subflow
+        template: subflow
+    - - name: notify-teams
+        template: notify-teams
+    - - name: git-upload-report
+        template: git-upload-report
+  - container:
+      env:
+      - name: GITHUB_KEY_FILE_PATH
+        value: /clusterscanner/github/github_private_key.pem
+      envFrom:
+      - secretRef:
+          name: '{{ workflow.parameters.gitSecretName }}'
+      image: '{{ workflow.parameters.imageSourceFetcherImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/github/github_private_key.pem
+        name: '{{ workflow.parameters.gitSecretName }}'
+        subPath: github_private_key.pem
+      - mountPath: /clusterscanner/image-source-list
+        name: '{{ workflow.parameters.imageSourceListConfigMapName }}'
+      - mountPath: /clusterscanner/out
+        name: tmp
+    name: fetch-image-list
+    outputs:
+      artifacts:
+      - archive:
+          none: {}
+        name: image-lists
+        path: /clusterscanner/out
+      - archive:
+          none: {}
+        name: image-list-merged
+        path: /clusterscanner/out/merged/merged.json
+    volumes:
+    - configMap:
+        name: '{{ workflow.parameters.imageSourceListConfigMapName }}'
+      name: '{{ workflow.parameters.imageSourceListConfigMapName }}'
+    - name: '{{ workflow.parameters.gitSecretName }}'
+      secret:
+        secretName: '{{ workflow.parameters.gitSecretName }}'
+    - emptyDir: {}
+      name: tmp
+  - container:
+      env:
+      - name: SCAN_ID
+        value: '{{ workflow.parameters.scanId }}'
+      - name: REGISTRY_SECRET
+        value: '{{ workflow.parameters.registrySecretName }}'
+      - name: DEPENDENCY_SCAN_CM
+        value: '{{ workflow.parameters.dependencyCheckDbConfigMapName }}'
+      - name: DEFECTDOJO_CM
+        value: '{{ workflow.parameters.defectDojoConfigMapName }}'
+      - name: DEFECTDOJO_SECRETS
+        value: '{{ workflow.parameters.defectDojoConfigMapName }}'
+      - name: MAX_RUNNING_JOBS_IN_QUEUE
+        value: "4"
+      - name: dependencyCheckSuppressionsConfigMapName
+        value: '{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}'
+      - name: NEW_VERSION_IMAGE_FIILTER
+        value: '{{ workflow.parameters.newVersionImageFilter }}'
+      - name: baseImageName
+        value: '{{ workflow.parameters.baseImageName }}'
+      - name: defectDojoClientImageName
+        value: '{{ workflow.parameters.defectDojoClientImageName }}'
+      - name: scanDistrolessImageName
+        value: '{{ workflow.parameters.scanDistrolessImageName }}'
+      - name: scanDependencyCheckImageName
+        value: '{{ workflow.parameters.scanDependencyCheckImageName }}'
+      - name: scanMalwareImageName
+        value: '{{ workflow.parameters.scanMalwareImageName }}'
+      - name: scanRootImageName
+        value: '{{ workflow.parameters.scanRootImageName }}'
+      - name: scanLifetimeImageName
+        value: '{{ workflow.parameters.scanLifetimeImageName }}'
+      - name: scanNewVersionImageName
+        value: '{{ workflow.parameters.scanNewVersionImageName }}'
+      - name: notifierImageName
+        value: '{{ workflow.parameters.notifierImageName }}'
+      image: '{{ workflow.parameters.workflowRunnerImageName }}'
+      imagePullPolicy: IfNotPresent
+    inputs:
+      artifacts:
+      - mode: 292
+        name: imageList
+        path: /clusterscanner/imageList.json
+    name: subflow
+  - name: notify-teams
+    script:
+      command:
+      - /bin/bash
+      env:
+      - name: SLACK_CLI_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: SLACK_CLI_TOKEN
+            name: '{{ workflow.parameters.slackTokenSecretName }}'
+      - name: ENFORCE_SLACK_CHANNEL
+        value: '{{ workflow.parameters.enforceSlackChannel }}'
+      - name: smtp
+        valueFrom:
+          secretKeyRef:
+            key: smtp
+            name: '{{ workflow.parameters.emailSecretName }}'
+      - name: smtp-auth
+        valueFrom:
+          secretKeyRef:
+            key: smtp-auth
+            name: '{{ workflow.parameters.emailSecretName }}'
+      - name: smtp-auth-user
+        valueFrom:
+          secretKeyRef:
+            key: smtp-auth-user
+            name: '{{ workflow.parameters.emailSecretName }}'
+      - name: smtp-auth-password
+        valueFrom:
+          secretKeyRef:
+            key: smtp-auth-password
+            name: '{{ workflow.parameters.emailSecretName }}'
+      image: '{{ workflow.parameters.notifierImageName }}'
+      imagePullPolicy: Always
+      source: |
+        set -e
+        shopt -s globstar nullglob
+
+        if [ "${RESULT_PATH}" == "" ]; then
+          RESULT_PATH=/clusterscanner/data
+        fi
+
+        inform() {
+          echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}"
+
+          #slack="#nobody-security" # for testing
+          if [ "${slack}" != "" ]; then
+            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+              echo "SLACK_CLI_TOKEN not set, exit"
+              exit 1
+            fi
+            echo "Sending to slack ${slack}"
+            # shellcheck disable=SC2001
+            message=$(echo "${message}" | sed 's#"##g')
+
+            ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \
+              --author 'ClusterScanner' \
+              --channel "${slack}" \
+              --color bad \
+              --fields '{"image": "'${image}'", "app": "'${appName}'", "namespace": "'${namespace}'", "envirnoment": "'${environment}'"}' \
+              --footer 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
+              --footer-icon 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
+              --image 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
+              --pretext "${title}" \
+              --text "${message}"
+          else
+            echo "slackChannel not set"
+          fi
+
+          if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
+            echo "Sending to email ${email}"
+            if [ "${smtp-auth-user}" != "USERNAME@YOURDOMAIN.COM" ] && [ "${smtp-auth-user}" != "" ]; then
+              message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
+              echo -e "${message}" | mail -s "Found unhandled findings" "${email}" # works
+            else
+              echo "Warning: email set, but no email configured"
+            fi
+          else
+            echo "Hint: email not set"
+          fi
+        }
+        errors=""
+        for file in "${RESULT_PATH}"/**/*.json; do
+          echo "found file ${file}"
+          item=$(cat "${file}")
+          image=$(echo "${item}" | jq -r '.image'| tr -cd '[:alnum:]./@:_-')
+          team=$(echo "${item}" | jq -r '.team'| tr -cd '[:alnum:]._-')
+          namespace=$(echo "${item}" | jq -r '.namespace'| tr -cd '[:alnum:]._-')
+          environment=$(echo "${item}" | jq -r '.environment'| tr -cd '[:alnum:]._-')
+          slack=$(echo "${item}" | jq -r '.slack')
+          appName=$(echo "${item}" | jq -r '.appname'| tr -cd '[:alnum:]._-')
+          email=$(echo "${item}" | jq -r '.email')
+          if [ "${ENFORCE_SLACK_CHANNEL}" != "" ]; then
+            slack="${ENFORCE_SLACK_CHANNEL}"
+          fi
+          echo "Inspecting team ${team} for image ${image}"
+          for result in $(echo "${item}" | jq -rcM '.uploadResults[] | @base64'); do
+            for result2 in $(echo "${result}" | base64 -d | jq -rcM '.[] | @base64'); do
+              notifications=$(echo "${result2}" | base64 -d | jq -rcM 'select(.finding == true)')
+              while IFS= read -r notification; do
+                echo "in notification for ${image}"
+                ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
+                message=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
+                errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
+                status=$(echo "${notification}" | jq -r ".status" | tr -cd '[:alnum:]._ -')
+                ddLinkScheme=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $1}')
+                ddLinkDomain=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $2}')
+                ddLinkBase="${ddLinkScheme}//${ddLinkDomain}"
+                for findingBase in $(echo "${notification}" | jq -rcM '.findings[] | @base64'); do
+                  finding=$(echo "${findingBase}" | base64 -d)
+                  findingId=$(echo "${finding}" | jq -r '.id' | tr -cd '[:alnum:]._ -')
+                  if [ "${findingId}" != "null" ] && [ "${findingId}" != "" ]; then
+                    ddLink="${ddLinkBase}/finding/${findingId}"
+                  else
+                    ddLink="${ddLinkTest}"
+                  fi
+                  title=$(echo "${finding}" | jq -r '.title' | cut -c1-50 | sed 's#{##g'| sed 's#}##g') #| tr -cd '[:alnum:]._ <>-')
+                  title="${title} in ${image}"
+                  description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g')
+                  message="${message}\n${description}\nScan Job Status: ${status}"
+                  if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
+                    message="${message}\nError: ${errorText}"
+                  fi
+                  output=$(inform "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}" || true)
+                  echo "${output}"
+                  if [ "$(echo "${output}" | grep -c '"ok": false')" -gt 0 ]; then
+                    echo "error in slack"
+                    errors="${errors}\n${output}"
+                  fi
+                  if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
+                    sleep 120 # wait for rate limt
+                    inform "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}"
+                  fi
+                  sleep 1 # reduce risk of rate limit
+                done
+              done <<< "${notifications}"
+            done
+          done
+        done
+        echo "${errors}"
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: '{{ workflow.parameters.scanId }}'
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  - name: git-upload-report
+    script:
+      command:
+      - /bin/bash
+      env:
+      - name: ENVIRNOMENT
+        value: '{{ workflow.parameters.scanId }}'
+      - name: SCAN_ID
+        value: '{{ workflow.parameters.scanId }}'
+      - name: GITHUB_KEY_FILE_PATH
+        value: /clusterscanner/github/github_private_key.pem
+      - name: GITHUB_REPOSITORY
+        value: '{{ workflow.parameters.allResultsGitTarget }}'
+      envFrom:
+      - secretRef:
+          name: '{{ workflow.parameters.gitSecretName }}'
+      image: '{{ workflow.parameters.imageCollectorImageName }}'
+      imagePullPolicy: IfNotPresent
+      source: |
+        set -e
+        cd $HOME
+        source auth.bash # > /dev/null 2>&1
+        source git.bash # > /dev/null 2>&1
+
+        if [ "${RESULT_PATH}" == "" ]; then
+          RESULT_PATH=/clusterscanner/data
+        fi
+
+        gitAuth
+        echo "gitFetch"
+        gitFetch
+
+
+        tmpdir=$(mktemp -d)
+        tmpdirBaseImage=$(mktemp -d)
+        #echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
+
+        for result in $(find ${RESULT_PATH} -name *.json); do
+          team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
+          age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
+          baseImageAge=$(cat $result | jq -r '.scanResults[] | .["scan-baseimage-lifetime"].age' | grep -v null || true)
+          environment=$(cat $result | jq -r '.environment' | sed 's/\s//g' || true)
+          if [ "${age}" != "" ]; then
+            echo ${age} >> ${tmpdir}/${environment}_${team}.txt
+          fi
+          if [ "${baseImageAge}" != "" ]; then
+            echo ${baseImageAge} >> ${tmpdirBaseImage}/${environment}_${team}.txt
+          fi
+        done
+
+        date=$(date '+%Y-%m-%d')
+        mkdir /tmp/clusterscanner-remote/${date} || true
+
+        for j in $(ls ${tmpdir}); do
+          result=$(cat ${tmpdir}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
+          filename=$(echo ${j} | sed 's#.txt##g')
+          echo "lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${date}/${filename}_lifetime.txt
+        done
+
+        for j in $(ls ${tmpdirBaseImage}); do
+          result=$(cat ${tmpdirBaseImage}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
+          filename=$(echo ${j} | sed 's#.txt##g')
+          echo "baseimage lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${date}/${filename}_baseimage-lifetime.txt
+        done
+
+        cd /tmp/clusterscanner-remote/${date}
+
+        git add * || true
+        git commit -m "add" || true
+
+        git push -f origin master || true
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: '{{ workflow.parameters.scanId }}'
+      - mountPath: /clusterscanner/github/github_private_key.pem
+        name: '{{ workflow.parameters.gitSecretName }}'
+        subPath: github_private_key.pem
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+    - name: '{{ workflow.parameters.gitSecretName }}'
+      secret:
+        secretName: '{{ workflow.parameters.gitSecretName }}'
+  workflowSpec:
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+    serviceAccountName: clusterscanner
+    ttlStrategy:
+      secondsAfterFailure: 86400
+      secondsAfterSuccess: 86400
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  labels:
+    app.kubernetes.io/instance: org.sda
+    app.kubernetes.io/name: clusterscanner
+  name: scan-image-job
+  namespace: clusterscanner
+spec:
+  activeDeadlineSeconds: 3600
+  artifactRepositoryRef:
+    configMap: artifact-repositories
+    key: default-v1
+  entrypoint: main
+  inputs:
+    parameters:
+    - name: REGISTRY_SECRET
+    - name: DEPENDENCY_SCAN_CM
+    - name: DEFECTDOJO_CM
+    - name: DEFECTDOJO_SECRETS
+    - name: SCAN_ID
+    - name: team
+    - name: appname
+    - name: environment
+    - name: namespace
+    - name: scm_source_branch
+    - name: image
+    - name: image_id
+    - name: slack
+    - name: is_scan_lifetime
+    - name: is_scan_baseimage_lifetime
+    - name: is_scan_distroless
+    - name: is_scan_malware
+    - name: is_scan_dependency_check
+    - name: is_scan_runasroot
+    - name: scan_lifetime_max_days
+    - name: is_scan_new_version
+    - name: new_version_image_filter
+    - name: dependencyCheckSuppressionsConfigMapName
+    - name: baseImageName
+    - name: defectDojoClientImageName
+    - name: scanDistrolessImageName
+    - name: scanDependencyCheckImageName
+    - name: scanMalwareImageName
+    - name: scanRootImageName
+    - name: scanLifetimeImageName
+    - name: scanNewVersionImageName
+  templates:
+  - dag:
+      tasks:
+      - name: imagefetcher
+        template: imagefetcher
+      - depends: imagefetcher
+        name: scan-distroless
+        template: scan-distroless
+      - depends: imagefetcher
+        name: scan-lifetime
+        template: scan-lifetime
+      - depends: imagefetcher
+        name: scan-baseimage-lifetime
+        template: scan-baseimage-lifetime
+      - depends: imagefetcher
+        name: scan-dependency-check
+        template: scan-dependency-check
+      - depends: imagefetcher
+        name: scan-runasroot
+        template: scan-runasroot
+      - depends: imagefetcher
+        name: scan-malware
+        template: scan-malware
+      - depends: imagefetcher
+        name: scan-new-version
+        template: scan-new-version
+      - arguments:
+          artifacts:
+          - from: '{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report
+              }}'
+            name: results-dependency-check
+        depends: scan-dependency-check
+        name: results-dependency-check-dd-upload
+        template: results-dependency-check-dd-upload
+      - depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded
+          || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
+        name: results-collect-generic-findings
+        template: results-collect-generic-findings
+      - arguments:
+          artifacts:
+          - from: '{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings
+              }}'
+            name: results-generic-findings
+        depends: results-collect-generic-findings
+        name: results-generic-dd-upload
+        template: results-generic-dd-upload
+      - arguments:
+          artifacts:
+          - from: '{{ tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link
+              }}'
+            name: results-dd-generic-test-link
+          - from: '{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file
+              }}'
+            name: results-dd-generic-is-finding-file
+          - from: '{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file
+              }}'
+            name: results-dd-generic-findings-file
+          - from: '{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link
+              }}'
+            name: results-dd-dependency-check-test-link
+          - from: '{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file
+              }}'
+            name: results-dd-dependency-check-is-finding-file
+          - from: '{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file
+              }}'
+            name: results-dd-dependency-check-findings-file
+          - from: '{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic
+              }}'
+            name: results-generic
+          parameters:
+          - name: dd-generic-exitcode
+            value: '{{ tasks.results-generic-dd-upload.exitCode }}'
+          - name: dd-generic-startedat
+            value: '{{ tasks.results-generic-dd-upload.startedAt }}'
+          - name: dd-generic-finishedat
+            value: '{{ tasks.results-generic-dd-upload.finishedAt }}'
+          - name: dd-dependency-check-exitcode
+            value: '{{ tasks.results-dependency-check-dd-upload.exitCode }}'
+          - name: dd-dependency-check-startedat
+            value: '{{ tasks.results-dependency-check-dd-upload.startedAt }}'
+          - name: dd-dependency-check-finishedat
+            value: '{{ tasks.results-dependency-check-dd-upload.finishedAt }}'
+        depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded)
+        name: results-aggregate
+        template: results-aggregate
+    name: main
+  - name: imagefetcher
+    script:
+      command:
+      - /bin/bash
+      env:
+      - name: IMAGE
+        value: '{{ workflow.parameters.image }}'
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      image: '{{ workflow.parameters.baseImageName }}'
+      imagePullPolicy: IfNotPresent
+      source: |
+        # IMAGE_TAR_PATH from base image
+        set -e
+        echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
+
+        IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
+        mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
+        mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
+        tmp_dir=$(mktemp -d --tmpdir="${IMAGE_TAR_FOLDER_PATH}/tmp")
+        rm -Rf "${tmp_dir}" || true
+        mkdir -p "${tmp_dir}"
+        image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
+        unpack_dir=$(mktemp -d --tmpdir="${tmp_dir}")
+        config_dir=$(mktemp -d --tmpdir="${tmp_dir}")
+        mkdir -p "${image_copy_dir}" "${config_dir}" "${unpack_dir}"
+        echo "Directory /run/containers"
+        ls -lah /run/containers
+
+        echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
+        # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
+        skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
+        ls -la "${config_dir}/config.json"
+        if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" ; then
+          echo "Already got image with identical config manifest, skipping"
+          # touch on folder to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
+          touch "${IMAGE_TAR_PATH}"
+          exit 0
+        fi
+
+        echo "Downloading image ${IMAGE_BY_HASH}"
+
+        skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}"
+        layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
+        if [ "${layers}" != "null" ] && [ "${layers}" != "" ]; then
+          extractionCommand=".layers | .[].digest"
+        elif [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ] && [ "$(jq -r '.fsLayers' "${image_copy_dir}/manifest.json")" != "null" ]; then
+          extractionCommand=".fsLayers | .[].blobSum"
+        else
+          echo "Could NOT find layers to unpack"
+          exit 2
+        fi
+        for l in $(jq -r "$extractionCommand" "${image_copy_dir}/manifest.json" | sed -e "s/^sha256://g"); do
+            echo "Extracting blob ${l}"
+            tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
+        done
+        echo "Changing directory permissions"
+        find "${unpack_dir}" -type d -exec chmod 755 {} +
+        echo "Changing file permissions"
+        find "${unpack_dir}" -type f -exec chmod 644 {} +
+        cd "${unpack_dir}"
+
+        echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
+        tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
+
+        echo "Copying manifest and config file"
+        cp "${image_copy_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
+        rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
+        cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
+
+        echo "Cleaning up"
+        rm -rf "${tmp_dir}"
+      volumeMounts:
+      - defaultMode: 511
+        mountPath: /clusterscanner/images
+        name: images
+        subPath: '{{ workflow.parameters.image_id }}'
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    volumes:
+    - name: images
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-images
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+  - container:
+      env:
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_distroless }}'
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      image: '{{ workflow.parameters.scanDistrolessImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/images
+        name: images
+        readOnly: true
+        subPath: '{{ workflow.parameters.image_id }}'
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/distroless
+    name: scan-distroless
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-distroless
+        path: /clusterscanner/data
+    volumes:
+    - name: images
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-images
+        readOnly: true
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: MAX_IMAGE_LIFETIME_IN_DAYS
+        value: '{{ workflow.parameters.scan_lifetime_max_days }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_lifetime }}'
+      image: '{{ workflow.parameters.scanLifetimeImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/lifetime
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    name: scan-lifetime
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-lifetime
+        path: /clusterscanner/data
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: MAX_IMAGE_LIFETIME_IN_DAYS
+        value: '{{ workflow.parameters.scan_lifetime_max_days }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_baseimage_lifetime }}'
+      - name: MODULE_NAME
+        value: scan-baseimage-lifetime
+      - name: IS_BASE_IMAGE_LIFETIME_SCAN
+        value: "true"
+      image: '{{ workflow.parameters.scanLifetimeImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/baseimage-lifetime
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    name: scan-baseimage-lifetime
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-baseimage-lifetime
+        path: /clusterscanner/data
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_runasroot }}'
+      image: '{{ workflow.parameters.scanRootImageName }}'
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/runasroot
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    name: scan-runasroot
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-runasroot
+        path: /clusterscanner/data
+    volumes:
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: IMAGE
+        value: '{{ workflow.parameters.image }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_new_version }}'
+      - name: IMAGE_SCAN_POSITIVE_FILTER
+        value: '{{ workflow.parameters.new_version_image_filter }}'
+      image: '{{ workflow.parameters.scanNewVersionImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/new-version
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    name: scan-new-version
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-runasroot
+        path: /clusterscanner/data
+    volumes:
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: IMAGE
+        value: '{{ workflow.parameters.image }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_malware }}'
+      image: '{{ workflow.parameters.scanMalwareImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/images
+        name: images
+        readOnly: true
+        subPath: '{{ workflow.parameters.image_id }}'
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic/malware
+      - defaultMode: 292
+        mountPath: /run/containers/auth.json
+        name: registry-creds
+        subPath: auth.json
+    name: scan-malware
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-runasroot
+        path: /clusterscanner/data
+    volumes:
+    - name: images
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-images
+        readOnly: true
+    - name: registry-creds
+      secret:
+        secretName: '{{ workflow.parameters.REGISTRY_SECRET }}'
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  - container:
+      env:
+      - name: IMAGE_BY_HASH
+        value: '{{ workflow.parameters.image_id }}'
+      - name: IS_SCAN
+        value: '{{ workflow.parameters.is_scan_dependency_check }}'
+      envFrom:
+      - configMapRef:
+          name: '{{ workflow.parameters.DEPENDENCY_SCAN_CM }}'
+      image: '{{ workflow.parameters.scanDependencyCheckImageName }}'
+      imagePullPolicy: Always
+      volumeMounts:
+      - mountPath: /clusterscanner/images
+        name: images
+        readOnly: true
+        subPath: '{{ workflow.parameters.image_id }}'
+      - mountPath: /clusterscanner/data
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/dependency-check
+      - mountPath: /tmp/suppressions
+        name: suppressions
+    name: scan-dependency-check
+    outputs:
+      artifacts:
+      - archiveLogs: true
+        name: results-dependency-check
+        path: /clusterscanner/data/module_scan-dependency-check.json
+      - name: results-dependency-check-report
+        path: /clusterscanner/data
+    volumes:
+    - name: images
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-images
+        readOnly: true
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+    - configMap:
+        name: '{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}'
+      name: suppressions
+  - container:
+      args:
+      - /code/defectdojo.groovy
+      command:
+      - /usr/bin/groovy
+      env:
+      - name: DD_PRODUCT_NAME
+        value: '{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace
+          }} | {{ workflow.parameters.appname }}'
+      - name: DD_BRANCH_NAME
+        value: '{{ workflow.parameters.image }}'
+      - name: DD_REPORT_TYPE
+        value: Dependency Check Scan
+      - name: NAMESPACE
+        value: '{{ workflow.parameters.namespace }}'
+      - name: ENVIRONMENT
+        value: '{{ workflow.parameters.environment }}'
+      - name: DD_TEAM
+        value: '{{ workflow.parameters.team }}'
+      - name: EXIT_CODE_ON_FINDING
+        value: "0"
+      - name: EXIT_CODE_ON_MISSING_REPORT
+        value: "0"
+      - name: DD_MINIMUM_SEVERITY
+        value: High
+      envFrom:
+      - configMapRef:
+          name: '{{ workflow.parameters.DEFECTDOJO_CM }}'
+      - secretRef:
+          name: '{{ workflow.parameters.DEFECTDOJO_SECRETS }}'
+      image: '{{ workflow.parameters.defectDojoClientImageName }}'
+      imagePullPolicy: IfNotPresent
+      retryStrategy:
+        limit: 10
+        retryPolicy: OnFailure
+      workingDir: /code
+    inputs:
+      artifacts:
+      - name: results-dependency-check
+        path: /tmp/dependency-check-results
+    name: results-dependency-check-dd-upload
+    outputs:
+      artifacts:
+      - name: results-dd-dependency-check-test-link
+        path: /code/defectDojoTestLink.txt
+      - name: is-finding-file
+        path: /code/isFinding
+      - name: findings-file
+        path: /code/findings.json
+  - name: results-collect-generic-findings
+    outputs:
+      artifacts:
+      - name: results-generic
+        path: /tmp/result.json
+      - name: results-generic-findings
+        path: /tmp/findings.csv
+    script:
+      command:
+      - /bin/bash
+      image: '{{ workflow.parameters.baseImageName }}'
+      source: |
+        set -e
+        JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+        find /tmp/results
+        for j in /tmp/results/**/*.json; do
+          echo "Collecting ${j}"
+          echo "${JSON_RESULT}" # TODOs
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
+        done
+        echo "${JSON_RESULT}" > /tmp/result.json
+        echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
+        cat /tmp/results/**/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given"
+        DATE=$(date +%m/%d/%Y)
+        echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.csv and /tmp/result.json"
+        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
+        sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
+        echo "Will replace placeholder CLUSTER in /tmp/findings.csv and /tmp/result.json"
+        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
+        sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
+        echo "Will replace placeholder NAMESPACE in /tmp/findings.csv and /tmp/result.json"
+        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+        sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
+        sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
+        sed -i "s-###DATE###-$DATE-g" /tmp/result.json
+      volumeMounts:
+      - mountPath: /tmp/results
+        name: scandata
+        subPath: results/{{ workflow.parameters.image_id }}/generic
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+        readOnly: true
+  - container:
+      args:
+      - /code/defectdojo.groovy
+      command:
+      - /usr/bin/groovy
+      env:
+      - name: DD_PRODUCT_NAME
+        value: '{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace
+          }} | {{ workflow.parameters.appname }}'
+      - name: DD_BRANCH_NAME
+        value: '{{ workflow.parameters.image }}'
+      - name: DD_REPORT_TYPE
+        value: Generic Findings Import
+      - name: DD_REPORT_PATH
+        value: /tmp/generic-results.csv
+      - name: EXIT_CODE_ON_FINDING
+        value: "0"
+      - name: NAMESPACE
+        value: '{{ workflow.parameters.namespace }}'
+      - name: ENVIRONMENT
+        value: '{{ workflow.parameters.environment }}'
+      - name: DD_TEAM
+        value: '{{ workflow.parameters.team }}'
+      - name: EXIT_CODE_ON_MISSING_REPORT
+        value: "0"
+      - name: DD_MINIMUM_SEVERITY
+        value: Medium
+      envFrom:
+      - configMapRef:
+          name: '{{ workflow.parameters.DEFECTDOJO_CM }}'
+      - secretRef:
+          name: '{{ workflow.parameters.DEFECTDOJO_SECRETS }}'
+      image: '{{ workflow.parameters.defectDojoClientImageName }}'
+      imagePullPolicy: IfNotPresent
+      retryStrategy:
+        limit: 10
+        retryPolicy: OnFailure
+      workingDir: /code
+    inputs:
+      artifacts:
+      - name: results-generic-findings
+        path: /tmp/generic-results.csv
+    name: results-generic-dd-upload
+    outputs:
+      artifacts:
+      - name: results-dd-generic-test-link
+        path: /code/defectDojoTestLink.txt
+      - name: is-finding-file
+        path: /code/isFinding
+      - name: findings-file
+        path: /code/findings.json
+  - inputs:
+      artifacts:
+      - name: results-dd-dependency-check-test-link
+        path: /tmp/dd-dependency-check-test-link.txt
+      - name: results-dd-generic-test-link
+        path: /tmp/dd-generic-test-link.txt
+      - name: results-dd-generic-is-finding-file
+        path: /tmp/isFinding-generic
+      - name: results-dd-generic-findings-file
+        path: /tmp/findings-generic.json
+      - name: results-dd-dependency-check-is-finding-file
+        path: /tmp/isFinding-dependency-check
+      - name: results-dd-dependency-check-findings-file
+        path: /tmp/findings-dependency-check.json
+      - name: results-generic
+        path: /tmp/result.json
+      parameters:
+      - name: dd-generic-exitcode
+      - name: dd-generic-startedat
+      - name: dd-generic-finishedat
+      - name: dd-dependency-check-exitcode
+      - name: dd-dependency-check-startedat
+      - name: dd-dependency-check-finishedat
+    name: results-aggregate
+    script:
+      command:
+      - /bin/bash
+      image: '{{ workflow.parameters.baseImageName }}'
+      source: |
+        set -e
+        IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
+        IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
+        IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)
+        IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | cut -d: -f2)
+
+        JSON_RESULT=$(cat /tmp/result.json)
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageHash = \"${IMAGE_HASH}\"")
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.image = "{{ workflow.parameters.image }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.environment = "{{ workflow.parameters.environment }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.namespace = "{{ workflow.parameters.namespace }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
+
+        JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
+        isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
+        if [ "$isFinding" == "true" ]; then
+          DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Potential unhandled known vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
+          if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
+            echo "Starting DepCheck Aggregate"
+            echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
+            FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
+            FILESIZE_LIMT=25600 # 20kb
+            if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
+              echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
+              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
+            else
+              echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
+              echo '[{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-check-zero.json
+              JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
+            fi
+          else
+            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
+            echo "Warning: /tmp/findings-dependency-check.json is empty"
+          fi
+        elif [ "xX{{ inputs.parameters.dd-dependency-check-exitcode }}" != "xX0" ]; then
+          echo "Exit code != 0"
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
+        else
+          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
+        fi
+        JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
+        JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
+
+        echo "Starting Generic"
+        JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
+        isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
+        if [ "$isFinding" == "true" ]; then
+          DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Potential unhandled vulnerabilities or misconfigurations found in image\", \"ddLink\": \"${DD_LINK}\"}")
+          if [ $(cat /tmp/findings-generic.json  | wc -c) -gt 5 ]; then
+            echo $JSON_DD_GENERIC> /tmp/generic.json
+            JSON_DD_GENERIC=$(jq '.findings += input'  /tmp/generic.json /tmp/findings-generic.json)
+          else
+            JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
+            echo "Warning: /tmp/finding-generic  is empty"
+          fi
+        elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\"}")
+        else
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
+        fi
+        JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
+        JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
+        echo ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]"
+        JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]")
+        DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
+        DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
+        if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ]; then
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = true")
+        else
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
+        fi
+
+        echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
+        echo "${JSON_RESULT}"
+        echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
+      volumeMounts:
+      - defaultMode: 511
+        mountPath: /clusterscanner/data
+        name: scandata
+        subPath: '{{ workflow.parameters.SCAN_ID }}'
+    volumes:
+    - name: scandata
+      persistentVolumeClaim:
+        claimName: cluster-image-scanner-scandata
+  ttlStrategy:
+    secondsAfterFailure: 86400
+    secondsAfterSuccess: 3600
