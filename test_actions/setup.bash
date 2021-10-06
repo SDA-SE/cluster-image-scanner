@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2026
 
 kubectl apply -k argocd
 sleep 5
@@ -9,6 +10,8 @@ do
 done
 
 sleep 10
+kubectl apply -f argocd.project.yml
+sleep 1
 kubectl apply -k argowf
 sleep 5
 until kubectl -n clusterscanner get pods -o json | jq 'if (.items|length != 2) then 'false' else .items[].status.conditions[].status=="True" end' | grep -qv false
