@@ -8,7 +8,6 @@ on:
   schedule:
     - cron: "30 6 * * *"
 
-
 jobs:
   shellcheck:
     name: runner / shellcheck
@@ -16,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@bb5be3440d752c70c5ade03b2b6bf859316db5e2
+        uses: reviewdog/action-shellcheck@f627b974d3005f993dc36f46d2cdf2684be18e5c
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -44,7 +43,7 @@ jobs:
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
         id: filter
         with:
-          base: 'master' # ignored in PRs
+          base: "master" # ignored in PRs
           filters: |
             base:
               - 'images/base/**'
