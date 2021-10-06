@@ -8,7 +8,7 @@ do
   sleep 5
 done
 
-
+sleep 10
 kubectl apply -k argowf
 sleep 5
 until kubectl -n clusterscanner get pods -o json | jq 'if (.items|length != 2) then 'false' else .items[].status.conditions[].status=="True" end' | grep -qv false
