@@ -31,12 +31,12 @@ wait_for_pods_ready () {
 }
 
 kubectl apply -k argocd
-wait_for_pods_ready "argocd" "argocd" 5 5 120
+wait_for_pods_ready "argocd" "argocd" 5 10 120
 
 kubectl apply -f argocd.project.yml
 
 kubectl apply -k argowf
-wait_for_pods_ready "argo-workflow" "clusterscanner" 2 5 120
+wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
 
 kubectl kustomize --load-restrictor LoadRestrictionsNone base > tmp.yml
 kubectl apply -f tmp.yml
