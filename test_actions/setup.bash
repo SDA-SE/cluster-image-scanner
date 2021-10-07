@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2026
+# shellcheck disable=SC2026,SC2154
 
 wait_for_pods_ready () {
   local name="${1}"; shift
