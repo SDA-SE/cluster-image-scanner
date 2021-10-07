@@ -6,6 +6,8 @@ generatorOptions:
 
 resources:
   - ../../deployment/overlays/test-local/
+  - minio.auth.yml
+  - minio.tenant.yml
 
 commonLabels:
   app.kubernetes.io/name: clusterscanner

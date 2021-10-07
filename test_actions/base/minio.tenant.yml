@@ -1,0 +1,29 @@
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: clusterscanner
+spec:
+  image: minio/minio:RELEASE.2021-09-03T03-56-13Z
+  credsSecret:
+    name: minio-auth
+  podManagementPolicy: Parallel
+  pools:
+    - servers: 1
+      volumesPerServer: 4
+      volumeClaimTemplate:
+        metadata:
+          name: minio-data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+  mountPath: /export
+  requestAutoCert: false

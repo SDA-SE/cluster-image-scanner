@@ -13,6 +13,7 @@ wait_for_pods_ready () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
+      kubectl get pods -A
       exit 1
     fi
     echo "waiting for ${name} to be created"
@@ -23,6 +24,7 @@ wait_for_pods_ready () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
+      kubectl get pods -A
       exit 1
     fi
     echo "waiting for ${name} to be up"
@@ -36,10 +38,13 @@ wait_for_pods_ready "argocd" "argocd" 5 10 120
 kubectl apply -f argocd.project.yml
 
 kubectl apply -k argowf
+kubectl apply -k minio
+
+wait_for_pods_ready "minio" "minio-operator" 2 10 120
 wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
 
 kubectl kustomize --load-restrictor LoadRestrictionsNone base > tmp.yml
 kubectl apply -f tmp.yml
 rm tmp.yml
 
-sleep 10
+wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
