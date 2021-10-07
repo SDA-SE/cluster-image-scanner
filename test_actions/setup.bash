@@ -73,6 +73,8 @@ rm tmp.yml
 which mc || curl -sLO https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x mc && mv ./mc /usr/local/bin/mc
 which argo || curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.13/argo-linux-amd64.gz && gunzip argo-linux-amd64.gz && chmod +x argo-linux-amd64 && mv ./argo-linux-amd64 /usr/local/bin/argo
 
+sleep 30
+
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
 sleep 10
