@@ -8,6 +8,7 @@ resources:
   - ../../deployment/overlays/test-local/
   - minio.auth.yml
   - minio.tenant.yml
+  - auth.yml
 
 commonLabels:
   app.kubernetes.io/name: clusterscanner
@@ -17,3 +18,22 @@ configMapGenerator:
   - name: suppressions-sda
     files:
       - ../../test/suppressions.xml
+
+patches:
+  - path: artifacts.yml
+  - patch: |-
+      - op: replace
+        path: /data/DD_URL
+        value: "https://defectdojo-test.tools.sda-se.io"
+    target:
+      kind: ConfigMap
+      name: defectdojo
+      namespace: clusterscanner
+  - patch: |-
+      - op: replace
+        path: /data/DD_URL
+        value: "https://defectdojo-test.tools.sda-se.io"
+    target:
+      kind: ConfigMap
+      name: defectdojo-test
+      namespace: clusterscanner
