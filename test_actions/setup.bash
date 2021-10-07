@@ -70,16 +70,21 @@ kubectl kustomize --load-restrictor LoadRestrictionsNone base > tmp.yml
 kubectl apply -f tmp.yml
 rm tmp.yml
 
+which mc || curl -sLO https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x mc && mv ./mc /usr/local/bin/mc
+which argo || curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.13/argo-linux-amd64.gz && gunzip argo-linux-amd64.gz && chmod +x argo-linux-amd64 && mv ./argo-linux-amd64 /usr/local/bin/argo
+
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
-[[ -f mc ]] || wget https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x mc
+sleep 10
 
 echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 kubectl -n clusterscanner port-forward svc/minio-hl 9000:9000 &
 
-./mc alias set local http://127.0.0.1:9000 testtesttest testtesttest || true
-./mc mb local/local || true
+sleep 2
+
+mc alias set local http://127.0.0.1:9000 testtesttest testtesttest || true
+mc mb local/local || true
 
 echo "submitting argo-main.yml"
 argo submit -n clusterscanner ../argo-main.yml
