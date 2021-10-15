@@ -102,7 +102,7 @@ spec:
             mode: 0444
       container:
         image: "{{ workflow.parameters.workflowRunnerImageName }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
@@ -202,13 +202,9 @@ spec:
               message=$(echo "${message}" | sed 's#"##g')
 
               ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \
-                --author 'ClusterScanner' \
+                --author 'ClusterImageScanner' \
                 --channel "${slack}" \
-                --color bad \
-                --fields '{"image": "'${image}'", "app": "'${appName}'", "namespace": "'${namespace}'", "envirnoment": "'${environment}'"}' \
                 --footer 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
-                --footer-icon 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
-                --image 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
                 --pretext "${title}" \
                 --text "${message}"
             else
@@ -264,8 +260,9 @@ spec:
                     fi
                     title=$(echo "${finding}" | jq -r '.title' | cut -c1-50 | sed 's#{##g'| sed 's#}##g') #| tr -cd '[:alnum:]._ <>-')
                     title="${title} in ${image}"
+                    severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g')
-                    message="${message}\n${description}\nScan Job Status: ${status}"
+                    message="${message}\n${description}\nSeverity: ${severity}\nScan Job Status: ${status}"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
                     fi
