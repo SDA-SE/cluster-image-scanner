@@ -287,6 +287,13 @@ getPods() {
               break;
             fi
           done
+
+          namespaceToScanRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
+          # shellcheck disable=SC2046
+          if [ "${namespaceToScanRegex}" != "" ] && [ "${namespaceToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -v -c "${namespaceToScanRegex}") -eq 1 ]; then
+            echo "Setting skip to true due to namespaceToScanRegex ${namespaceToScanRegex}"
+            skip="true"
+          fi
           if [ "${IMAGE_SKIP_POSITIVE_LIST}" != "" ] && [ "$(echo "${image}" | grep -c "${IMAGE_SKIP_POSITIVE_LIST}")" -ne 1 ]; then
             echo "skipping ${image} based on IMAGE_SKIP_POSITIVE_LIST with regex ${IMAGE_SKIP_POSITIVE_LIST}"
             skip="true"
