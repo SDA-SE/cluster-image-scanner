@@ -116,7 +116,7 @@ buildah config \
   --env DEFAULT_SKIP="false" \
   --env IMAGE_SKIP_POSITIVE_LIST="" \
   --env IMAGE_SKIP_NEGATIVE_LIST="" \
-  --env NAMESPACE_SKIP_REGEX=="" \
+  --env NAMESPACE_SKIP_REGEX="" \
   --env DEFAULT_SCAN_LIFETIME="true" \
   --env DEFAULT_SCAN_DISTROLESS="true" \
   --env DEFAULT_SCAN_MALWARE="true" \
@@ -135,6 +135,7 @@ buildah config \
   --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
+  --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org.sdase.org/namespace_filter" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \
   --cmd "/home/code/entrypoint.bash" \

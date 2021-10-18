@@ -14,13 +14,14 @@ contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/p
 sdase.org/description: "My service description" # optional
 
 # Skip scanning for an image in a namespace
-clusterscanner.sdase.org/skip_regex: "mock-service:|mongo:|opa:" # String, especially useful for development clusters with development and production components at the same cluster
+clusterscanner.sdase.org/skip_regex: "^mock-service:\|^mongo:\|^openpolicyagent/opa:" # String, especially useful for development clusters with development and production components at the same cluster
 clusterscanner.sdase.org/skip: "true" # Boolean, to skip all images in the namespace
 clusterscanner.sdase.org/skip: "false" # Boolean,  to scan all images in the namespace, in case the default is true
 
 # Object
 ## Skip scanning for all images in the pod
 clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for development clusters with development and production components in one namespace
+clusterscanner.sdase.org.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" # String, compares the current namespace with the given filter (regex)
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
 scm.sdase.org/source_url="https://github.com/cluster-image-scanner"
@@ -38,6 +39,7 @@ clusterscanner.sdase.org/is-scan-malware: "false" # Boolean, scan to be implemen
 
 clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the lifetime scan
 ```
+Filters like `skip_regex` and `namespace_filter` are implemented with [grep](https://www.gnu.org/software/grep/manual/grep.html).
 
 ### ISO 27001 compliance
 You might use `sdase.org/description` to describe the services in all namespaces. It will enforce an extra file `service-description.json` in the target repository. This procedure might solve parts of the ISO 27001 requirement _A.8_ to establish an asset inventory.
