@@ -13,23 +13,25 @@ function scan_result_post {
 
 IS_USE_CACHE=false
 function scan_result_pre {
-  if [ "${RESULT_CACHING_HOURS}" == "" ]; then RESULT_CACHING_HOURS=4; fi
-  RESULT_CACHING_MIN=$( expr ${RESULT_CACHING_HOURS} \* 60)
+  if [ "${IS_SCAN}" == "true" ];then
+    if [ "${RESULT_CACHING_HOURS}" == "" ]; then RESULT_CACHING_HOURS=4; fi
+    RESULT_CACHING_MIN=$( expr ${RESULT_CACHING_HOURS} \* 60)
 
-  RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
-  if [ -f "${RESULT_FILE}" ]; then
-    lastStatus=$(cat "${RESULT_FILE}" | jq -r '.["'${MODULE_NAME}'"] | .status' 2>/dev/null || true)
-    if [ "${lastStatus}" != "completed" ] && [ "${IS_SCAN}" == "true" ]; then
-      echo "lastStatus: ${lastStatus}"
-      echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
-      rm "${RESULT_FILE}"
-    fi
-    if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
-      echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
-      IS_USE_CACHE=true
-      JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
-      scan_result_post
-      exit 0
+    RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
+    if [ -f "${RESULT_FILE}" ]; then
+      lastStatus=$(cat "${RESULT_FILE}" | jq -r '.["'${MODULE_NAME}'"] | .status' 2>/dev/null || true)
+      if [ "${lastStatus}" != "completed" ; then
+        echo "lastStatus: ${lastStatus}"
+        echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
+        rm "${RESULT_FILE}"
+      fi
+      if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
+        echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
+        IS_USE_CACHE=true
+        JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
+        scan_result_post
+        exit 0
+      fi
     fi
   fi
   JSON_RESULT=$(echo "{}" | jq -Sc ".+= {\"startedAt\": \"$(date --rfc-3339=ns)\"}")
