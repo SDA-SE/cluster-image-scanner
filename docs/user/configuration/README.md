@@ -24,9 +24,8 @@ clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for developmen
 clusterscanner.sdase.org.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" # String, compares the current namespace with the given filter (regex)
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
-scm.sdase.org/source_url="https://github.com/cluster-image-scanner"
-scm.sdase.org/source_branch="master"
-scm.sdase.org/release="1.0.0" # see also labels
+scm.sdase.org/source_url="https://github.com/cluster-image-scanner" # String
+scm.sdase.org/release="1.0.0" # String, see also labels
   
 # Adjust scans on object or namespace
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
