@@ -204,9 +204,9 @@ spec:
               ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \
                 --author 'ClusterImageScanner' \
                 --channel "${slack}" \
-                --footer 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
-                --pretext "${title}" \
+                --title "${title}" \
                 --text "${message}"
+#                --fields 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
             else
               echo "slackChannel not set"
             fi
