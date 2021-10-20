@@ -206,7 +206,7 @@ spec:
                 --channel "${slack}" \
                 --title "${title}" \
                 --text "${message}"
-#                --fields 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
+              #                --fields 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
             else
               echo "slackChannel not set"
             fi
