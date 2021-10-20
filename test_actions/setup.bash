@@ -70,8 +70,18 @@ kubectl kustomize --load-restrictor LoadRestrictionsNone base > tmp.yml
 kubectl apply -f tmp.yml
 rm tmp.yml
 
-which mc || curl -sLO https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x mc && mv ./mc /usr/local/bin/mc
-which argo || curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.13/argo-linux-amd64.gz && gunzip argo-linux-amd64.gz && chmod +x argo-linux-amd64 && mv ./argo-linux-amd64 /usr/local/bin/argo
+if ! which mc > /dev/null 2>&1; then
+  curl -sLO https://dl.min.io/client/mc/release/linux-amd64/mc
+  chmod +x mc
+  mv ./mc /usr/local/bin/mc
+fi
+
+if ! which argo > /dev/null 2>&1; then
+  curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.13/argo-linux-amd64.gz
+  gunzip argo-linux-amd64.gz
+  chmod +x argo-linux-amd64
+  mv ./argo-linux-amd64 /usr/local/bin/argo
+fi
 
 sleep 30
 
@@ -91,5 +101,6 @@ mc mb local/local || true
 echo "submitting argo-main.yml"
 argo submit -n clusterscanner ../argo-main.yml
 
-workflow=$(argo -n clusterscanner list | grep orchestration | awk "{print $1}")
+sleep 5
+workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
 argo -n clusterscanner wait "${workflow}"
