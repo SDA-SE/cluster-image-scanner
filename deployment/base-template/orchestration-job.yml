@@ -54,7 +54,7 @@ spec:
             template: notify-teams
         - - name: git-upload-report
             template: git-upload-report
-#            when: "{{ workflow.parameters.allResultsGitTarget }}" != ""
+            when: "{{ workflow.parameters.allResultsGitTarget }} !=  ''"
 
     - name: fetch-image-list
       outputs:
