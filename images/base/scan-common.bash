@@ -22,7 +22,7 @@ function scan_result_pre {
       lastStatus=$(cat "${RESULT_FILE}" | jq -r '.["'${MODULE_NAME}'"] | .status' 2>/dev/null || true)
       if [ "${lastStatus}" != "completed" ]; then
         echo "lastStatus: ${lastStatus}"
-        echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
+        echo "Removing ${RESULT_FILE} because last scan is not 'completed' (e.g. skipped, failed)"
         rm "${RESULT_FILE}"
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then

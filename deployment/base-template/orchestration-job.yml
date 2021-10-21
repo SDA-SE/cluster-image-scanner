@@ -244,7 +244,7 @@ spec:
                 while IFS= read -r notification; do
                   echo "in notification for ${image}"
                   ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
-                  message=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
+                  infoText=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
                   errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
                   status=$(echo "${notification}" | jq -r ".status" | tr -cd '[:alnum:]._ -')
                   ddLinkScheme=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $1}')
@@ -262,7 +262,7 @@ spec:
                     title="${title} in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g')
-                    message="${message}\n${description}\nSeverity: ${severity}\nScan Job Status: ${status}"
+                    message="${infoText}\n${description}\nSeverity: ${severity}\nScan Job Status: ${status}"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
                     fi
