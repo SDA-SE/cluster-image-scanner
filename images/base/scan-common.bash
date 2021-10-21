@@ -20,7 +20,7 @@ function scan_result_pre {
     RESULT_FILE="${ARTIFACTS_PATH}/module_${MODULE_NAME}.json"
     if [ -f "${RESULT_FILE}" ]; then
       lastStatus=$(cat "${RESULT_FILE}" | jq -r '.["'${MODULE_NAME}'"] | .status' 2>/dev/null || true)
-      if [ "${lastStatus}" != "completed" ; then
+      if [ "${lastStatus}" != "completed" ]; then
         echo "lastStatus: ${lastStatus}"
         echo "Removing ${RESULT_FILE} because this scan changed from skip=true to skip=false"
         rm "${RESULT_FILE}"
