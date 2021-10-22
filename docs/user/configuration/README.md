@@ -21,11 +21,11 @@ clusterscanner.sdase.org/skip: "false" # Boolean,  to scan all images in the nam
 # Object
 ## Skip scanning for all images in the pod
 clusterscanner.sdase.org/skip: "true" # Boolean, specially useful for development clusters with development and production components in one namespace
-clusterscanner.sdase.org.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" # String, compares the current namespace with the given filter (regex)
+clusterscanner.sdase.org.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" # String, compares the current namespace with the given filter (regex), see also [namespace-filter](namespace-filter.md)
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
-scm.sdase.org/source_url="https://github.com/cluster-image-scanner" # String
-scm.sdase.org/release="1.0.0" # String, see also labels
+scm.sdase.org/source_url="https://github.com/cluster-image-scanner" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
+scm.sdase.org/release="1.0.0" # String, see also labels, defaults to the image tag
   
 # Adjust scans on object or namespace
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
