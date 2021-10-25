@@ -50,7 +50,7 @@ app.kubernetes.io/name: "ring-calling-service" # defaults to image
 app.kubernetes.io/version: "3.42.0" # defaults to image tag
 ```
 
-## Sample recommended confuigration
+## Sample recommended configuration
 This is a recommended configuration including ISO 27001 asset catalog compliance, in case the standards (slack channel naming and scan-configurations) are adjusted to your needs, already.
 
 ### Annotations
