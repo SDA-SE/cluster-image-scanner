@@ -22,8 +22,8 @@ function scan_result_pre {
       lastStatus=$(cat "${RESULT_FILE}" | jq -r '.["'${MODULE_NAME}'"] | .status' 2>/dev/null || true)
       if [ "${lastStatus}" != "completed" ]; then
         echo "lastStatus: ${lastStatus}"
-        echo "Removing ${RESULT_FILE} because last scan is not 'completed' (e.g. skipped, failed)"
-        rm "${RESULT_FILE}"
+        echo "Removing ${ARTIFACTS_PATH}/* because last scan is not 'completed' (e.g. skipped, failed)"
+        rm "${ARTIFACTS_PATH}/*"
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
         echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
