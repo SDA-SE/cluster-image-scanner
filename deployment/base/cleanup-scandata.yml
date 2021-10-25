@@ -17,9 +17,6 @@ spec:
           - name: scandata
             persistentVolumeClaim:
               claimName: cluster-image-scanner-scandata
-          - name: images-unpacked
-            persistentVolumeClaim:
-              claimName: cluster-image-scanner-images-unpacked
         script:
           securityContext:
             runAsNonRoot: false
