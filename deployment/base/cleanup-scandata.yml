@@ -1,18 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: cleanup-pvc-wf-scandata
+  name: cleanup-enforced-delte-pvc-wf-scandata
   namespace: clusterscanner
 spec:
-  schedule: "23 15 1 * *"
+  schedule: "30 11 2 * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
-    entrypoint: pvc-cleanup-scandata
+    entrypoint: pvc-cleanup
     templates:
-      - name: pvc-cleanup-scandata
+      - name: pvc-cleanup
         volumes:
           - name: scandata
             persistentVolumeClaim:
@@ -21,25 +21,16 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/cluster-image-scanner-base:2
+          image: quay.io/sdase/clusterscanner-base:2
           volumeMounts:
             - name: scandata
               mountPath: /clusterscanner/data
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: [bash]
-          env:
-            - name: MAX_DAYS
-              value: "7"
           source: |
             set -e
             /usr/bin/whoami
-            du -sh /clusterscanner/images/data || true
-
-            for cleanupPath in $(find /clusterscanner/data/ -name *.json -mtime +${MAX_DAYS}); do
-                echo "Removing ${cleanupPath}"
-                rm -Rf ${cleanupPath} || true # folders have owner rights issues
-            done
-            find /clusterscanner/data/ -empty -type d -delete
-
-            echo "done"
+            echo "Deleting all data"
+            du -sh /clusterscanner/data/ || true
+            rm -Rf /clusterscanner/data/*
             exit 0

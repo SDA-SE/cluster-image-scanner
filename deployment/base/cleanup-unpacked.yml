@@ -1,45 +1,37 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: cleanup-pvc-wf-images
+  name: cleanup-enforced-delte-pvc-wf-images
   namespace: clusterscanner
 spec:
-  schedule: "0 15 1 * *"
+  schedule: "30 11 1 * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
-    entrypoint: pvc-cleanup-images
+    entrypoint: pvc-cleanup
     templates:
-      - name: pvc-cleanup-images
+      - name: pvc-cleanup
         volumes:
-          - name: images-unpacked
+          - name: images
             persistentVolumeClaim:
-              claimName: cluster-image-scanner-images-unpacked
+              claimName: cluster-image-scanner-images
         script:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/cluster-image-scanner-base:2
+          image: quay.io/sdase/clusterscanner-base:2
           volumeMounts:
-            - name: images-unpacked
-              mountPath: /clusterscanner/images/unpacked
-          imagePullPolicy: Always
+            - name: images
+              mountPath: /clusterscanner/images
+          imagePullPolicy: IfNotPresent
           command: [bash]
-          env:
-            - name: MAX_DAYS
-              value: "7"
           source: |
             set -e
             /usr/bin/whoami
-            du -sh /clusterscanner/images/unpacked || true
+            echo "Deleting all data"
+            du -sh /clusterscanner/images/ || true
 
-            for cleanupPath in $(find /clusterscanner/images/* -maxdepth 2 -mindepth 2 -mtime +${MAX_DAYS}); do
-                echo "Removing ${cleanupPath}"
-                rm -Rf ${cleanupPath} || true # folders have owner rights issues
-            done
-            find /clusterscanner/images/ -maxdepth 2 -empty -type d -delete
-
-            echo "done"
+            rm -Rf /clusterscanner/images/*
             exit 0
