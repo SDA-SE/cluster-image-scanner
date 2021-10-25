@@ -294,7 +294,7 @@ getPods() {
             echo "Setting skip to true due to namespaceToScanRegex ${namespaceToScanRegex}"
             skip="true"
           fi
-          podToScanRegex=$(cat /tmp/container.json | jq -rcM ".${NAMESPACE_TO_SCAN_ANNOTATION}")
+          podToScanRegex=$(cat /tmp/container.json | jq -rcM ".[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
           # shellcheck disable=SC2046
           if [ "${podToScanRegex}" != "" ] && [ "${podToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -v -c "${podToScanRegex}") -eq 1 ]; then
             echo "Setting skip to true due to podToScanRegex ${podToScanRegex}"
