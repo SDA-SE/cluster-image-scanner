@@ -20,8 +20,8 @@ resources:
   - repolist.yml
   - email.yml
   - synchronization.cm.yml
-#  - cleanup-scandata.yml
-#  - cleanup-unpacked.yml
+  - cleanup-scandata.yml
+  - cleanup-unpacked.yml
 
 configMapGenerator:
   - name: suppressions
