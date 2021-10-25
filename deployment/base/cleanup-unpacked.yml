@@ -10,8 +10,9 @@ spec:
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
+    entrypoint: pvc-cleanup-images
     templates:
-      - name: pvc-cleanup
+      - name: pvc-cleanup-images
         volumes:
           - name: images-unpacked
             persistentVolumeClaim:

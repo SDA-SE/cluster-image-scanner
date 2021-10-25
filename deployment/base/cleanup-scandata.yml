@@ -10,6 +10,7 @@ spec:
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
+    entrypoint: pvc-cleanup-scandata
     templates:
       - name: pvc-cleanup-scandata
         volumes:
