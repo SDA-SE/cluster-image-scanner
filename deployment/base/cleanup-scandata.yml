@@ -4,13 +4,12 @@ metadata:
   name: cleanup-pvc-wf-scandata
   namespace: clusterscanner
 spec:
-  schedule: "23 14 * * *"
+  schedule: "23 15 1 * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
-    entrypoint: pvc-cleanup
     templates:
       - name: pvc-cleanup-scandata
         volumes:
