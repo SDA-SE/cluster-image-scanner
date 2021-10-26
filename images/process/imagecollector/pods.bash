@@ -226,7 +226,8 @@ getPods() {
       pods=$(kubectl get pods --namespace=${namespace} --field-selector=status.phase=Running --output json)
       for pod in $(echo ${pods} | jq -rcM '.items[]? | @base64'); do
         echo "Pod in namespace ${namespace}"
-        echo ${pod} | base64 -d | jq '{
+        podDecoded=$(echo ${pod} | base64 -d)
+        echo "${podDecoded}" | jq '{
           "email": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'email"],
           "slack": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'slack"],
           "scm_source_url": .metadata.annotations["'${SCM_URL_ANNOTATION}'"],
@@ -249,7 +250,7 @@ getPods() {
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
-        for container in $(echo $pod | base64 -d |  jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
+        for container in $(echo "${podDecoded}" | jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
           echo "container in ${namespace}"
 
           # The following is an example:
@@ -294,7 +295,7 @@ getPods() {
             echo "Setting skip to true due to namespaceToScanRegex ${namespaceToScanRegex} from ${NAMESPACE_TO_SCAN_ANNOTATION}"
             skip="true"
           fi
-          podToScanRegex=$(cat /tmp/container.json | jq -rcM ".[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
+          podToScanRegex=$(echo "${podDecoded}" | jq -rcM ".metadata.annotations[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
           # shellcheck disable=SC2046
           if [ "${podToScanRegex}" != "" ] && [ "${podToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -v -c "${podToScanRegex}") -eq 1 ]; then
             echo "Setting skip to true due to podToScanRegex ${podToScanRegex} from ${NAMESPACE_TO_SCAN_ANNOTATION}"

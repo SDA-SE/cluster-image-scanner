@@ -6,6 +6,7 @@ export IS_FETCH_DESCRIPTION="true"
 export TEAM_MAPPING='[{ "namespace_filter": "verdaccio-", "team": "operations", "description": "verdaccio is about..." }]'
 
 DESCRIPTION_ANNOTATION="sdase.org/description"
+export NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter"
 export DEFAULT_SKIP="false"
 export DEFAULT_SCAN_LIFETIME="true"
 export DEFAULT_SCAN_DISTROLESS="true"
