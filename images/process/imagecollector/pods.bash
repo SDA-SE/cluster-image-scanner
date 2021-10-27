@@ -270,7 +270,7 @@ getPods() {
 
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
-          imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*/##')
+          imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
