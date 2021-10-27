@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /home/code
-
-export HOME=/home/code
+export HOME=/clusterscanner
 
 source pods.bash
 source git.bash

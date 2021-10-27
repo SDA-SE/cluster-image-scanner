@@ -61,7 +61,7 @@ githubAuth() {
 }
 
 gitSshAuth() {
-  SSH_TARGET_PATH="/home/code/.ssh"
+  SSH_TARGET_PATH="$HOME/.ssh"
   mkdir -p "${SSH_TARGET_PATH}"
   chmod 750 "${SSH_TARGET_PATH}"
   TARGET_SSH_KEY_PATH="${SSH_TARGET_PATH}/id_rsa"
@@ -87,7 +87,7 @@ gitSshAuth() {
   fi
   CLONE_URL="ssh://git@${GIT_SSH_REPOSITORY_HOST}${GIT_REPOSITORY_PATH}"
   _id=$(id -u)
-  echo "openshift:x:${_id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd
+  echo "openshift:x:${_id}:0:openshift user:/clusterscanner:/sbin/nologin" >> /etc/passwd
   # for key generated with openssh version<7.6, see https://serverfault.com/questions/854208/ssh-suddenly-returning-invalid-format/960647
   # shellcheck disable=SC2001
   _ssh_repository_host_no_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#:.*##g')
@@ -100,9 +100,11 @@ gitSshAuth() {
 
 gitAuth() {
   if [ "${GITHUB_REPOSITORY}" != "SET-ME" ]; then
+    echo "github detected"
     githubAuth
     CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@${GITHUB_REPOSITORY}"
   elif [ "${GIT_SSH_REPOSITORY_HOST}" != "SET-ME" ]; then
+    echo "ssh detected"
     gitSshAuth
   else
     echo "ERROR: Git parameters are missing"
