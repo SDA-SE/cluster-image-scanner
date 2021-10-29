@@ -63,9 +63,13 @@ githubAuth() {
 gitSshAuth() {
   SSH_TARGET_PATH="$HOME/.ssh"
   mkdir -p "${SSH_TARGET_PATH}"
-  chmod 750 "${SSH_TARGET_PATH}"
+  chmod 770 "${SSH_TARGET_PATH}"
   TARGET_SSH_KEY_PATH="${SSH_TARGET_PATH}/id_rsa"
-  cat /.ssh/id_rsa/ssh-privatekey >${TARGET_SSH_KEY_PATH}
+  if [ -e "${TARGET_SSH_KEY_PATH}" ]; then
+    echo "TARGET_SSH_KEY_PATH ${TARGET_SSH_KEY_PATH} exists, return"
+    return
+  fi
+  cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
 
   if [ ! -e ${TARGET_SSH_KEY_PATH} ]; then
     echo "ERROR: Var TARGET_SSH_KEY_PATH is not set, exit"
@@ -86,8 +90,8 @@ gitSshAuth() {
     echo "" >> "${TARGET_SSH_KEY_PATH}"
   fi
   CLONE_URL="ssh://git@${GIT_SSH_REPOSITORY_HOST}${GIT_REPOSITORY_PATH}"
-  _id=$(id -u)
-  echo "openshift:x:${_id}:0:openshift user:/clusterscanner:/sbin/nologin" >> /etc/passwd
+  id=$(id -u)
+  echo "openshift:x:${id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd
   # for key generated with openssh version<7.6, see https://serverfault.com/questions/854208/ssh-suddenly-returning-invalid-format/960647
   # shellcheck disable=SC2001
   _ssh_repository_host_no_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#:.*##g')

@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-export HOME=/clusterscanner
+export HOME=/home/code
+id || true
 
+cd $HOME
 source pods.bash
 source git.bash
 IMAGE_FILENAME_JSON=/tmp/cluster-scan/output.json

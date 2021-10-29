@@ -55,7 +55,7 @@ rsync -a ${tools_mnt}/usr/bin/find ${mnt}/usr/bin/find
 rsync -a bin/kubectl "${mnt}/usr/local/bin/kubectl"
 rsync -a entrypoint.bash "${mnt}/home/code/entrypoint.bash"
 rsync -a pods.bash "${mnt}/home/code/pods.bash"
-rsync -a build.sh "${mnt}/home/code/build.sh # for sha1"
+#rsync -a build.sh "${mnt}/home/code/build.sh" # for sha1
 rsync -a .gitconfig "${mnt}/home/code/.gitconfig"
 rsync -a config "${mnt}/home/code/"
 rsync -a "${tools_mnt}/clusterscanner/git.bash" "${mnt}/home/code/"
@@ -63,20 +63,16 @@ rsync -a "${tools_mnt}/clusterscanner/auth.bash" "${mnt}/home/code/"
 
 # git looks up for a user
 openShiftGroupId=0
-echo "nonroot:x:1001:${openShiftGroupId}:nonroot:/home/code:/sbin/nologin" >>"${mnt}/etc/passwd"
+echo "nonroot:x:1001:${openShiftGroupId}:nonroot:/home/code:/sbin/nologin" >> "${mnt}/etc/passwd"
 echo "nobody:x:1001:" >>"${mnt}/etc/group"
 echo "openshift:x:5555:" >>"${mnt}/etc/group"
 chgrp "${openShiftGroupId}" "${mnt}/etc/passwd" # openShift 3.X specifc, https://docs.openshift.com/container-platform/3.3/creating_images/guidelines.html
 chmod g=u "${mnt}/etc/passwd"
 chmod o=u "${mnt}/etc/passwd"
 
-mkdir -p "${mnt}/.ssh"
-chmod 777 -R "${mnt}/home/"
+# the ssh folder must be owned by the user, therefore, the folder can not be created in advance
+chmod 777 "${mnt}/home/code/"
 chown -R "1001:${openShiftGroupId}" "${mnt}/home/code/"
-#chmod 770 ${mnt}/home/code/.ssh
-#touch ${mnt}/home/code/.ssh/known_hosts
-#chown 1001:$openShiftGroupId ${mnt}/home/code/.ssh/known_hosts
-#chmod 777 ${mnt}/home/code/.ssh/known_hosts
 
 chmod 555 "${mnt}/etc/hosts"
 
