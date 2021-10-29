@@ -4,5 +4,5 @@ metadata:
   labels:
     kubernetes.io/metadata.name: wordpress
   annotations:
-    clusterscanner.sdase.org/is-scan-dependency-check: "false"
+    clusterscanner.sdase.org/skip: "true"
   name: wordpress

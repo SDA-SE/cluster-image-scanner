@@ -40,7 +40,9 @@ for teamStructure in $(echo $NAMESPACE_MAPPINGS | jq -rcM '.teams[] | @base64');
   done;
 done
 
-mappingNamespacesFlat=${mappingNamespacesFlat%?}; # remove last char ,
+if [ "${mappingNamespacesFlat}" != "]" ]; then
+  mappingNamespacesFlat=${mappingNamespacesFlat%?}; # remove last char ,
+fi
 mappingNamespacesFlat="${mappingNamespacesFlat}]"
 NAMESPACE_MAPPINGS=""
 
@@ -104,17 +106,18 @@ getPods() {
 
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
-      if [ "$(echo "${namespaceAnnotations}" | grep -c "NotFound")" -gt 0 ]; then
+      if [ $(echo "${namespaceAnnotations}" | grep -c "NotFound") -gt 0 ]; then
         echo "Namespace ${namespace} doesn't exists anymore"
         continue
       fi
 
+      echo "mappingNamespacesFlat"
       descriptionMapping=""
       for mapping in $(echo ${mappingNamespacesFlat} | jq -rcM ".[] | @base64"); do
         mapping=$(echo ${mapping} | base64 -d)
         configurationsToMap=$(echo "${mapping}" | jq -r 'keys | .[]' | grep -v namespace_filter)
-        export namespaceMapping=$(echo ${mapping} | jq -rcM '.namespace_filter')
-        if [ $( echo "${namespace}" | grep "${namespaceMapping}" | wc -l) -ne 0 ]; then
+        export namespaceMapping=$(echo "${mapping}" | jq -rcM '.namespace_filter')
+        if [ $( echo "${namespace}" | grep -c "${namespaceMapping}") -ne 0 ]; then
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
@@ -127,7 +130,7 @@ getPods() {
           done
         fi
       done
-
+      echo "Will set IS_FETCH_DESCRIPTION if ${IS_FETCH_DESCRIPTION} is true"
       if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
         if [ "${description}" == "" ]; then
           description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
@@ -139,14 +142,14 @@ getPods() {
           echo "\"${namespace}\"" >> /tmp/cluster-scan/description/missing-service-description.txt
         fi
       fi
-
+      echo "setting team"
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
       fi
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team="${DEFAULT_TEAM_NAME}"
       fi
-      #echo "getting namespaceContact"
+      echo "setting namespaceContacts"
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
         slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       fi
@@ -163,7 +166,7 @@ getPods() {
           email=""
         fi
       fi
-
+      echo "skipImageBasedOnNamespaceRegex"
       skipImageBasedOnNamespaceRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION}\"]")
       if [ "${skipImageBasedOnNamespaceRegex}" == "" ] || [ "${skipImageBasedOnNamespaceRegex}" == "null" ]; then
           skipImageBasedOnNamespaceRegex="NO-SKIP"

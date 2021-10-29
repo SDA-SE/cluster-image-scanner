@@ -40,6 +40,9 @@ spec:
     type: Recreate
   template:
     metadata:
+      annotations:
+        clusterscanner.sdase.org/skip: "false"
+        clusterscanner.sdase.org/namespace_filter: "^wordpress$"
       labels:
         app: wordpress
         tier: frontend
