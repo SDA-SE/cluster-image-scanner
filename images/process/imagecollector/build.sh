@@ -131,7 +131,7 @@ buildah config \
   --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
-  --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org.sdase.org/namespace_filter" \
+  --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \
   --cmd "/home/code/entrypoint.bash" \
