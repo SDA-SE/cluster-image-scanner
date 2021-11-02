@@ -17,7 +17,7 @@ Sample Namespaces:
 
 An example filter:
 ```
-clusterscanner.sdase.org.sdase.org/namespace_filter: "^fellowship-ring-release$\|^fellowship-ring-develop$"
+clusterscanner.sdase.org/namespace_filter: "^fellowship-ring-release$\|^fellowship-ring-develop$"
 ```
 
 While production is important for security metrics, the branch develop is important during the development process.
