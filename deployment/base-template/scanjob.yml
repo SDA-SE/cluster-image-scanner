@@ -509,7 +509,6 @@ spec:
           - name: DD_MINIMUM_SEVERITY
             value: "High"
 
-
     - name: results-collect-generic-findings
       volumes:
         - name: scandata
