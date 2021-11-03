@@ -279,6 +279,7 @@ spec:
             value: "{{ workflow.parameters.scan_lifetime_max_days }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_lifetime }}"
+
     - name: scan-baseimage-lifetime
       volumes:
         - name: scandata
@@ -534,12 +535,18 @@ spec:
           find /tmp/results
           for j in /tmp/results/**/*.json; do
             echo "Collecting ${j}"
-            echo "${JSON_RESULT}" # TODOs
-            JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [$(cat "${j}" | jq -ScM .)]")
+            JSON_RESULT=$(cat "${j}" | jq -ScM .)
+            echo "${JSON_RESULT}"
+            isFinding=$(echo "${JSON_RESULT}" | jq -ScM ".[].finding") || isFinding="false"
+            if [ "${isFinding}" == "true" ]; then
+              echo "Checking for csv:"
+              ls -la $(dirname "${j}")/*.csv
+              cat $(dirname "${j}")/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given for ${j}"
+            fi
+            JSON_RESULTS=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
-          echo "${JSON_RESULT}" > /tmp/result.json
+          echo "${JSON_RESULTS}" > /tmp/result.json
           echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
-          cat /tmp/results/**/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given"
           DATE=$(date +%m/%d/%Y)
           echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.csv and /tmp/result.json"
           sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
@@ -722,3 +729,4 @@ spec:
           echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
           echo "${JSON_RESULT}"
           echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
+
