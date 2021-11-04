@@ -24,7 +24,7 @@ function scan_result_pre {
       if [ "${lastStatus}" != "completed" ]; then
         echo "lastStatus: ${lastStatus}"
         echo "Removing ${ARTIFACTS_PATH}/* because last scan is not 'completed' (e.g. skipped, failed)"
-        rm "${ARTIFACTS_PATH}"/* || true # true: for the case that no files are there
+        rm "${ARTIFACTS_PATH}"/* || echo "ERROR: No artifacts are there" # true: for the case that no files are there
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
         echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
