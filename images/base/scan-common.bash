@@ -13,7 +13,8 @@ function scan_result_post {
 
 IS_USE_CACHE=false
 function scan_result_pre {
-  if [ "${IS_SCAN}" == "true" ];then
+  echo "MODULE_NAME: ${MODULE_NAME}"
+  if [ "${IS_SCAN}" == "true" ]; then
     if [ "${RESULT_CACHING_HOURS}" == "" ]; then RESULT_CACHING_HOURS=4; fi
     RESULT_CACHING_MIN=$( expr ${RESULT_CACHING_HOURS} \* 60)
 
@@ -23,7 +24,7 @@ function scan_result_pre {
       if [ "${lastStatus}" != "completed" ]; then
         echo "lastStatus: ${lastStatus}"
         echo "Removing ${ARTIFACTS_PATH}/* because last scan is not 'completed' (e.g. skipped, failed)"
-        rm "${ARTIFACTS_PATH}/*"
+        rm "${ARTIFACTS_PATH}/*" || true # true: for the case that no files are there
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
         echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
