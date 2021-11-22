@@ -31,6 +31,10 @@ EOF
 }
 
 sp_authorize() {
+    if [ "${GITHUB_APP_ID}" == "" ]; then
+      echo "GITHUB_APP_ID is empty, not creating github token"
+      return 1
+    fi
     createJWT
     createdGithubToken=true
     GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GITHUB_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
