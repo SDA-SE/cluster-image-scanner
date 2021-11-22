@@ -15,6 +15,9 @@ for repofile in /clusterscanner/image-source-list/*; do
     sp_getfile "${repourl}" "/clusterscanner/out/${i}.json" #> /dev/null 2>&1#
     if [ "$(grep -c 'image' "/clusterscanner/out/${i}.json")" -eq 0 ]; then
       echo "Could not get repo ${repourl} from (${repofile}) or the repos doesn't include images"
+      ls -la /clusterscanner/out/${i}.json
+      echo "Content of /clusterscanner/out/${i}.json"
+      cat /clusterscanner/out/${i}.json
       exit 1
     fi
   else
