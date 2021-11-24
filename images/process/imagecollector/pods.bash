@@ -144,7 +144,7 @@ getPods() {
       fi
       echo "setting team"
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
-        team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"' )
+        team=$(echo "${namespaceAnnotations}" | jq -r '."'${TEAM_ANNOTATION}'"')
       fi
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team="${DEFAULT_TEAM_NAME}"
