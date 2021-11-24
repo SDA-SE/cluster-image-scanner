@@ -282,7 +282,7 @@ getPods() {
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
           else
-            if [ "${NAMESPACE_SKIP_REGEX}" != "" ] && [ $(echo "${namespace}" | grep "${NAMESPACE_SKIP_REGEX}" | wc -l) -gt 0 ]; then
+            if [ "${NAMESPACE_SKIP_REGEX}" != "" ] && [ $(echo "${namespace}" | grep -c "${NAMESPACE_SKIP_REGEX}") -gt 0 ]; then
               echo "Skipping image due to namespace name and NAMESPACE_SKIP_REGEX ${NAMESPACE_SKIP_REGEX}"
               skip="true"
             fi
