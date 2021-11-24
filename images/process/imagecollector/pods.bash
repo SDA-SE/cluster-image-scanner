@@ -149,12 +149,16 @@ getPods() {
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team="${DEFAULT_TEAM_NAME}"
       fi
+      team=$(echo "${team}"| tr '[:upper:]' '[:lower:]')
       echo "setting namespaceContacts"
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
         slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       fi
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
           slack="#${team}${DEFAULT_SLACK_POSTFIX}"
+      fi
+      if [ "${slack}" != "#.*" ]; then
+        echo "WARN: The given slack channel '${slack}' doesn't start with #"
       fi
       if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
         email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
