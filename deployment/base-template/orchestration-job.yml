@@ -54,7 +54,7 @@ spec:
             template: notify-teams
         - - name: git-upload-report
             template: git-upload-report
-#            when: "{{ workflow.parameters.allResultsGitTarget }} == "
+    #            when: "{{ workflow.parameters.allResultsGitTarget }} == "
 
     - name: fetch-image-list
       outputs:
@@ -183,7 +183,7 @@ spec:
                 key: smtp-auth-password
         command: [/bin/bash]
         source: |
-          set -e
+          #set -e
           shopt -s globstar nullglob
 
           if [ "${RESULT_PATH}" == "" ]; then
@@ -215,7 +215,7 @@ spec:
 
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
               echo "Sending to email ${email}"
-              if [ "${smtp-auth-user}" != "USERNAME@YOURDOMAIN.COM" ] && [ "${smtp-auth-user}" != "" ]; then
+              if [ "${smtp-auth-user}" != "USERNAME@YOURDOMAIN.COM" ] && [ "${smtp-auth-user}" != "" ] && [ "${smtp-auth}" != "smtp_auth_SECRET" ]; then
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
                 echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
               else
