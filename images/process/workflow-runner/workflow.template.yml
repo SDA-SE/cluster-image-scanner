@@ -3,7 +3,7 @@ kind: Workflow
 metadata:
   generateName: "###workflow_name###"
   labels:
-    clusterscanner.sda.se/scan-id: "###SCAN_ID###"
+    clusterscanner.sda.org/scan-id: "###SCAN_ID###"
 spec:
   synchronization:
     semaphore:

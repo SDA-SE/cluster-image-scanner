@@ -56,20 +56,20 @@ while read -r line; do
 
   for outdatedJob in $(argo list --running -n clusterscanner --prefix scanjob | grep "Running *1h" | awk '{print $1}'); do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
-    argo stop "${outdatedJob}" -n clusterscanner
+    argo stop "${outdatedJob}" -n "${JOB_EXECUTION_NAMESPACE}"
   done
   counter=$((counter+1))
   echo "Job Status (Submitted Jobs/Total Jobs): ${counter}/${totalCount}"
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     # argo list --status Pending,Running results in Running only, maybe this will be fixed one day
-    while [[ "$(argo list -n clusterscanner | grep scanjob | grep "Pending\|Running" | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
+    while [[ "$(argo list -n "${JOB_EXECUTION_NAMESPACE}" | grep scanjob | grep "Pending\|Running" | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
       echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 10 seconds until there are less"
       sleep 10
     done
   fi
 done < /clusterscanner/imageListSeparated.json
-while [[ "$(argo list --running -n clusterscanner -l "clusterscanner.sda.se/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
+while [[ "$(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" -l "clusterscanner.sda.org/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
   echo "There are still scans running, waiting another 10 seconds"
   sleep 10
 done
