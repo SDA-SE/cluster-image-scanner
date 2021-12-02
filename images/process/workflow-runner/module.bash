@@ -47,6 +47,9 @@ while read -r line; do
   sed -i "s~###scanRootImageName###~${scanRootImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanLifetimeImageName###~${scanLifetimeImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanNewVersionImageName###~${scanNewVersionImageName}~" /clusterscanner/template.yml
+  workflowGeneratedName="sj-${environment}-${namespace}-${team}-"
+  workflowGeneratedName="${workflowGeneratedName:0:62}"
+  sed -i "s~###workflow_name###~${workflowGeneratedName}~" /clusterscanner/template.yml
 
   cat /clusterscanner/template.yml
   kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /clusterscanner/template.yml

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: scanjob-###environment###-###namespace###-###team###-
+  generateName: "###workflow_name###"
   labels:
     clusterscanner.sda.se/scan-id: "###SCAN_ID###"
 spec:
