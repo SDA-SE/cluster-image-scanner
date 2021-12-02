@@ -49,7 +49,7 @@ while read -r line; do
   sed -i "s~###scanNewVersionImageName###~${scanNewVersionImageName}~" /clusterscanner/template.yml
 
   cat /clusterscanner/template.yml
-  kubectl create -n clusterscanner -f /clusterscanner/template.yml
+  kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /clusterscanner/template.yml
 
   for outdatedJob in $(argo list --running -n clusterscanner --prefix scanjob | grep "Running *1h" | awk '{print $1}'); do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"

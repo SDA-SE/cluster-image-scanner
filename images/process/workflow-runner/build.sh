@@ -75,6 +75,7 @@ buildah config \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env "GITHUB_KEY_FILE_PATH=/clusterscanner/github/github_private_key.pem" \
   --env "MAX_RUNNING_JOBS_IN_QUEUE=5" \
+  --env "JOB_EXECUTION_NAMESPACE=clusterscanner" \
   "${ctr}"
 
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
