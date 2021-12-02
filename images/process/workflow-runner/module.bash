@@ -14,6 +14,9 @@ while read -r line; do
   fi
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
   IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
+  namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
+  environment=$(echo "${DATA_JSON}" | jq -r .environment)
+  team=$(echo "${DATA_JSON}" | jq -r .team)
   cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
@@ -21,10 +24,10 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /clusterscanner/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /clusterscanner/template.yml
   sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /clusterscanner/template.yml
-  sed -i "s~###team###~$(echo "${DATA_JSON}" | jq -r .team)~" /clusterscanner/template.yml
+  sed -i "s~###team###~${team}~" /clusterscanner/template.yml
   sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /clusterscanner/template.yml
-  sed -i "s~###environment###~$(echo "${DATA_JSON}" | jq -r .environment)~" /clusterscanner/template.yml
-  sed -i "s~###namespace###~$(echo "${DATA_JSON}" | jq -r .namespace)~" /clusterscanner/template.yml
+  sed -i "s~###environment###~${environment}~" /clusterscanner/template.yml
+  sed -i "s~###namespace###~${namespace}~" /clusterscanner/template.yml
   sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /clusterscanner/template.yml
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /clusterscanner/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /clusterscanner/template.yml
