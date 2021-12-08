@@ -55,9 +55,13 @@ sp_getfile() {
     if [ "${accept}" == "" ]; then
       accept="application/vnd.github.v4.raw"
     fi
-    curl -L \
-        --output "${dst}" \
-        --header "Accept: ${accept}" \
-        --header "Authorization: token ${GITHUB_TOKEN}" \
-        "${src}"
+
+    command="curl -L --output \"${dst}\" --header \"Accept: ${accept}\""
+
+    if [ "${GITHUB_TOKEN}" != "" ]; then
+      command="${command} --header \"Authorization: token ${GITHUB_TOKEN}\""
+    fi
+    command="${command} \"${src}\""
+    echo "debug: Using command ${command}"
+    eval ${command}
 }
