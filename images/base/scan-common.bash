@@ -27,7 +27,8 @@ function scan_result_pre {
         rm "${ARTIFACTS_PATH}"/* || echo "ERROR: No artifacts are there" # true: for the case that no files are there
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
-        echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN})"
+        echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN}), ARTIFACTS_PATH ${ARTIFACTS_PATH}:"
+        ls -la "${ARTIFACTS_PATH}"
         IS_USE_CACHE=true
         JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
         scan_result_post
