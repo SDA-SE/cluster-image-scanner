@@ -80,7 +80,7 @@ spec:
             template: results-dependency-check-dd-upload
             arguments:
               artifacts:
-                - name: results-dependency-check
+                - name: results-dependency-check-report
                   from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
 
           - name: results-collect-generic-findings
@@ -465,7 +465,7 @@ spec:
     - name: results-dependency-check-dd-upload
       inputs:
         artifacts:
-          - name: results-dependency-check
+          - name: results-dependency-check-report
             path: /tmp/dependency-check-results
       outputs:
         artifacts:
@@ -477,7 +477,7 @@ spec:
             path: /code/findings.json
       container:
         image: "{{ workflow.parameters.defectDojoClientImageName }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # TODO IfNotPresent
         retryStrategy:
           limit: 10
           retryPolicy: "OnFailure"
