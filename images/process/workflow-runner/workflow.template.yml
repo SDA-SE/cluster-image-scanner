@@ -26,6 +26,8 @@ spec:
         value: "###team###"
       - name: appname
         value: "###appname###"
+      - name: appversion
+        value: "###appversion###"
       - name: environment
         value: "###environment###"
       - name: namespace

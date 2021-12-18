@@ -26,6 +26,7 @@ while read -r line; do
   sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /clusterscanner/template.yml
   sed -i "s~###team###~${team}~" /clusterscanner/template.yml
   sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /clusterscanner/template.yml
+  sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /clusterscanner/template.yml
   sed -i "s~###environment###~${environment}~" /clusterscanner/template.yml
   sed -i "s~###namespace###~${namespace}~" /clusterscanner/template.yml
   sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /clusterscanner/template.yml
