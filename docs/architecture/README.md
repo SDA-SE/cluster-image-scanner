@@ -17,3 +17,5 @@ The Architectural Decisions are documented:
 - [Image Transfer](decisions/case-study-image-transfer.md)
 
 The [threat model](threat-model.md) is documented.
+
+A comparsion of [ClusterImageScanner](comparsion.md) with other tools has been performed.
