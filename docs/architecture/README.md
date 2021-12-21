@@ -18,4 +18,4 @@ The Architectural Decisions are documented:
 
 The [threat model](threat-model.md) is documented.
 
-A comparsion of [ClusterImageScanner](comparsion.md) with other tools has been performed.
+A [comparsion](comparsion.md) of ClusterImageScanner with other tools has been performed.
