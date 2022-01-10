@@ -33,7 +33,7 @@ Scanning for new versions for dependencies.
 See [Image Lifetime](../user/scans/image-lifetime.md).
 
 ## Base Image Lifetime scan
-See [Image Lifetime](../user/scans/baseimage-lifetime.md).
+See [BaseImage Lifetime](../user/scans/baseimage-lifetime.md).
 
 ## Run as Root scan
 See [Run as Root](../user/scans/run-as-root.md).
