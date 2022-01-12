@@ -79,6 +79,7 @@ spec:
       container:
         image: "{{ workflow.parameters.imageSourceFetcherImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: /clusterscanner/github/github_private_key.pem
@@ -102,6 +103,7 @@ spec:
             mode: 0444
       container:
         image: "{{ workflow.parameters.workflowRunnerImageName }}"
+        command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         env:
           - name: SCAN_ID

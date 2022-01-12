@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - scanjob.yml
   - orchestration-job.yml
+  - scanjob-parameter.yml
 
 
 commonLabels:

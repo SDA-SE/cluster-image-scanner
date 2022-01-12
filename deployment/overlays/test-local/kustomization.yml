@@ -17,7 +17,7 @@ patches:
 - patch: |-
     - op: replace
       path: /data/DD_URL
-      value: "http://192.168.178.55:8081/"
+      value: "http://192.168.2.102:8081/"
   target:
     kind: ConfigMap
     name: defectdojo
@@ -26,7 +26,7 @@ patches:
 - patch: |-
     - op: replace
       path: /data/DD_URL
-      value: "http://192.168.178.55:8081/"
+      value: "http://192.168.2.102:8081/"
   target:
     kind: ConfigMap
     name: defectdojo-test
@@ -72,6 +72,12 @@ secretGenerator:
     files:
       - config-source/github_private_key.pem
 
+  - name: dependency-track
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/dependency-track.secret.env
 
 configMapGenerator:
   - name: dependency-check-db
@@ -84,3 +90,9 @@ configMapGenerator:
     behavior: replace
     envs:
       - config-source/repolist.env
+
+  - name: dependency-track
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/dependency-track.cm.env

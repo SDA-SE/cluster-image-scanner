@@ -26,6 +26,8 @@ spec:
       - name: scm_source_branch
       - name: image
       - name: image_id
+      - name: appversion
+      - name: appname
       - name: slack
       - name: is_scan_lifetime
       - name: is_scan_baseimage_lifetime
@@ -52,6 +54,27 @@ spec:
         tasks:
           - name: imagefetcher
             template: imagefetcher
+          - name: sbom-generation
+            depends: imagefetcher
+            template: sbom-generation
+          # wait for https://github.com/argoproj/argo-workflows/issues/6869 to be in release
+          #            arguments:
+          #              parameters:
+          #                - name: scanSyftImageName
+          #                  valueFrom:
+          #                  configMapKeyRef:
+          #                    name: scanjob-parameter
+          #                    key: syftImageName
+          - name: scan-dependency-track
+            depends: sbom-generation
+            template: scan-dependency-track
+            arguments:
+              artifacts:
+                - name: sbom
+                  from: "{{ tasks.sbom-generation.outputs.artifacts.sbom }}"
+          - name: results-dependency-track-dd-upload
+            depends: scan-dependency-track
+            template: results-dependency-track-dd-upload
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
@@ -73,20 +96,17 @@ spec:
           - name: scan-new-version
             depends: imagefetcher
             template: scan-new-version
-
           - name: results-dependency-check-dd-upload
             #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
             depends: scan-dependency-check
             template: results-dependency-check-dd-upload
-            #arguments:
-            #  artifacts:
-            #    - name: results-dependency-check-report
-            #      from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
-
+            arguments:
+              artifacts:
+                - name: results-dependency-check-report
+                  from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
-
           - name: results-generic-dd-upload
             depends: results-collect-generic-findings
             template: results-generic-dd-upload
@@ -94,7 +114,6 @@ spec:
               artifacts:
                 - name: results-generic-findings
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
-
           - name: results-aggregate
             depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded)
             template: results-aggregate
@@ -176,16 +195,18 @@ spec:
           # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
           skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
           ls -la "${config_dir}/config.json"
-          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" ; then
+          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" && [ -f ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar ]; then
             echo "Already got image with identical config manifest, skipping"
             # touch on folder to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
             touch "${IMAGE_TAR_PATH}"
             exit 0
           fi
 
-          echo "Downloading image ${IMAGE_BY_HASH}"
+          echo "Downloading image ${IMAGE_BY_HASH} to ${image_copy_dir}"
 
-          skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}"
+          skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}/"
+          rm -Rf ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar || true
+          skopeo copy "docker://${IMAGE_BY_HASH}" "docker-archive:${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar"
           layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
           if [ "${layers}" != "null" ] && [ "${layers}" != "" ]; then
             extractionCommand=".layers | .[].digest"
@@ -216,6 +237,173 @@ spec:
           echo "Cleaning up"
           rm -rf "${tmp_dir}"
 
+    - name: sbom-generation
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-images
+            readOnly: true
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      outputs:
+        artifacts:
+          - name: sbom
+            path: /clusterscanner/data/bom.json
+            archiveLogs: true
+#      inputs:
+#        parameters:
+#          - name: scanSyftImageName
+      container:
+        image: "anchore/syft"
+        command: ["/syft"]
+        args: [
+            "packages",
+            "docker-archive:/clusterscanner/images/docker-archive-image.tar",
+            "--output",
+            "cyclonedx-json",
+            "--file",
+            "/clusterscanner/data/bom.json"
+        ]
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+
+    - name: scan-dependency-track
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      inputs:
+        artifacts:
+          - name: sbom
+            path: /clusterscanner/data/bom.json
+      script:
+        image: "{{ workflow.parameters.baseImageName }}"
+        command: [/bin/bash]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: PROJECT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: VERSION
+            value: "{{ workflow.parameters.appversion }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: TEAM
+            value: "{{ workflow.parameters.team }}"
+        envFrom:
+          - secretRef:
+              name: "dependency-track"
+          - configMapRef:
+              name: "dependency-track"
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+        source: |
+          set -e
+          export bomBase64=$(cat /clusterscanner/data/bom.json | base64 -w 0)
+          echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${VERSION}'", "autoCreate": true, "bom": "'${bomBase64}'" }' > /tmp/tmpdata
+          echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${VERSION}'" }'
+          curl -X "PUT" "${DEPENDENCY_TRACK_URL}/api/v1/bom" \
+            -H 'Content-Type: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            -d @/tmp/tmpdata
+          echo "GET ${DEPENDENCY_TRACK_URL}/api/v1/project?name=${PROJECT_NAME}"
+
+          nameParameterUrlEncoded=$(printf %s  "name=${PROJECT_NAME}" | jq -sRr @uri)
+          curl "${DEPENDENCY_TRACK_URL}/api/v1/project?${nameParameterUrlEncoded}" \
+            --header 'Accept: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            --output /tmp/project.json
+
+          echo "/tmp/project.json"
+          cat /tmp/project.json
+          cat /tmp/project.json | jq -r '.[] | select(.version=="'${VERSION}'") | .uuid' > /tmp/project-uuid.txt
+
+          export UUID=$(cat /tmp/project-uuid.txt)
+          if [ "${UUID}" == "" ]; then
+            echo "Error: UUID has the unexpceted value '${UUID}'"
+            exit 1
+          fi
+          if [ $(echo "${UUID}" | wc -l) -ne 1 ]; then
+            echo "Error: UUID '${UUID}' has unexpected newline"
+            exit 3
+          fi
+
+
+          echo "Fetching ${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export"
+          curl "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export" \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" --output /clusterscanner/data/findings.json
+          echo "Findings"
+          cat /clusterscanner/data/findings.json
+
+
+    - name: results-dependency-track-dd-upload
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      outputs:
+        artifacts:
+          - name: results-dd-dependency-check-test-link
+            path: /code/defectDojoTestLink.txt
+          - name: is-finding-file
+            path: /code/isFinding
+          - name: findings-file
+            path: /code/findings.json
+      container:
+        image: "{{ workflow.parameters.defectDojoClientImageName }}"
+        volumeMounts:
+          - name: scandata
+            mountPath: /tmp/dependency-track-results
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+            readOnly: true
+        imagePullPolicy: Always # TODO IfNotPresent
+        retryStrategy:
+          limit: 10
+          retryPolicy: "OnFailure"
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - secretRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+        env:
+          - name: DD_PRODUCT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: DD_REPORT_TYPE
+            value: "Dependency Track Finding Packaging Format (FPF) Export"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: DD_TEAM
+            value: "{{ workflow.parameters.team }}"
+          - name: DD_REPORT_PATH
+            value: "/tmp/dependency-track-results/findings.json"
+          - name: EXIT_CODE_ON_FINDING
+            value: "0"
+          - name: EXIT_CODE_ON_MISSING_REPORT
+            value: "0" # make the job successful
+          - name: DD_MINIMUM_SEVERITY
+            value: "High"
+
 
     - name: scan-distroless
       volumes:
@@ -233,6 +421,7 @@ spec:
             archiveLogs: true
       container:
         image: "{{ workflow.parameters.scanDistrolessImageName }}"
+        command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -264,6 +453,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -296,6 +486,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -332,6 +523,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanRootImageName }}"
         imagePullPolicy: IfNotPresent
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -362,6 +554,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanNewVersionImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -400,6 +593,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanMalwareImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
@@ -442,6 +636,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanDependencyCheckImageName }}"
         imagePullPolicy: Always # TODO
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images

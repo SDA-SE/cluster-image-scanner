@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: clusterscanner
+  name: scanjob-parameter
+  labels:
+    # Note that this label is required for the informer to detect this ConfigMap.
+    workflows.argoproj.io/configmap-type: Parameter
+data:
+  syftImageName: "anchore/syft"
