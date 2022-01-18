@@ -3,8 +3,8 @@ kind: Kustomization
 
 resources:
   - ../test
-  - ./defectdojo.secret.yml
-  - ./slack.yml
+  - defectdojo.secret.yml
+  - slack.yml
   - rbac.yml
 
 generatorOptions:
@@ -13,24 +13,24 @@ generatorOptions:
     app.kubernetes.io/instance: test
 
 patches:
-- path: artifacts.yml
-- patch: |-
-    - op: replace
-      path: /data/DD_URL
-      value: "http://192.168.178.55:8081/"
-  target:
-    kind: ConfigMap
-    name: defectdojo
-    namespace: clusterscanner
+  - path: artifacts.yml
+  - patch: |-
+      - op: replace
+        path: /data/DD_URL
+        value: "http://192.168.178.55:8081/"
+    target:
+      kind: ConfigMap
+      name: defectdojo
+      namespace: clusterscanner
 
-- patch: |-
-    - op: replace
-      path: /data/DD_URL
-      value: "http://192.168.178.55:8081/"
-  target:
-    kind: ConfigMap
-    name: defectdojo-test
-    namespace: clusterscanner
+  - patch: |-
+      - op: replace
+        path: /data/DD_URL
+        value: "http://192.168.178.55:8081/"
+    target:
+      kind: ConfigMap
+      name: defectdojo-test
+      namespace: clusterscanner
 
 secretGenerator:
   - name: email
@@ -71,7 +71,6 @@ secretGenerator:
       - config-source/github.env
     files:
       - config-source/github_private_key.pem
-
 
 configMapGenerator:
   - name: dependency-check-db

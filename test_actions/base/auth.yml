@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  auth.json: e30K
+kind: Secret
+metadata:
+  name: registry-default
+type: kubernetes.io/secret
