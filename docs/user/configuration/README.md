@@ -34,6 +34,7 @@ clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
 clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
+clusterscanner.sdase.org/is-scan-dependency-track: "false" # Boolean
 clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
 clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean
 clusterscanner.sdase.org/is-scan-malware: "false" # Boolean, scan to be implemented

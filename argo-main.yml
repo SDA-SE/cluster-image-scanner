@@ -58,7 +58,9 @@ spec:
       - name: imageSourceFetcherImageName
         value: "quay.io/sdase/cluster-image-scanner-image-source-fetcher:2"
       - name: workflowRunnerImageName
-        value: "quay.io/sdase/cluster-image-scanner-workflow-runner:merge"
+        value: "quay.io/sdase/cluster-image-scanner-workflow-runner:merge" # TODO
+      - name: scanSyftImageName
+        value: "anchore/syft:v0.35.1"
       - name: notifierImageName
         value: "quay.io/sdase/cluster-image-scanner-notifier:2"
   templates:

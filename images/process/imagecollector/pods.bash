@@ -99,6 +99,7 @@ getPods() {
       isScanDistroless=""
       isScanMalware=""
       isScanDependencyCheck=""
+      isScanDependencyTrack=""
       isScanRunasroot=""
       isScanNewVersion=""
       scanLifetimeMaxDays=""
@@ -209,11 +210,17 @@ getPods() {
       if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
         isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
       fi
+      if [ "${isScanDependencyTrack}" == "" ] || [ "${isScanDependencyTrack}" == "null" ]; then
+        isScanDependencyTrack=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_TRACK_ANNOTATION}\"]")
+      fi
+      if [ "${isScanDependencyTrack}" == "" ] || [ "${isScanDependencyTrack}" == "null" ]; then
+        isScanDependencyTrack="${DEFAULT_SCAN_DEPENDENCY_Track}"
+      fi
       if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
         isScanRunasroot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
       fi
       if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
-        isScanRunasroot="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
+        isScanRunasroot="${DEFAULT_SCAN_RUNASROOT}"
       fi
       if [ "${isScanNewVersion}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
         isScanNewVersion=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_NEW_VERSION_ANNOTATION}\"]")
@@ -252,6 +259,7 @@ getPods() {
           "is_scan_distroless": .metadata.annotations["'${SCAN_DISTROLESS_ANNOTATION}'"],
           "is_scan_malware": .metadata.annotations["'${SCAN_MALWARE_ANNOTATION}'"],
           "is_scan_dependency_check": .metadata.annotations["'${SCAN_DEPENDENCY_CHECK_ANNOTATION}'"],
+          "is_scan_dependency_track": .metadata.annotations["'${SCAN_DEPENDENCY_TRACK_ANNOTATION}'"],
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
           "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
@@ -324,6 +332,7 @@ getPods() {
           if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseimageLifetime}'" else . end |
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
           if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
+          if .is_scan_dependency_track == null then .is_scan_dependency_track="'${isScanDependencyTrack}'" else . end |
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |

@@ -39,6 +39,7 @@ spec:
       - workflow.parameters.scanRootImageName
       - workflow.parameters.scanLifetimeImageName
       - workflow.parameters.scanNewVersionImageName
+      - workflow.parameters.scanSyftImageName
   templates:
     - name: main
       steps:
