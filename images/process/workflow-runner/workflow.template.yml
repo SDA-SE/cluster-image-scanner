@@ -78,6 +78,8 @@ spec:
         value: "###scanLifetimeImageName###"
       - name: scanNewVersionImageName
         value: "###scanNewVersionImageName###"
+      - name: scanjobEnvParameter
+        value: "scanjob-env-parameter"
 
   workflowTemplateRef:
     name: scan-image-job
