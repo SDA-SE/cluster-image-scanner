@@ -214,7 +214,7 @@ getPods() {
         isScanDependencyTrack=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_TRACK_ANNOTATION}\"]")
       fi
       if [ "${isScanDependencyTrack}" == "" ] || [ "${isScanDependencyTrack}" == "null" ]; then
-        isScanDependencyTrack="${DEFAULT_SCAN_DEPENDENCY_Track}"
+        isScanDependencyTrack="${DEFAULT_SCAN_DEPENDENCY_TRACK}"
       fi
       if [ "${isScanRunasroot}" == "" ] || [ "${isScanRunasroot}" == "null" ]; then
         isScanRunasroot=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_RUNASROOT_ANNOTATION}\"]")
