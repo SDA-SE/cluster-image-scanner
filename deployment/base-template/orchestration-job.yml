@@ -95,6 +95,8 @@ spec:
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
+          - configMapRef:
+              name: "scanjob-env-parameter"
 
     - name: subflow
       inputs:
@@ -106,6 +108,9 @@ spec:
         image: "{{ workflow.parameters.workflowRunnerImageName }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: "scanjob-env-parameter"
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
@@ -141,6 +146,8 @@ spec:
             value: "{{ workflow.parameters.scanNewVersionImageName }}"
           - name: notifierImageName
             value: "{{ workflow.parameters.notifierImageName }}"
+          - name: scanSyftImageName
+            value: "{{ workflow.parameters.scanSyftImageName }}"
 
     - name: notify-teams
       volumes:
@@ -184,6 +191,9 @@ spec:
               secretKeyRef:
                 name: "{{ workflow.parameters.emailSecretName }}"
                 key: smtp-auth-password
+        envFrom:
+          - configMapRef:
+              name: "scanjob-env-parameter"
         command: [/bin/bash]
         source: |
           #set -e
@@ -339,6 +349,8 @@ spec:
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
+          - configMapRef:
+              name: "scanjob-env-parameter"
         command: [/bin/bash]
         source: |
           set -e

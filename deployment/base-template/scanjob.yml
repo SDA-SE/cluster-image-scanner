@@ -37,6 +37,7 @@ spec:
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
       - name: is_scan_new_version
+      - name: is_scan_dependency_track
       - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
       - name: baseImageName
@@ -48,6 +49,7 @@ spec:
       - name: scanLifetimeImageName
       - name: scanNewVersionImageName
       - name: scanSyftImageName
+      - name: scanjobEnvParameter
 
   templates:
     - name: main
@@ -178,10 +180,9 @@ spec:
             value: "{{ workflow.parameters.image }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
-          - name: SKOPEO_COPY_PARAMETER
-            value: "" # e.g. "--src-tls-verify=false "
-          - name: SKOPEO_INSPECT_PARAMETER
-            value: "" # e.g. "tls-verify=false "
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
           set -e
@@ -262,7 +263,7 @@ spec:
             archiveLogs: true
       container:
         image: "{{ workflow.parameters.scanSyftImageName }}"
-        command: ["/syft"]
+        command: ["/clusterscanner/entrypoint.bash"]
         args: [
             "packages",
             "docker-archive:/clusterscanner/images/docker-archive-image.tar",
@@ -271,6 +272,9 @@ spec:
             "--file",
             "/clusterscanner/data/bom.json"
         ]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -295,6 +299,8 @@ spec:
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         env:
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_dependency_track }}"
           - name: PROJECT_NAME
             value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
           - name: VERSION
@@ -311,6 +317,8 @@ spec:
           - secretRef:
               name: "dependency-track"
           - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+          - configMapRef:
               name: "dependency-track"
         volumeMounts:
           - name: scandata
@@ -318,6 +326,10 @@ spec:
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
         source: |
           set -e
+          if [ "${IS_SCAN}" != "true" ]; then
+            echo "Dependency Track scan is disabled"
+            exit 0
+          fi
           bomPath="/clusterscanner/data/bom.json"
           exportFilePath="/clusterscanner/data/findings.json"
           if [ "${DEPENDENCY_TRACK_KEY}" == "" ]; then
@@ -381,7 +393,8 @@ spec:
 
           echo "Fetching ${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export"
 
-
+          exit 0
+          ## In development: Check for new package version
           purl="^(?:(?!pkg:deb).)*$"
           purl="pkg:maven.*"
           purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
@@ -391,6 +404,32 @@ spec:
            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
            --output ${exportFilePath}
 
+          DEFAULT_NPM_BASE_URL="https://registry.npmjs.org";
+          NPM_API_LATEST_URL="/-/package/%s/dist-tags";
+          # http://localhost:8071/api/v1/component/project/bc33ac48-fb26-4142-99c3-96fdb0f07066?searchText=&sortOrder=asc&pageSize=100&pageNumber=1
+          # jq | '.[]'
+          # foreach
+          if  [ repositoryType == "NPM" ]; then
+            packageName="abab"
+            version="1.0.0"
+
+            packageNameEncoded=$(printf %s "${packageName}" | jq -sRr @uri)
+
+            times=$(curl --silent  "${DEFAULT_NPM_BASE_URL}/${packageNameEncoded}" | jq -r ".time")
+            next=false;
+            for listedVersion in $versions; do
+              if [ "${next}" == "true" ];then
+                break;
+              fi;
+              #echo "${version} == ${listedVersion}";
+              if [ "${version}" == "${listedVersion}" ]; then
+                next="true";
+              fi
+            done
+
+            publishedDate=$(curl --silent  "${DEFAULT_NPM_BASE_URL}/${packageNameEncoded}" | jq -r ".time[\"${listedVersion}\"]")
+
+          fi
 
 
     - name: results-dependency-track-dd-upload
@@ -424,6 +463,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
           - secretRef:
               name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
         env:
@@ -480,6 +521,9 @@ spec:
             value: "{{ workflow.parameters.is_scan_distroless }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-lifetime
       volumes:
@@ -513,6 +557,9 @@ spec:
             value: "{{ workflow.parameters.scan_lifetime_max_days }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_lifetime }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-baseimage-lifetime
       volumes:
@@ -550,6 +597,9 @@ spec:
             value: "scan-baseimage-lifetime"
           - name: IS_BASE_IMAGE_LIFETIME_SCAN
             value: "true"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-runasroot
       volumes:
@@ -581,6 +631,9 @@ spec:
             value: "{{ workflow.parameters.image_id }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_runasroot }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-new-version
       volumes:
@@ -616,6 +669,9 @@ spec:
             value: "{{ workflow.parameters.is_scan_new_version }}"
           - name: IMAGE_SCAN_POSITIVE_FILTER
             value: "{{ workflow.parameters.new_version_image_filter }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-malware
       volumes:
@@ -657,6 +713,9 @@ spec:
             value: "{{ workflow.parameters.image }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_malware }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-dependency-check
       volumes:
@@ -699,7 +758,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
-
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: results-dependency-check-dd-upload
       volumes:
@@ -732,6 +792,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
           - secretRef:
               name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
         env:
@@ -751,8 +813,6 @@ spec:
             value: "0"
           - name: EXIT_CODE_ON_MISSING_REPORT
             value: "0" # make the job successful
-          - name: DD_MINIMUM_SEVERITY
-            value: "High"
 
     - name: results-collect-generic-findings
       volumes:
@@ -773,6 +833,9 @@ spec:
             mountPath: /tmp/results
             subPath: "results/{{ workflow.parameters.image_id }}/generic"
         command: [/bin/bash]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
           JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
@@ -830,6 +893,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
           - secretRef:
               name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
         env:
@@ -899,6 +964,9 @@ spec:
             subPath: "{{ workflow.parameters.SCAN_ID }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
         command: [/bin/bash]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
           IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
