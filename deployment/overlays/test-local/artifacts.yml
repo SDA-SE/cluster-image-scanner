@@ -8,7 +8,7 @@ metadata:
 data:
   default-v1: |
     s3:
-      bucket: sda-clusterscanner-argoworkflow-temp
+      bucket: cluster-image-scanner
       endpoint: s3.eu-central-1.amazonaws.com
       region: eu-central-1
       insecure: false

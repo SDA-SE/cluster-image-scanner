@@ -26,6 +26,8 @@ spec:
       - name: scm_source_branch
       - name: image
       - name: image_id
+      - name: appversion
+      - name: appname
       - name: slack
       - name: is_scan_lifetime
       - name: is_scan_baseimage_lifetime
@@ -35,6 +37,7 @@ spec:
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
       - name: is_scan_new_version
+      - name: is_scan_dependency_track
       - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
       - name: baseImageName
@@ -45,6 +48,8 @@ spec:
       - name: scanRootImageName
       - name: scanLifetimeImageName
       - name: scanNewVersionImageName
+      - name: scanSyftImageName
+      - name: scanjobEnvParameter
 
   templates:
     - name: main
@@ -52,6 +57,19 @@ spec:
         tasks:
           - name: imagefetcher
             template: imagefetcher
+          - name: sbom-generation
+            depends: imagefetcher
+            template: sbom-generation
+          - name: scan-dependency-track
+            depends: sbom-generation
+            template: scan-dependency-track
+            arguments:
+              artifacts:
+                - name: sbom
+                  from: "{{ tasks.sbom-generation.outputs.artifacts.sbom }}"
+          - name: results-dependency-track-dd-upload
+            depends: scan-dependency-track
+            template: results-dependency-track-dd-upload
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
@@ -73,20 +91,17 @@ spec:
           - name: scan-new-version
             depends: imagefetcher
             template: scan-new-version
-
           - name: results-dependency-check-dd-upload
             #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
             depends: scan-dependency-check
             template: results-dependency-check-dd-upload
-            #arguments:
-            #  artifacts:
-            #    - name: results-dependency-check-report
-            #      from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
-
+            arguments:
+              artifacts:
+                - name: results-dependency-check-report
+                  from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
-
           - name: results-generic-dd-upload
             depends: results-collect-generic-findings
             template: results-generic-dd-upload
@@ -94,9 +109,8 @@ spec:
               artifacts:
                 - name: results-generic-findings
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
-
           - name: results-aggregate
-            depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded)
+            depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
@@ -106,14 +120,20 @@ spec:
                   from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file }}"
                 - name: results-dd-generic-findings-file
                   from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file }}"
+                - name: results-generic
+                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
                 - name: results-dd-dependency-check-test-link
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
                 - name: results-dd-dependency-check-is-finding-file
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
                 - name: results-dd-dependency-check-findings-file
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
-                - name: results-generic
-                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
+                - name: results-dd-dependency-track-test-link
+                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link }}"
+                - name: results-dd-dependency-track-is-finding-file
+                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.is-finding-file }}"
+                - name: results-dd-dependency-track-findings-file
+                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.findings-file }}"
               parameters:
                 - name: "dd-generic-exitcode"
                   value: "{{ tasks.results-generic-dd-upload.exitCode }}"
@@ -127,6 +147,12 @@ spec:
                   value: "{{ tasks.results-dependency-check-dd-upload.startedAt }}"
                 - name: "dd-dependency-check-finishedat"
                   value: "{{ tasks.results-dependency-check-dd-upload.finishedAt }}"
+                - name: "dd-dependency-track-exitcode"
+                  value: "{{ tasks.results-dependency-track-dd-upload.exitCode }}"
+                - name: "dd-dependency-track-startedat"
+                  value: "{{ tasks.results-dependency-track-dd-upload.startedAt }}"
+                - name: "dd-dependency-track-finishedat"
+                  value: "{{ tasks.results-dependency-track-dd-upload.finishedAt }}"
 
     - name: imagefetcher
       volumes:
@@ -154,6 +180,9 @@ spec:
             value: "{{ workflow.parameters.image }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
           set -e
@@ -174,18 +203,20 @@ spec:
 
           echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
           # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
-          skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
+          skopeo inspect ${SKOPEO_INSPECT_PARAMETER} --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
           ls -la "${config_dir}/config.json"
-          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" ; then
+          if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" && [ -f ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar ]; then
             echo "Already got image with identical config manifest, skipping"
             # touch on folder to modify mtime, so it is not getting cleaned up for MAX_DAYS, see cleanup.yml
             touch "${IMAGE_TAR_PATH}"
             exit 0
           fi
 
-          echo "Downloading image ${IMAGE_BY_HASH}"
+          echo "Downloading image ${IMAGE_BY_HASH} to ${image_copy_dir}"
 
-          skopeo copy "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}"
+          skopeo copy ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}/"
+          rm -Rf ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar || true
+          skopeo copy ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "docker-archive:${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar"
           layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
           if [ "${layers}" != "null" ] && [ "${layers}" != "" ]; then
             extractionCommand=".layers | .[].digest"
@@ -216,6 +247,248 @@ spec:
           echo "Cleaning up"
           rm -rf "${tmp_dir}"
 
+    - name: sbom-generation
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-images
+            readOnly: true
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      outputs:
+        artifacts:
+          - name: sbom
+            path: /clusterscanner/data/bom.json
+            archiveLogs: true
+      container:
+        image: "{{ workflow.parameters.scanSyftImageName }}"
+        command: ["/clusterscanner/entrypoint.bash"]
+        args: [
+            "packages",
+            "docker-archive:/clusterscanner/images/docker-archive-image.tar",
+            "--output",
+            "cyclonedx-json",
+            "--file",
+            "/clusterscanner/data/bom.json"
+        ]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: images
+            mountPath: /clusterscanner/images
+            subPath: "{{ workflow.parameters.image_id }}"
+            readOnly: true
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+
+    - name: scan-dependency-track
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      inputs:
+        artifacts:
+          - name: sbom
+            path: /clusterscanner/data/bom.json
+      script:
+        image: "{{ workflow.parameters.baseImageName }}"
+        command: [/bin/bash]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_dependency_track }}"
+          - name: PROJECT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: VERSION
+            value: "{{ workflow.parameters.appversion }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: TEAM
+            value: "{{ workflow.parameters.team }}"
+        envFrom:
+          - secretRef:
+              name: "dependency-track"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+          - configMapRef:
+              name: "dependency-track"
+        volumeMounts:
+          - name: scandata
+            mountPath: /clusterscanner/data
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+        source: |
+          set -e
+          if [ "${IS_SCAN}" != "true" ]; then
+            echo "Dependency Track scan is disabled"
+            exit 0
+          fi
+          bomPath="/clusterscanner/data/bom.json"
+          exportFilePath="/clusterscanner/data/findings.json"
+          if [ "${DEPENDENCY_TRACK_KEY}" == "" ]; then
+           echo "Error: DEPENDENCY_TRACK_KEY not set"
+           exit 4
+          fi
+          bomBase64=$(cat "${bomPath}" | base64 -w 0)
+          echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${VERSION}'", "autoCreate": true, "bom": "'${bomBase64}'" }' > /tmp/tmpfile
+          curl -X "PUT" \
+            "${DEPENDENCY_TRACK_URL}/api/v1/bom" \
+            -H 'Content-Type: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            -d @/tmp/tmpfile \
+            --silent \
+            --show-error \
+            --output /tmp/token.json
+          token=$(cat /tmp/token.json | jq -r '.token')
+
+          counter=0
+          processingPerformed="false"
+          MAX_RETRIES=60
+          while [ "${processingPerformed}" == "true" ]; do
+           let counter=counter+1
+           url="${DEPENDENCY_TRACK_URL}/api/v1/bom/token/${token}"
+           echo "Fetching $url"
+           processingPerformed=$(curl ${url} \
+            --header 'Accept: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            --silent \
+            --show-error \
+           | jq '.processing')
+           echo "Processing status '${processingPerformed}' from Dependency Track"
+           if [ ${counter} -gt ${MAX_RETRIES} ]; then
+             echo "ERROR Reached maximum retries of ${MAX_RETRIES}, stop trying to get processing status"
+             exit 2
+           fi
+           sleep 2
+          done
+          echo "GET ${DEPENDENCY_TRACK_URL}/api/v1/project?name=${PROJECT_NAME}&.."
+          nameParameterUrlEncoded=$(printf %s "${PROJECT_NAME}" | jq -sRr @uri)
+          curl "${DEPENDENCY_TRACK_URL}/api/v1/project?name=${nameParameterUrlEncoded}" \
+           --silent \
+           --show-error \
+           --header 'Accept: application/json' \
+           -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+           --output /tmp/project.json
+
+          echo "/tmp/project.json"
+          cat /tmp/project.json
+          cat /tmp/project.json | jq -r '.[] | select(.version=="'${VERSION}'") | .uuid' > /tmp/project-uuid.txt
+
+          export UUID=$(cat /tmp/project-uuid.txt)
+          if [ "${UUID}" == "" ]; then
+           echo "Error: UUID has the unexpceted value '${UUID}'"
+           exit 1
+          fi
+          if [ $(echo "${UUID}" | wc -l) -ne 1 ]; then
+           echo "Error: UUID '${UUID}' has unexpected newline"
+           exit 3
+          fi
+
+          echo "Fetching ${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export"
+
+          exit 0
+          ## In development: Check for new package version
+          purl="^(?:(?!pkg:deb).)*$"
+          purl="pkg:maven.*"
+          purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
+          curl -v "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export?purl=${purlEncodedValue}" \
+           --silent \
+           --show-error \
+           -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+           --output ${exportFilePath}
+
+          DEFAULT_NPM_BASE_URL="https://registry.npmjs.org";
+          NPM_API_LATEST_URL="/-/package/%s/dist-tags";
+          # http://localhost:8071/api/v1/component/project/bc33ac48-fb26-4142-99c3-96fdb0f07066?searchText=&sortOrder=asc&pageSize=100&pageNumber=1
+          # jq | '.[]'
+          # foreach
+          if  [ repositoryType == "NPM" ]; then
+            packageName="abab"
+            version="1.0.0"
+
+            packageNameEncoded=$(printf %s "${packageName}" | jq -sRr @uri)
+
+            times=$(curl --silent  "${DEFAULT_NPM_BASE_URL}/${packageNameEncoded}" | jq -r ".time")
+            next=false;
+            for listedVersion in $versions; do
+              if [ "${next}" == "true" ];then
+                break;
+              fi;
+              #echo "${version} == ${listedVersion}";
+              if [ "${version}" == "${listedVersion}" ]; then
+                next="true";
+              fi
+            done
+
+            publishedDate=$(curl --silent  "${DEFAULT_NPM_BASE_URL}/${packageNameEncoded}" | jq -r ".time[\"${listedVersion}\"]")
+
+          fi
+
+
+    - name: results-dependency-track-dd-upload
+      volumes:
+        - name: scandata
+          persistentVolumeClaim:
+            claimName: cluster-image-scanner-scandata
+      outputs:
+        artifacts:
+          - name: results-dd-dependency-track-test-link
+            path: /code/defectDojoTestLink.txt
+          - name: is-finding-file
+            path: /code/isFinding
+          - name: findings-file
+            path: /code/findings.json
+      container:
+        image: "{{ workflow.parameters.defectDojoClientImageName }}"
+        volumeMounts:
+          - name: scandata
+            mountPath: /tmp/dependency-track-results
+            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+            readOnly: true
+        imagePullPolicy: Always # TODO IfNotPresent
+        retryStrategy:
+          limit: 10
+          retryPolicy: "OnFailure"
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+          - secretRef:
+              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+        env:
+          - name: DD_PRODUCT_NAME
+            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: DD_BRANCH_NAME
+            value: "{{ workflow.parameters.image }}"
+          - name: DD_REPORT_TYPE
+            value: "Dependency Track Finding Packaging Format (FPF) Export"
+          - name: NAMESPACE
+            value: "{{ workflow.parameters.namespace }}"
+          - name: ENVIRONMENT
+            value: "{{ workflow.parameters.environment }}"
+          - name: DD_TEAM
+            value: "{{ workflow.parameters.team }}"
+          - name: DD_REPORT_PATH
+            value: "/tmp/dependency-track-results/findings.json"
+          - name: EXIT_CODE_ON_FINDING
+            value: "0"
+          - name: EXIT_CODE_ON_MISSING_REPORT
+            value: "0" # make the job successful
+          - name: DD_MINIMUM_SEVERITY
+            value: "High"
+
 
     - name: scan-distroless
       volumes:
@@ -233,6 +506,7 @@ spec:
             archiveLogs: true
       container:
         image: "{{ workflow.parameters.scanDistrolessImageName }}"
+        command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         volumeMounts:
           - name: images
@@ -247,6 +521,9 @@ spec:
             value: "{{ workflow.parameters.is_scan_distroless }}"
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-lifetime
       volumes:
@@ -264,6 +541,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -279,6 +557,9 @@ spec:
             value: "{{ workflow.parameters.scan_lifetime_max_days }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_lifetime }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-baseimage-lifetime
       volumes:
@@ -296,6 +577,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanLifetimeImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -315,6 +597,9 @@ spec:
             value: "scan-baseimage-lifetime"
           - name: IS_BASE_IMAGE_LIFETIME_SCAN
             value: "true"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-runasroot
       volumes:
@@ -332,6 +617,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanRootImageName }}"
         imagePullPolicy: IfNotPresent
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -345,6 +631,9 @@ spec:
             value: "{{ workflow.parameters.image_id }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_runasroot }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-new-version
       volumes:
@@ -362,6 +651,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanNewVersionImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -379,6 +669,9 @@ spec:
             value: "{{ workflow.parameters.is_scan_new_version }}"
           - name: IMAGE_SCAN_POSITIVE_FILTER
             value: "{{ workflow.parameters.new_version_image_filter }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-malware
       volumes:
@@ -400,6 +693,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanMalwareImageName }}"
         imagePullPolicy: Always
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
@@ -419,6 +713,9 @@ spec:
             value: "{{ workflow.parameters.image }}"
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_malware }}"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: scan-dependency-check
       volumes:
@@ -442,6 +739,7 @@ spec:
       container:
         image: "{{ workflow.parameters.scanDependencyCheckImageName }}"
         imagePullPolicy: Always # TODO
+        command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: images
             mountPath: /clusterscanner/images
@@ -460,7 +758,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
-
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
     - name: results-dependency-check-dd-upload
       volumes:
@@ -493,6 +792,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
           - secretRef:
               name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
         env:
@@ -512,8 +813,6 @@ spec:
             value: "0"
           - name: EXIT_CODE_ON_MISSING_REPORT
             value: "0" # make the job successful
-          - name: DD_MINIMUM_SEVERITY
-            value: "High"
 
     - name: results-collect-generic-findings
       volumes:
@@ -534,6 +833,9 @@ spec:
             mountPath: /tmp/results
             subPath: "results/{{ workflow.parameters.image_id }}/generic"
         command: [/bin/bash]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
           JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
@@ -591,6 +893,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
           - secretRef:
               name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
         env:
@@ -618,20 +922,26 @@ spec:
     - name: results-aggregate
       inputs:
         artifacts:
-          - name: results-dd-dependency-check-test-link
-            path: /tmp/dd-dependency-check-test-link.txt
           - name: results-dd-generic-test-link
             path: /tmp/dd-generic-test-link.txt
           - name: results-dd-generic-is-finding-file
             path: /tmp/isFinding-generic
           - name: results-dd-generic-findings-file
             path: /tmp/findings-generic.json
+          - name: results-generic
+            path: /tmp/result.json
+          - name: results-dd-dependency-check-test-link
+            path: /tmp/dd-dependency-check-test-link.txt
           - name: results-dd-dependency-check-is-finding-file
             path: /tmp/isFinding-dependency-check
           - name: results-dd-dependency-check-findings-file
             path: /tmp/findings-dependency-check.json
-          - name: results-generic
-            path: /tmp/result.json
+          - name: results-dd-dependency-track-test-link
+            path: /tmp/dd-dependency-track-test-link.txt
+          - name: results-dd-dependency-track-is-finding-file
+            path: /tmp/isFinding-dependency-track
+          - name: results-dd-dependency-track-findings-file
+            path: /tmp/findings-dependency-track.json
         parameters:
           - name: dd-generic-exitcode
           - name: dd-generic-startedat
@@ -639,6 +949,9 @@ spec:
           - name: dd-dependency-check-exitcode
           - name: dd-dependency-check-startedat
           - name: dd-dependency-check-finishedat
+          - name: dd-dependency-track-exitcode
+          - name: dd-dependency-track-startedat
+          - name: dd-dependency-track-finishedat
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -651,6 +964,9 @@ spec:
             subPath: "{{ workflow.parameters.SCAN_ID }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
         command: [/bin/bash]
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
           IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
@@ -669,6 +985,39 @@ spec:
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
+
+          JSON_DD_DEPENDENCY_TRACK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-track-startedat }}\"}")
+          isFinding=$(cat /tmp/isFinding-dependency-track) || isFinding="false"
+          if [ "$isFinding" == "true" ]; then
+            DD_LINK=$(cat /tmp/dd-dependency-track-test-link.txt)
+            JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Potential unhandled known vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
+            if [ $(cat /tmp/findings-dependency-track.json | wc -c) -gt 5 ]; then
+              echo "Starting DepCheck Aggregate"
+              echo $JSON_DD_DEPENDENCY_TRACK > /tmp/dd-deptrack.json
+              FILESIZE=$(stat -c%s "/tmp/findings-dependency-track.json")
+              FILESIZE_LIMT=25600 # 20kb
+              if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
+                echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT for /tmp/findings-dependency-track.json"
+                JSON_DD_DEPENDENCY_TRACK=$(jq '.findings += input'  /tmp/dd-deptrack.json /tmp/findings-dependency-track.json)
+              else
+                echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT /tmp/findings-dependency-track.json"
+                echo '[{ "title": "Dependency Track Finding", "description": "OWASP Dependency Track found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-track-zero.json
+                JSON_DD_DEPENDENCY_TRACK=$(jq '.findings += input'  /tmp/dd-deptrack.json /tmp/findings-dependency-track-zero.json)
+              fi
+            else
+              JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"findings\": []}")
+              echo "Warning: /tmp/findings-dependency-track.json is empty"
+            fi
+          elif [ "xX{{ inputs.parameters.dd-dependency-track-exitcode }}" != "xX0" ]; then
+            echo "Exit code != 0"
+            JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
+          else
+            JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
+          fi
+          JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-track-finishedat }}\"}")
+          JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"scanType\": \"Dependency Track\"}")
+
+
 
           JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
           isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
@@ -711,7 +1060,7 @@ spec:
               echo $JSON_DD_GENERIC> /tmp/generic.json
               JSON_DD_GENERIC=$(jq '.findings += input'  /tmp/generic.json /tmp/findings-generic.json)
             else
-              JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
+              JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_GENERIC} | jq -Sc ". += {\"findings\": []}")
               echo "Warning: /tmp/finding-generic  is empty"
             fi
           elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
@@ -721,11 +1070,14 @@ spec:
           fi
           JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
           JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
-          echo ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]"
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += [{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}]")
+
+          uploadResults="[{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}, {\"ddDependencyTrackUpload\": ${JSON_DD_DEPENDENCY_TRACK}}]"
+          echo "uploadResults: ${uploadResults}"
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += ${uploadResults}")
           DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
+          DD_DEPENDENCY_TRACK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyTrackUpload) | .ddDependencyTrackUpload.finding")
           DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
-          if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ]; then
+          if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ] || [ "xX${DD_DEPENDENCY_TRACK_FINDING}" == "xXtrue" ]; then
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = true")
           else
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")

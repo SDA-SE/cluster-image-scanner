@@ -22,6 +22,8 @@ resources:
   - synchronization.cm.yml
   - cleanup-scandata.yml
   - cleanup-unpacked.yml
+  - dependency-track.cm.yml
+  - dependency-track.secret.yml
 
 configMapGenerator:
   - name: suppressions

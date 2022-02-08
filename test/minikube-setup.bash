@@ -37,6 +37,9 @@ sed -i "s#smtp_auth_SECRET#$smtp_auth_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-
 sed -i "s#smtp_auth-user_SECRET#$smtp_auth_user_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp_auth-password_SECRET#$smtp_auth_password_SECRET#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 
+sed -i "s#DEPENDENCY_TRACK_URL_PLACEHOLDER#${DEPENDENCY_TRACK_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/dependency-track.cm.env
+sed -i "s#DEPENDENCY_TRACK_KEY_PLACEHOLDER#${DEPENDENCY_TRACK_KEY_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/dependency-track.secret.env
+
 cp ${HOME}/.clusterscanner/suppressions.xml .
 
 AUTH_FILE=${HOME}/.docker/config.json
@@ -105,7 +108,8 @@ argocd proj --server localhost:8085 --insecure allow-namespace-resource  cluster
 sleep 1
 #argocd repo --server localhost:8085 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
 echo "Applying argoworkflow.yml"
-kubectl apply -f ./argoworkflow.yml
+#kubectl apply -k ./argowf/
+kubectl apply -f ./argowf/argoworkflow.yml
 sleep 20
 
 if [ "$IS_MINIKUBE" == "true" ]; then
@@ -146,3 +150,6 @@ cd ./cluster-image-scanner-image-collector/
 ./minikube-setup.bash
 cd ..
 
+echo "Token:"
+server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
+echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"

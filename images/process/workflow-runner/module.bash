@@ -14,6 +14,7 @@ while read -r line; do
   fi
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
   IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
+  is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
@@ -26,6 +27,7 @@ while read -r line; do
   sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /clusterscanner/template.yml
   sed -i "s~###team###~${team}~" /clusterscanner/template.yml
   sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /clusterscanner/template.yml
+  sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /clusterscanner/template.yml
   sed -i "s~###environment###~${environment}~" /clusterscanner/template.yml
   sed -i "s~###namespace###~${namespace}~" /clusterscanner/template.yml
   sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /clusterscanner/template.yml
@@ -38,6 +40,7 @@ while read -r line; do
   sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml
+  sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /clusterscanner/template.yml
   sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /clusterscanner/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /clusterscanner/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
@@ -50,6 +53,8 @@ while read -r line; do
   sed -i "s~###scanRootImageName###~${scanRootImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanLifetimeImageName###~${scanLifetimeImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanNewVersionImageName###~${scanNewVersionImageName}~" /clusterscanner/template.yml
+  echo "#############DEBUG: Replaceing scanSyftImageName with ${scanSyftImageName}"
+  sed -i "s~###scanSyftImageName###~${scanSyftImageName}~" /clusterscanner/template.yml
   workflowGeneratedName="sj-${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /clusterscanner/template.yml
