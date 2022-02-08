@@ -56,6 +56,8 @@ spec:
         value: "###is_scan_runasroot###"
       - name: is_scan_new_version
         value: "###is_scan_new_version###"
+      - name: is_scan_dependency_track
+        value: "###is_scan_dependency_track###"
       - name: scan_lifetime_max_days
         value: "###scan_lifetime_max_days###"
       - name: dependencyCheckSuppressionsConfigMapName
