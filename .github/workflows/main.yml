@@ -38,6 +38,7 @@ jobs:
       malware: ${{ steps.filter.outputs.malware }}
       runasroot: ${{ steps.filter.outputs.runasroot }}
       new-version: ${{ steps.filter.outputs.new-version }}
+      syft: ${{ steps.filter.outputs.syft }}
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
@@ -67,6 +68,8 @@ jobs:
               - 'images/scan/runasroot/**'
             new-version:
               - 'images/scan/new-version/**'
+            syft:
+              - 'images/scan/syft/**'
 
   build_image_base:
     needs: changes
@@ -259,6 +262,26 @@ jobs:
         with:
           image-path: images/scan/malware
           image-name: cluster-image-scanner-scan-malware
+          registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
+          registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  build_syft:
+    needs: [changes, build_image_base]
+    runs-on: ubuntu-latest
+    # run on base image change
+    # do not execute for PRs that origin from forks due to security concerns and missing secrets
+    if: |
+      (github.event_name == 'schedule' && github.ref == 'master') ||
+      (always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.distroless == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: ./.github/actions/build_image
+        with:
+          image-path: images/scan/syft
+          image-name: cluster-image-scanner-scan-syft
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
