@@ -152,3 +152,4 @@ cd ..
 
 echo "Token:"
 server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
+echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
