@@ -63,10 +63,6 @@ spec:
           - name: scan-dependency-track
             depends: sbom-generation
             template: scan-dependency-track
-            arguments:
-              artifacts:
-                - name: sbom
-                  from: "{{ tasks.sbom-generation.outputs.artifacts.sbom }}"
           - name: results-dependency-track-dd-upload
             depends: scan-dependency-track
             template: results-dependency-track-dd-upload
@@ -256,11 +252,6 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
-      outputs:
-        artifacts:
-          - name: sbom
-            path: /clusterscanner/data/bom.json
-            archiveLogs: true
       container:
         image: "{{ workflow.parameters.scanSyftImageName }}"
         command: ["/clusterscanner/entrypoint.bash"]
@@ -272,6 +263,9 @@ spec:
             "--file",
             "/clusterscanner/data/bom.json"
         ]
+        env:
+          - name: IS_SCAN
+            value: "{{ workflow.parameters.is_scan_dependency_track }}"
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
@@ -290,10 +284,6 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
-      inputs:
-        artifacts:
-          - name: sbom
-            path: /clusterscanner/data/bom.json
       script:
         image: "{{ workflow.parameters.baseImageName }}"
         command: [/bin/bash]
