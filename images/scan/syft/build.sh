@@ -37,7 +37,7 @@ base_image_base="quay.io/sdase/cluster-image-scanner-base:2"
 ctr_base="$( buildah from --pull --quiet $base_image_base )"
 mnt_base="$( buildah mount "${ctr_base}" )"
 
-rsync -a "${mnt_base}/" "${mnt}" # overrides stuff from syft, hopefully it works}
+rsync -a --exclude="etc/ssl/certs" "${mnt_base}/" "${mnt}" # overrides stuff from syft, hopefully it works}
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
