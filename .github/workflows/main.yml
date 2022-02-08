@@ -266,7 +266,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_syft:
-    needs: [changes, build_image_base]
+ #   needs: [changes, build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
