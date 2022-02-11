@@ -3,7 +3,7 @@
 
 Discover vulnerabilities and container image misconfiguration in production environments.
 
-The Cluster Scanner detects images in Kubernetes clusters and provides fast feedback based on security tests. It is recommended to run the Cluster Scanner in production environments.
+The ClusterImageScanner detects images in Kubernetes clusters and provides fast feedback based on security tests. It is recommended to run the Cluster Scanner in production environments.
 As a developer, the Cluster Scanner works out of the box. As a system operator, I just have to add the Cluster Scanner in my deployment configuration, for example Argo CD. The benefit is to get feedback on what is in production and not what should be in production. For example, due to waiting for approval or due to a failing build.
 
 The use case is shown in the following figure:
