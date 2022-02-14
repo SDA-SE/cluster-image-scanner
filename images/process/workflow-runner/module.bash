@@ -76,6 +76,7 @@ while read -r line; do
       sleep 10
     done
   fi
+  sleep 0.3
 done < /clusterscanner/imageListSeparated.json
 while [[ "$(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" -l "clusterscanner.sda.org/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
   echo "There are still scans running, waiting another 10 seconds"
