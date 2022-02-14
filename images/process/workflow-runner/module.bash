@@ -71,7 +71,7 @@ while read -r line; do
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     # argo list --status Pending,Running results in Running only, maybe this will be fixed one day
-    while [[ "$(argo list -n "${JOB_EXECUTION_NAMESPACE}" | grep "${scanjobPrefix}" | grep "Pending\|Running" | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
+    while [[ "$(argo list -n "${JOB_EXECUTION_NAMESPACE}" | grep "${scanjobPrefix}" | grep -c "Pending\|Running")" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
       echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 10 seconds until there are less"
       sleep 10
     done
