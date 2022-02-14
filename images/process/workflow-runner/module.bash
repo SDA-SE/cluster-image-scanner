@@ -19,6 +19,7 @@ while read -r line; do
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
   cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
+  scanjobPrefix="sj-"
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /clusterscanner/template.yml
@@ -53,9 +54,8 @@ while read -r line; do
   sed -i "s~###scanRootImageName###~${scanRootImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanLifetimeImageName###~${scanLifetimeImageName}~" /clusterscanner/template.yml
   sed -i "s~###scanNewVersionImageName###~${scanNewVersionImageName}~" /clusterscanner/template.yml
-  echo "#############DEBUG: Replaceing scanSyftImageName with ${scanSyftImageName}"
   sed -i "s~###scanSyftImageName###~${scanSyftImageName}~" /clusterscanner/template.yml
-  workflowGeneratedName="sj-${environment}-${namespace}-${team}-"
+  workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /clusterscanner/template.yml
 
@@ -71,12 +71,11 @@ while read -r line; do
 
   if [ "${MAX_RUNNING_JOBS_IN_QUEUE}" != "" ]; then
     # argo list --status Pending,Running results in Running only, maybe this will be fixed one day
-    while [[ "$(argo list -n "${JOB_EXECUTION_NAMESPACE}" | grep scanjob | grep "Pending\|Running" | wc -l)" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
+    while [[ "$(argo list -n "${JOB_EXECUTION_NAMESPACE}" | grep "${scanjobPrefix}" | grep -c "Pending\|Running")" -gt ${MAX_RUNNING_JOBS_IN_QUEUE} ]]; do # this should be shifted to argo workflows, as soon as there is a solution for a cluster wide argo workflows setup
       echo "There are more than ${MAX_RUNNING_JOBS_IN_QUEUE} workflows pending/running, waiting 10 seconds until there are less"
       sleep 10
     done
   fi
-  sleep 0.3
 done < /clusterscanner/imageListSeparated.json
 while [[ "$(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" -l "clusterscanner.sda.org/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
   echo "There are still scans running, waiting another 10 seconds"
