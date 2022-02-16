@@ -5,6 +5,7 @@ metadata:
   labels:
     clusterscanner.sda.org/scan-id: "###SCAN_ID###"
 spec:
+  serviceAccountName: ###SERVICE_ACCOUNT_NAME###
   synchronization:
     semaphore:
       configMapKeyRef:
