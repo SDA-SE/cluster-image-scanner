@@ -7,7 +7,7 @@ spec:
   activeDeadlineSeconds: 21600 # 6h
   entrypoint: main # Entry point for job execution
   workflowSpec:
-    serviceAccountName: clusterscanner
+    #serviceAccountName: clusterscanner
     ttlStrategy:
       secondsAfterSuccess: 172800
       secondsAfterFailure: 172800
