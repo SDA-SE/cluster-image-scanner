@@ -3,6 +3,7 @@
 set -e
 
 ls -la
+env
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /clusterscanner/imageListSeparated.json
 totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
