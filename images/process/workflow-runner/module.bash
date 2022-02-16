@@ -4,6 +4,9 @@ set -e
 
 ls -la
 env
+if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
+  SERVICE_ACCOUNT_NAME="clusterscanner"
+fi
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /clusterscanner/imageListSeparated.json
 totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
@@ -21,6 +24,7 @@ while read -r line; do
   team=$(echo "${DATA_JSON}" | jq -r .team)
   cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
   scanjobPrefix="sj-"
+  sed -i "s~###SERVICE_ACCOUNT_NAME###~${SERVICE_ACCOUNT_NAME}~" /clusterscanner/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /clusterscanner/template.yml
