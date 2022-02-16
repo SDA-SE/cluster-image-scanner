@@ -10,4 +10,4 @@ data:
   SKOPEO_COPY_PARAMETER: "" # e.g. "--src-tls-verify=false "
   SKOPEO_INSPECT_PARAMETER: "" # e.g. "tls-verify=false "
   #NO_PROXY: "" # e.g. IP of kubernetes.default.svc
-  JAVA_OPTS: "" # e.g. proxy
+  #JAVA_OPTS: "" # e.g. proxy
