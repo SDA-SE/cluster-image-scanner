@@ -106,7 +106,7 @@ gitSshAuth() {
 }
 
 gitAuth() {
-  if [ "${GITHUB_REPOSITORY}" != "SET-ME" ]; then
+  if [ "${GITHUB_REPOSITORY}" != "SET-ME" ] && [ "${GITHUB_APP_ID}" != "" ] ; then
     echo "github detected"
     githubAuth
     CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@${GITHUB_REPOSITORY}"
