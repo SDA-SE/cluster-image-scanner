@@ -37,6 +37,14 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp -a *.bash "${mnt}/clusterscanner/"
 
+dnf_opts=(
+  "--installroot=/mnt"
+  "--assumeyes"
+  "--setopt=install_weak_deps=false"
+  "--releasever=8"
+  "--setopt=tsflags=nocontexts,nodocs"
+  "--quiet"
+)
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install -y "${dnf_opts[@]}" curl git openssl openssh
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
