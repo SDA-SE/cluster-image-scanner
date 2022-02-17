@@ -94,7 +94,7 @@ gitSshAuth() {
   fi
   CLONE_URL="ssh://git@${GIT_SSH_REPOSITORY_HOST}${GIT_REPOSITORY_PATH}"
   id=$(id -u)
-  echo "openshift:x:${id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd
+  echo "openshift:x:${id}:0:openshift user:/home/code:/sbin/nologin" >> /etc/passwd || true
   # for key generated with openssh version<7.6, see https://serverfault.com/questions/854208/ssh-suddenly-returning-invalid-format/960647
   # shellcheck disable=SC2001
   _ssh_repository_host_no_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#:.*##g')
