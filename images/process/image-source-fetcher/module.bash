@@ -3,7 +3,6 @@ set -e
 
 echo "source auth.bash"
 source auth.bash # > /dev/null 2>&1
-source git.bash # > /dev/null 2>&1
 echo "calling sp_authorize"
 sp_authorize || echo "Couldn't authorize, assuming the image-source-repo is accessible by anonymous." #> /dev/null 2>&1
 
@@ -22,6 +21,7 @@ for repofile in /clusterscanner/image-source-list/*; do
       exit 1
     fi
   elif [ $(echo "${repourl}" | grep -c "ssh://") -eq 1 ]; then
+    source git.bash # > /dev/null 2>&1
     GIT_REPOSITORY_PATH=$(echo ${repourl} | sed 's#.*@##g')
     GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
     GIT_SSH_REPOSITORY_HOST=$(echo ${repourl} | sed 's#.*@##g' | sed 's#/.*##g')
