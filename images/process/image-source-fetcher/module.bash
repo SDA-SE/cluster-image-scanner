@@ -20,6 +20,14 @@ for repofile in /clusterscanner/image-source-list/*; do
       cat /clusterscanner/out/${i}.json
       exit 1
     fi
+  elif [ "$(echo "${repourl}" | grep -c "ssh://")" -eq 1 ]; then
+    GIT_REPOSITORY_PATH=$(echo ${repourl} | sed 's#.*@##g')
+    GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
+    GIT_SSH_REPOSITORY_HOST=$(echo ${repourl} | sed 's#.*@##g' | sed 's#/.*##g')
+    gitAuth
+    git clone "${repourl}" /tmp/${i}
+    find /tmp/${i} -name "*.json" -exec mv "{}" /clusterscanner/out/ \;
+    rm -Rf /tmp/${i}
   else
     dest="/clusterscanner/out/${i}.tar"
     sp_getfile "${repourl}" "${dest}" "application/vnd.github.v3+json" #> /dev/null 2>&1#
