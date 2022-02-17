@@ -20,7 +20,7 @@ for repofile in /clusterscanner/image-source-list/*; do
       cat /clusterscanner/out/${i}.json
       exit 1
     fi
-  elif [ "$(echo "${repourl}" | grep -c "ssh://")" -eq 1 ]; then
+  elif [ $(echo "${repourl}" | grep -c "ssh://") -eq 1 ]; then
     GIT_REPOSITORY_PATH=$(echo ${repourl} | sed 's#.*@##g')
     GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
     GIT_SSH_REPOSITORY_HOST=$(echo ${repourl} | sed 's#.*@##g' | sed 's#/.*##g')
