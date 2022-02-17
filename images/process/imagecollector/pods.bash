@@ -280,6 +280,17 @@ getPods() {
               "image_id": .imageID
             }' > /tmp/container.json
 
+          if [ -e config/registry-rename.json ]; then
+            for row in $(cat config/registry-rename.json | jq -r '.[] | @base64'); do
+              original=$(echo ${row} | base64 -d | jq -r '.original');
+              original_escaped="$(printf '%s' "${original}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
+              replacement=$(echo ${row} | base64 -d | jq -r '.replacement');
+              replacement_escaped="$(printf '%s' "${replacement}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
+              echo ${original_escaped}
+              sed -i "s#${original_escaped}#${replacement_escaped}#g" /tmp/container.json
+            done
+          fi
+
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
           imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
