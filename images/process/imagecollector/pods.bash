@@ -272,16 +272,13 @@ getPods() {
           # { "image":"sha256:XXX",
           #   "imageID":"docker-pullable://k8s.gcr.io/ingress-nginx/controller@sha256:YYY" }
           # k8s.gcr.io/ingress-nginx/controller@sha256:XXX is not existing, therefore, we take the imageID
-          echo "${container}" | base64 -d | jq '. |
-          if .imageID|startswith("docker://") then .imageID="\("sha256:")\(.imageID|split(":")[2])" else . end |
-          if .imageID|startswith("docker-pullable://") then if .image|startswith("sha") then .image=(.imageID|split("//"))[1] else  .imageID="\("sha256:")\(.imageID|split(":")[2])" end else . end |
-          if .imageID|startswith("docker-pullable://") then if .image|startswith("sha") then .image=.imageID else  . end else . end |
-          if .imageID|startswith("sha256:") then .imageID="\(.image|split(":")[0])\("@sha256:")\(.imageID|split(":")[1])" else . end |
-          if .image|test("sha256:") then .imageID=.image else . end |
-          if .imageID == null then .imageID=.image else . end | {
-            "image": .image,
-            "image_id": .imageID
-          }' > /tmp/container.json
+          echo "${container}" | base64 -d
+          echo "${container}" | base64 -d | sed 's#docker-pullable://##g' | sed 's#docker://##g' | jq '. |
+            if .image|test("sha256:") then .imageID=.image else . end |
+            if .imageID == null then .imageID=.image else . end | {
+              "image": .image,
+              "image_id": .imageID
+            }' > /tmp/container.json
 
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
