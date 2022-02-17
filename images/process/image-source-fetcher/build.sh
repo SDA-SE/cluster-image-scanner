@@ -27,11 +27,19 @@ cleanup() {
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
+
+base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
+ctr_tools="$(buildah from --pull --quiet ${base_image})"
+
 base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
 cp -a *.bash "${mnt}/clusterscanner/"
+
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" curl git openssl openssh
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
+rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
