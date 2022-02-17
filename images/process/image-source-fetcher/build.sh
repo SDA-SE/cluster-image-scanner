@@ -40,6 +40,7 @@ cp -a *.bash "${mnt}/clusterscanner/"
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install -y "${dnf_opts[@]}" curl git openssl openssh
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
+find $mnt
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
