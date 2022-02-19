@@ -4,6 +4,10 @@
 # TODO This script needs to be refactored one day, in a way that only jsons are used (and no other env variables)
 
 set -e
+echo "Workdir:"
+ls -la
+echo "Workdir/config"
+ls -la config
 
 function setAttributes {
   snakeCaseVariableName=${1} # var_name
@@ -45,8 +49,7 @@ if [ "${mappingNamespacesFlat}" != "[" ]; then
 fi
 mappingNamespacesFlat="${mappingNamespacesFlat}]"
 echo "mappingNamespacesFlat: ${mappingNamespacesFlat}"
-ls -la
-ls -la config
+
 
 NAMESPACE_MAPPINGS=""
 
@@ -285,13 +288,11 @@ getPods() {
             }' > /tmp/container.json
 
           if [ -e config/registry-rename.json ]; then
-            cat config/registry-rename.json
             for row in $(cat config/registry-rename.json | jq -r '.[] | @base64'); do
               original=$(echo ${row} | base64 -d | jq -r '.original');
               original_escaped="$(printf '%s' "${original}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
               replacement=$(echo ${row} | base64 -d | jq -r '.replacement');
               replacement_escaped="$(printf '%s' "${replacement}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
-              echo "will replace ${original_escaped} with ${replacement_escaped}"
               sed -i "s#${original_escaped}#${replacement_escaped}#g" /tmp/container.json
             done
           fi
