@@ -47,6 +47,7 @@ mappingNamespacesFlat="${mappingNamespacesFlat}]"
 echo "mappingNamespacesFlat: ${mappingNamespacesFlat}"
 ls -la
 ls -la config
+
 NAMESPACE_MAPPINGS=""
 
 getPods() {
@@ -284,6 +285,7 @@ getPods() {
             }' > /tmp/container.json
 
           if [ -e config/registry-rename.json ]; then
+            cat config/registry-rename.json
             for row in $(cat config/registry-rename.json | jq -r '.[] | @base64'); do
               original=$(echo ${row} | base64 -d | jq -r '.original');
               original_escaped="$(printf '%s' "${original}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
