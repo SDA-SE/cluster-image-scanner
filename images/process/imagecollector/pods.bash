@@ -288,7 +288,7 @@ getPods() {
               original_escaped="$(printf '%s' "${original}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
               replacement=$(echo ${row} | base64 -d | jq -r '.replacement');
               replacement_escaped="$(printf '%s' "${replacement}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
-              echo "will replace "${original_escaped} with ${replacement_escaped}"
+              echo "will replace ${original_escaped} with ${replacement_escaped}"
               sed -i "s#${original_escaped}#${replacement_escaped}#g" /tmp/container.json
             done
           fi
