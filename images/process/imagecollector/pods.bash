@@ -40,7 +40,7 @@ for teamStructure in $(echo $NAMESPACE_MAPPINGS | jq -rcM '.teams[] | @base64');
   done;
 done
 
-if [ "${mappingNamespacesFlat}" != "]" ]; then
+if [ "${mappingNamespacesFlat}" != "[" ]; then
   mappingNamespacesFlat=${mappingNamespacesFlat%?}; # remove last char ,
 fi
 mappingNamespacesFlat="${mappingNamespacesFlat}]"
