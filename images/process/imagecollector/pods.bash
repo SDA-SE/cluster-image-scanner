@@ -44,6 +44,8 @@ if [ "${mappingNamespacesFlat}" != "]" ]; then
   mappingNamespacesFlat=${mappingNamespacesFlat%?}; # remove last char ,
 fi
 mappingNamespacesFlat="${mappingNamespacesFlat}]"
+echo "mappingNamespacesFlat: ${mappingNamespacesFlat}"
+ls -la
 NAMESPACE_MAPPINGS=""
 
 getPods() {
@@ -286,7 +288,7 @@ getPods() {
               original_escaped="$(printf '%s' "${original}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
               replacement=$(echo ${row} | base64 -d | jq -r '.replacement');
               replacement_escaped="$(printf '%s' "${replacement}" | sed -e 's/[]\/$*.^|[]/\\&/g' | sed ':a;N;$!ba;s,\n,\\n,g')"
-              echo ${original_escaped}
+              echo "will replace "${original_escaped} with ${replacement_escaped}"
               sed -i "s#${original_escaped}#${replacement_escaped}#g" /tmp/container.json
             done
           fi
