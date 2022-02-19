@@ -46,6 +46,7 @@ fi
 mappingNamespacesFlat="${mappingNamespacesFlat}]"
 echo "mappingNamespacesFlat: ${mappingNamespacesFlat}"
 ls -la
+ls -la config
 NAMESPACE_MAPPINGS=""
 
 getPods() {
@@ -361,3 +362,4 @@ getPods() {
     jq 'unique' "${IMAGE_JSON_FILE}" > "${IMAGE_JSON_FILE}.tmp"
     mv "${IMAGE_JSON_FILE}.tmp" "${IMAGE_JSON_FILE}"
 }
+
