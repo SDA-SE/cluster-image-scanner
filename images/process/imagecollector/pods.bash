@@ -305,7 +305,7 @@ getPods() {
             imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' ' ')
             imageBaseArray=(${imageBaseString})
             imageBase="${imageBaseArray[0]}:${imageBaseArray[1]}"
-            echo $imageBase
+            echo "imageBase: ${imageBase}"
           fi
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
