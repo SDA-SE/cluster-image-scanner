@@ -299,7 +299,14 @@ getPods() {
 
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
-          imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
+          if [ $(echo "${image}" | grep -c ":") -eq 1 ]; then # sha256 has also two ":",example for sha 602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
+            imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
+          else
+            imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' ' ')
+            imageBaseArray=(${imageBaseString})
+            imageBase="${imageBaseArray[0]}:${imageBaseArray[1]}"
+            echo $imageBase
+          fi
           skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
