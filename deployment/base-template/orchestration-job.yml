@@ -83,15 +83,15 @@ spec:
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
-            mountPath: /clusterscanner/git/git_private_key
-            subPath: git_private_key
+            mountPath: /clusterscanner/github/github_private_key.pem
+            subPath: github_private_key.pem
           - name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
             mountPath: /clusterscanner/image-source-list
           - name: tmp
             mountPath: /clusterscanner/out
         env:
           - name: GITHUB_KEY_FILE_PATH
-            value: /clusterscanner/git/git_private_key
+            value: /clusterscanner/github/github_private_key.pem
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
