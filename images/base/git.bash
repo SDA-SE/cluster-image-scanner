@@ -65,16 +65,13 @@ gitSshAuth() {
   mkdir -p "${SSH_TARGET_PATH}"
   chmod 770 "${SSH_TARGET_PATH}"
   TARGET_SSH_KEY_PATH="${SSH_TARGET_PATH}/id_rsa"
-  if [ -e "${TARGET_SSH_KEY_PATH}" ]; then
-    echo "TARGET_SSH_KEY_PATH ${TARGET_SSH_KEY_PATH} exists, return"
-    return
-  fi
+
   if [ -e /.ssh/id_rsa/ssh-privatekey ]; then
     cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
   elif [ -e /clusterscanner/git/git_private_key ]; then # same path is used for github private key
     cat /clusterscanner/git/git_private_key > "${TARGET_SSH_KEY_PATH}"
   fi
-  if [ ! -e ${TARGET_SSH_KEY_PATH} ]; then
+  if [ -z "${TARGET_SSH_KEY_PATH}" ]; then
     echo "ERROR: Var TARGET_SSH_KEY_PATH is not set, exit"
     exit 1
   fi
