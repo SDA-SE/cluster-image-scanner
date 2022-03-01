@@ -68,8 +68,8 @@ gitSshAuth() {
 
   if [ -e /.ssh/id_rsa/ssh-privatekey ]; then
     cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
-  elif [ -e /clusterscanner/git/github_private_key.pem ]; then # same path is used for github private key
-    cat /clusterscanner/git/github_private_key.pem > "${TARGET_SSH_KEY_PATH}"
+  elif [ -e /clusterscanner/github/github_private_key.pem ]; then # same path is used for github private key
+    cat /clusterscanner/github/github_private_key.pem > "${TARGET_SSH_KEY_PATH}"
   fi
   if [ $(wc -l "${TARGET_SSH_KEY_PATH}" | awk '{print $1}') -eq 0 ]; then
     echo "ERROR: Var TARGET_SSH_KEY_PATH is not set, exit"
