@@ -296,15 +296,19 @@ getPods() {
               sed -i "s#${original_escaped}#${replacement_escaped}#g" /tmp/container.json
             done
           fi
-
+          # Test cases:
+          # image=602401143452.dkr.ecr.eu-central-1.amazonaws.com:5000/eks/kube-proxy:XXXXX
+          # image=602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy:XXXXX
+          # image=602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
-          imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' ' ')
-          if [ $(echo "${imageBaseString}" | wc -l) -eq 2 ]; then # sha256 has also two ":",example for sha 602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
+          imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' '\n')
+          if [ $(echo "${imageBaseString}" | wc -l) -eq 3 ]; then # sha256 has also two ":",example for sha 602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
             imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
+            echo "test"
           else
             imageBaseArray=(${imageBaseString})
-            imageBase="${imageBaseArray[0]}:${imageBaseArray[1]}"
+            imageBase="${imageBaseArray[0]}"
           fi
           echo "imageBase: ${imageBase}"
           skip=${DEFAULT_SKIP}
