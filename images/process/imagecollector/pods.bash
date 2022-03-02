@@ -305,7 +305,6 @@ getPods() {
           imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' '\n')
           if [ $(echo "${imageBaseString}" | wc -l) -eq 3 ]; then # sha256 has also two ":",example for sha 602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
             imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
-            echo "test"
           else
             imageBaseArray=(${imageBaseString})
             imageBase="${imageBaseArray[0]}"
