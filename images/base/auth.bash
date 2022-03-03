@@ -27,7 +27,6 @@ EOF
     header_payload=$(echo -n "${header_base64}.${payload_base64}")
     echo "Creating Signature with header_payload $header_payload AND GITHUB_KEY_FILE_PATH: $GITHUB_KEY_FILE_PATH"
     ls -la $GITHUB_KEY_FILE_PATH
-    cat $GITHUB_KEY_FILE_PATH
     signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GITHUB_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
     export CLUSTER_SCAN_JWT="${header_payload}.${signature}"
