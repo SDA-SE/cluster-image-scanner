@@ -109,9 +109,7 @@ sleep 1
 #argocd repo --server localhost:8085 --insecure add git@github.com:pagel-pro/clusterscanner-orchestration.git --ssh-private-key-path ~/.ssh/id_rsa
 echo "Applying argoworkflow.yml"
 #kubectl apply -k ./argowf/
-kubectl apply -f ./argowf/argoworkflow.yml
-kubectl apply -f ./argowf/role-binding.yml
-kubectl apply -f ./argowf/workflowtaskresults.yml
+kubectl apply -f https://github.com/argoproj/argo-workflows/releases/download/v3.2.9/namespace-install.yaml -n clusterscanner
 sleep 20
 
 if [ "$IS_MINIKUBE" == "true" ]; then
