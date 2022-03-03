@@ -110,6 +110,8 @@ sleep 1
 echo "Applying argoworkflow.yml"
 #kubectl apply -k ./argowf/
 kubectl apply -f ./argowf/argoworkflow.yml
+kubectl apply -f ./argowf/role-binding.yml
+kubectl apply -f ./argowf/workflowtaskresults.yml
 sleep 20
 
 if [ "$IS_MINIKUBE" == "true" ]; then

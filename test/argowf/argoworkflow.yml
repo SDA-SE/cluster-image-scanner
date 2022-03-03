@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/argoproj/argo-workflows.git
-    targetRevision: v3.2.8
+    targetRevision: v3.2.9
     path: manifests/namespace-install
   project: clusterscanner
   syncPolicy:
