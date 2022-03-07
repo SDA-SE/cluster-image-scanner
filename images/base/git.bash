@@ -36,6 +36,7 @@ EOF
   header_payload=$(echo -n "${header_base64}.${payload_base64}")
   signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GITHUB_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
   export CLUSTER_SCAN_JWT="${header_payload}.${signature}"
+  sleep 1 # time screw
 }
 
 githubAuth() {
@@ -118,7 +119,7 @@ gitAuth() {
 
 gitFetch() {
   rm -Rf /tmp/clusterscanner-remote || true
-  echo "CLONE_URL: ${CLONE_URL}"
+  #echo "CLONE_URL: ${CLONE_URL}"
   git clone "${CLONE_URL}" /tmp/clusterscanner-remote
   echo "fetched to /tmp/clusterscanner-remote"
 }
