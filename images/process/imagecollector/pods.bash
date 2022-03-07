@@ -242,7 +242,6 @@ getPods() {
         scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
 
-
       # TODO in the future maybe not only running pods
       pods=$(kubectl get pods --namespace=${namespace} --field-selector=status.phase=Running --output json)
       for pod in $(echo ${pods} | jq -rcM '.items[]? | @base64'); do
