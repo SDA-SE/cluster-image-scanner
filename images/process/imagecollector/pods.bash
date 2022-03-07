@@ -233,7 +233,7 @@ getPods() {
         isScanNewVersion=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_NEW_VERSION_ANNOTATION}\"]")
       fi
       if [ "${isScanNewVersion}" == "" ] || [ "${isScanNewVersion}" == "null" ]; then
-        isScanNewVersion="${DEFAULT_SCAN_IS_NEW_VERSION}"
+        isScanNewVersion="${DEFAULT_SCAN_NEW_VERSION}"
       fi
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}\"]")
