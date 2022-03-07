@@ -14,7 +14,7 @@ source /clusterscanner/scan-common.bash
 scan_result_pre
 
 echo "Analysing IMAGE_BY_HASH: ${IMAGE_BY_HASH}"
-skopeo inspect "docker://${IMAGE_BY_HASH}" > /dev/null || exit=true
+skopeo inspect ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" > /dev/null || exit=true
 if [ "${exit}" == "true" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
@@ -27,7 +27,7 @@ dt1=""
 if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   # apt.* includes apt-get, apt.*upgrade includes dist-upgrade
   distroPackageUpdateCommands=("apt.*upgrade" "yum.*update" "apk.*upgrade" "zypper.*update")
-  imageHistory=$(skopeo inspect --config "docker://${IMAGE_BY_HASH}" | jq -r '.history')
+  imageHistory=$(skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" | jq -r '.history')
   for updateCommand in ${distroPackageUpdateCommands[@]}; do
     if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
       dt1=$(echo ${imageHistory} | jq -r '.[] | select(.created_by != null) | select(.created_by | match("'${updateCommand}'")) | .created' | tail -n 1)
@@ -40,7 +40,7 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   sed -i 's#Image#BaseImage#g' /clusterscanner/lifetime.csv
   IMAGE_TYPE="BaseImage"
 else
-  dt1=$(skopeo inspect "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
+  dt1=$(skopeo inspect ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
   IMAGE_TYPE="Image"
 fi
 echo $dt1
