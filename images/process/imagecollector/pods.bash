@@ -302,10 +302,12 @@ getPods() {
           # image=602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
           image=$(cat /tmp/container.json | jq -rcM ".image")
           imageTag=$(echo "${image}" | sed 's#.*@sha256#sha256#' | sed 's#.*/.*:##')
-          imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' '\n')
-          if [ $(echo "${imageBaseString}" | wc -l) -eq 3 ]; then # sha256 has also two ":",example for sha 602401143452.dkr.ecr.eu-central-1.amazonaws.com/eks/kube-proxy@sha256:XXXXX
+          imageHostBaseString=$(echo "${image}" | sed 's#/.*##' | sed 's#@sha256.*##' | tr ':' '\n')
+          if [ $(echo "${imageHostBaseString}" | wc -l) -eq 2 ]; then
+            # port in host
             imageBase=$(echo "${image}" | sed 's#@sha256.*##' | sed 's#:.*##')
           else
+            imageBaseString=$(echo "${image}" | sed 's#@sha256.*##' | tr ':' '\n')
             imageBaseArray=(${imageBaseString})
             imageBase="${imageBaseArray[0]}"
           fi

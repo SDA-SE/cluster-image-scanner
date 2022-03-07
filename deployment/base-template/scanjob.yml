@@ -959,10 +959,19 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
-          IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f1)
+          field=1
+          if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+            field=2
+          fi
+          IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
           IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
-          IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f2)
-          IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | cut -d: -f2)
+          if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+            field=2
+          else 
+            field=3 
+          fi
+          IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
+          IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | sed -e "s#/#__#g" | cut -d: -f${field})
 
           JSON_RESULT=$(cat /tmp/result.json)
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
