@@ -373,6 +373,8 @@ spec:
           echo "RESULT_PATH:"
           ls -la ${RESULT_PATH} 
           for result in $(find ${RESULT_PATH} -name *.json); do
+            echo $result
+            cat $result 
             team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
             age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
             baseImageAge=$(cat $result | jq -r '.scanResults[] | .["scan-baseimage-lifetime"].age' | grep -v null || true)
