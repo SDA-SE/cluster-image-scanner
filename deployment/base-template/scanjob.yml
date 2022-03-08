@@ -828,7 +828,7 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
-          JSON_RESULT=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+          JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           find /tmp/results
           echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
           for j in /tmp/results/**/*.json; do
@@ -841,7 +841,7 @@ spec:
               ls -la $(dirname "${j}")/*.csv
               cat $(dirname "${j}")/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given for ${j}"
             fi
-            JSON_RESULTS=$(echo "${JSON_RESULT}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
+            JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
           echo "${JSON_RESULTS}" > /tmp/result.json
           DATE=$(date +%m/%d/%Y)
