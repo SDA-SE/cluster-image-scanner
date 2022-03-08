@@ -370,7 +370,8 @@ spec:
           tmpdir=$(mktemp -d)
           tmpdirBaseImage=$(mktemp -d)
           #echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
-
+          echo "RESULT_PATH:"
+          ls -la ${RESULT_PATH} 
           for result in $(find ${RESULT_PATH} -name *.json); do
             team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
             age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
@@ -400,7 +401,7 @@ spec:
           done
 
           cd /tmp/clusterscanner-remote/${date}
-
+          ls -la /tmp/clusterscanner-remote/${date}
           git add * || true
           git commit -m "add" || true
 
