@@ -28,8 +28,8 @@ function scan_result_pre {
       fi
       if [[ $(find "${RESULT_FILE}" -mmin -${RESULT_CACHING_MIN} -print 2>/dev/null) ]]; then
         echo "Scan has been performed, already, using old result (RESULT_CACHING_MIN ${RESULT_CACHING_MIN}), ARTIFACTS_PATH ${ARTIFACTS_PATH}:"
-        rm ${ARTIFACTS_PATH}/dependency-check* || true
         cat  ${ARTIFACTS_PATH}/dependency-check-report.xml || true
+        rm ${ARTIFACTS_PATH}/dependency-check* || true
         ls -la "${ARTIFACTS_PATH}"
         IS_USE_CACHE=true
         JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
