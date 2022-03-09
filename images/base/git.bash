@@ -64,7 +64,7 @@ githubAuth() {
 gitSshAuth() {
   SSH_TARGET_PATH="$HOME/.ssh"
   mkdir -p "${SSH_TARGET_PATH}"
-  chmod 770 "${SSH_TARGET_PATH}"
+  chmod -R 770 "${SSH_TARGET_PATH}"
   TARGET_SSH_KEY_PATH="${SSH_TARGET_PATH}/id_rsa"
 
   if [ -e /.ssh/id_rsa/ssh-privatekey ]; then

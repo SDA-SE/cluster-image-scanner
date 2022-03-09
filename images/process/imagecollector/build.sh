@@ -136,6 +136,7 @@ buildah config \
   --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \
+  --env HOME="/home/code" \
   --cmd "/home/code/entrypoint.bash" \
   --user 1001 \
   --label "${oci_prefix}.authors=SDA SE Engineers <engineers@sda-se.io>" \
