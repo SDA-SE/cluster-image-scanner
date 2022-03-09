@@ -33,7 +33,6 @@ function scan_result_pre {
         IS_USE_CACHE=true
         JSON_RESULT=$(cat "${RESULT_FILE}" | jq ".\"${MODULE_NAME}\"")
         scan_result_post
-        rm ${ARTIFACTS_PATH}/* || true
         exit 0
       fi
     fi
