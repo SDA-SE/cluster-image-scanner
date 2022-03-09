@@ -33,7 +33,7 @@ base_image="quay.io/sdase/owasp-dependency-check:6"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
-base_image_base="quay.io/sdase/cluster-image-scanner-base:2"
+base_image_base="quay.io/sdase/cluster-image-scanner-base:merge"
 ctr_base="$( buildah from --pull --quiet $base_image_base )"
 mnt_base="$( buildah mount "${ctr_base}" )"
 
