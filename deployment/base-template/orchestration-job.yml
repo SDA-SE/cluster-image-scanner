@@ -361,6 +361,11 @@ spec:
           if [ "${RESULT_PATH}" == "" ]; then
             RESULT_PATH=/clusterscanner/data
           fi
+          
+          if [ "${GITHUB_REPOSITORY}" == "" ]; then
+            echo "No repo to upload stats"
+            exit 0
+          fi
 
           gitAuth
           echo "gitFetch"
