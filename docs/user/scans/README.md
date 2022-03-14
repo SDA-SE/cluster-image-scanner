@@ -23,7 +23,7 @@ There are a number of different types of scans that can produce different findin
 When a finding is detected, the first step is to perform an analysis. The following treatments can be used for this:
 
 - Avoidance: Remove the component with the threat/vulnerability.
-- Mitigation: Patch a vulnerability. In DefectDojo, vulnerabilities are automatically closed after the next scan report.
+- Mitigation: Patch a vulnerable component. In DefectDojo, vulnerabilities are automatically closed after the next scan report.
 - Acceptance: Accept a vulnerability. In DefectDojo, the vulnerability needs to be manually marked as Accepted.
 - False Positive: The finding doesn't apply. In DefectDojo, the vulnerability can be manually marked as False Positive.
 
