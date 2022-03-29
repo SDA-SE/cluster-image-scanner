@@ -143,7 +143,7 @@ getPods() {
         if [ "${description}" == "" ]; then
           description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
         fi
-        description=$(echo "${description}" | sed -e 's#"#\"#g')
+        description=$(echo "${description}" | sed -e 's#"##g')
         namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\", \"team\": \"${team}\"}")
         echo "namespaceInfo: ${namespaceInfo}"
         newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
