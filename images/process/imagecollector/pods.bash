@@ -141,7 +141,7 @@ getPods() {
       echo "Will set IS_FETCH_DESCRIPTION if ${IS_FETCH_DESCRIPTION} is true"
       if [ "${IS_FETCH_DESCRIPTION}" == "true" ]; then
         if [ "${description}" == "" ]; then
-          description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##')
+          description=$(echo "${namespaceAnnotations}" | jq -rcM ".[\"${DESCRIPTION_ANNOTATION}\"]" | sed -e 's#^null$##' | sed -e 's#"#\"#')
         fi
         namespaceInfo=$(echo "{\"namespace\": \""${namespace}"\", \"description\": \""${description}"\", \"team\": \"${team}\"}")
         newDescriptionFile=$(jq --argjson namespaceInfo "${namespaceInfo}" '. += [$namespaceInfo]' ${DESCRIPTION_JSON_FILE})
