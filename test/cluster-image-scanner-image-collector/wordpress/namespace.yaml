@@ -4,5 +4,6 @@ metadata:
   labels:
     kubernetes.io/metadata.name: wordpress
   annotations:
-    clusterscanner.sdase.org/skip: "true"
+    clusterscanner.sdase.org/skip: "false"
+    sdase.org/description: 'Test: "Test"'
   name: wordpress
