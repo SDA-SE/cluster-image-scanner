@@ -171,7 +171,7 @@ getPods() {
         echo "WARN: The given slack channel '${slack}' doesn't start with #"
       fi
       if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
-        email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"')
+        email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"' | sed 's# ##g')
       fi
       if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
         if [ "${CONTACT_DEFAULT_EMAIL}" != "" ]; then
@@ -350,7 +350,6 @@ getPods() {
           fi
 
           echo "will combine both in ${namespace}"
-          echo "email ${email}"
           jq -s '. | add |
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
           if .email == null then .email="'${email}'" else . end |
