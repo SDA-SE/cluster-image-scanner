@@ -350,6 +350,7 @@ getPods() {
           fi
 
           echo "will combine both in ${namespace}"
+          echo "email ${email}"
           jq -s '. | add |
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
           if .email == null then .email="'${email}'" else . end |
