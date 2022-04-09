@@ -53,6 +53,11 @@ spec:
 
   templates:
     - name: main
+      retryStrategy:
+        limit: 4
+        retryPolicy: "Always"
+        affinity:
+          nodeAntiAffinity: {}
       dag:
         tasks:
           - name: imagefetcher
@@ -158,6 +163,11 @@ spec:
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+      retryStrategy:
+        limit: 4
+        retryPolicy: "Always"
+        affinity:
+          nodeAntiAffinity: {}
       script:
         image: "{{ workflow.parameters.baseImageName }}"
         command: [/bin/bash]
