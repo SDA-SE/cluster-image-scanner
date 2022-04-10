@@ -42,7 +42,7 @@ for repofile in /clusterscanner/image-source-list/*; do
   ((i=i+1))
 done
 mkdir -p /clusterscanner/out/merged
-jq -s 'flatten' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
+jq -s 'flatten  | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
 sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
 ls -la /clusterscanner/out/merged/
 exit 0
