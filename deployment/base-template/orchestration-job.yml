@@ -42,6 +42,12 @@ spec:
       - workflow.parameters.scanSyftImageName
   templates:
     - name: main
+      retryStrategy:
+        limit: 4
+        retryPolicy: "Always"
+          maxDuration: "50m"
+        affinity:
+          nodeAntiAffinity: {} # This might help for no available components (e.g. defectdojo) and broken volume mounts on a node with broken PVC, https://github.com/argoproj/argo-workflows/blob/master/docs/fields.md#retrynodeantiaffinity
       steps:
         - - name: fetch-image-list
             template: fetch-image-list
