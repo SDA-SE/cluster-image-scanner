@@ -228,7 +228,7 @@ spec:
 
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
               echo "Sending to email ${email}"
-              if [ "${smtp-auth-user}" != "USERNAME@YOURDOMAIN.COM" ] && [ "${smtp-auth-user}" != "" ] && [ "${smtp-auth}" != "smtp_auth_SECRET" ]; then
+              if [ "${smtp-auth-password}" != "YOURPASSWORD" ] && [ "${smtp-auth-password}" != "" ] && [ "${smtp-auth-password}" != "smtp_auth_password_SECRET" ]; then
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
                 echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
               else
