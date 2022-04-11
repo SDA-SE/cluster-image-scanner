@@ -83,15 +83,15 @@ spec:
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
-            mountPath: /clusterscanner/github/github_private_key.pem
-            subPath: github_private_key.pem
+            mountPath: "/clusterscanner/github/github_private_key.pem"
+            subPath: "github_private_key.pem"
           - name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
             mountPath: /clusterscanner/image-source-list
           - name: tmp
             mountPath: /clusterscanner/out
         env:
           - name: GITHUB_KEY_FILE_PATH
-            value: /clusterscanner/github/github_private_key.pem
+            value: "/clusterscanner/github/github_private_key.pem"
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
@@ -334,9 +334,9 @@ spec:
             mountPath: /clusterscanner/data
             subPath: "{{ workflow.parameters.scanId }}"
           - name: "{{ workflow.parameters.gitSecretName }}"
-            mountPath: /clusterscanner/github/github_private_key.pem
-            subPath: github_private_key.pem
-        imagePullPolicy: IfNotPresent
+            mountPath: "/clusterscanner/github/github_private_key.pem"
+            subPath: "github_private_key.pem"
+        imagePullPolicy: Always # IfNotPresent
         env:
           - name: ENVIRNOMENT
             value: "{{ workflow.parameters.scanId }}"
