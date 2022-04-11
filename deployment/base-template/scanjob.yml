@@ -55,7 +55,7 @@ spec:
     - name: main
       retryStrategy:
         limit: 1
-        retryPolicy: "OnFailure"
+        retryPolicy: "Always"
         affinity:
           nodeAntiAffinity: {}
       dag:
@@ -261,12 +261,12 @@ spec:
         image: "{{ workflow.parameters.scanSyftImageName }}"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
-            "packages",
-            "docker-archive:/clusterscanner/images/docker-archive-image.tar",
-            "--output",
-            "cyclonedx-json",
-            "--file",
-            "/clusterscanner/data/bom.json"
+          "packages",
+          "docker-archive:/clusterscanner/images/docker-archive-image.tar",
+          "--output",
+          "cyclonedx-json",
+          "--file",
+          "/clusterscanner/data/bom.json"
         ]
         env:
           - name: IS_SCAN
