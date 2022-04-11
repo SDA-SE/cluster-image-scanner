@@ -6,6 +6,7 @@ git config --global user.name "ClusterImageScanner"
 if [ $(echo "${GITHUB_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
   export GIT_REPOSITORY_PATH=$(echo ${GITHUB_REPOSITORY} | sed 's#.*@##g')
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
+  export GIT_REPOSITORY_PATH="/${GIT_REPOSITORY_PATH}"
   export GIT_SSH_REPOSITORY_HOST=$(echo ${GITHUB_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
 fi
 
