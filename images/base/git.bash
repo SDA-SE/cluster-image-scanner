@@ -2,6 +2,12 @@
 set -e
 git config --global user.email ""
 git config --global user.name "ClusterImageScanner"
+
+if [ $(echo "${GITHUB_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
+  export GIT_REPOSITORY_PATH=$(echo ${repourl} | sed 's#.*@##g')
+  export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
+  export GIT_SSH_REPOSITORY_HOST=$(echo ${repourl} | sed 's#.*@##g' | sed 's#/.*##g')
+fi
 createJWT() {
   if [ "${GITHUB_KEY_FILE_PATH}" == "" ]; then
     export GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
