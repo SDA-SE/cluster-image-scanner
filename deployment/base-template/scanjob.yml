@@ -54,8 +54,8 @@ spec:
   templates:
     - name: main
       retryStrategy:
-        limit: 4
-        retryPolicy: "Always"
+        limit: 1
+        retryPolicy: "OnFailure"
         affinity:
           nodeAntiAffinity: {}
       dag:
@@ -163,11 +163,6 @@ spec:
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-      retryStrategy:
-        limit: 4
-        retryPolicy: "Always"
-        affinity:
-          nodeAntiAffinity: {}
       script:
         image: "{{ workflow.parameters.baseImageName }}"
         command: [/bin/bash]
@@ -453,9 +448,6 @@ spec:
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
             readOnly: true
         imagePullPolicy: Always # TODO IfNotPresent
-        retryStrategy:
-          limit: 10
-          retryPolicy: "OnFailure"
         command: [/usr/bin/groovy]
         args:
           - "/code/defectdojo.groovy"
@@ -782,9 +774,6 @@ spec:
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
             readOnly: true
         imagePullPolicy: Always # TODO IfNotPresent
-        retryStrategy:
-          limit: 10
-          retryPolicy: "OnFailure"
         command: [/usr/bin/groovy]
         args:
           - "/code/defectdojo.groovy"
@@ -883,9 +872,6 @@ spec:
       container:
         image: "{{ workflow.parameters.defectDojoClientImageName }}"
         imagePullPolicy: IfNotPresent
-        retryStrategy:
-          limit: 10
-          retryPolicy: "OnFailure"
         command: [/usr/bin/groovy]
         args:
           - "/code/defectdojo.groovy"
