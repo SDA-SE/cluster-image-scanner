@@ -375,7 +375,7 @@ getPods() {
     # fix syntax between namespaces
     sed  -i -z 's#}\s{#},\n{#g' "${IMAGE_JSON_FILE}"
     echo "]" >> "${IMAGE_JSON_FILE}"
-    jq 'unique' "${IMAGE_JSON_FILE}" > "${IMAGE_JSON_FILE}.tmp"
+    jq 'unique | sort_by(.image, .namespace)' "${IMAGE_JSON_FILE}" > "${IMAGE_JSON_FILE}.tmp"
     mv "${IMAGE_JSON_FILE}.tmp" "${IMAGE_JSON_FILE}"
 }
 
