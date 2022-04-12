@@ -400,7 +400,7 @@ spec:
             echo "${result} ${filename}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt
           done
           cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.txt
-          rm /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.txt /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt
+          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.txt /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt
 
           for j in $(ls ${tmpdirBaseImage}); do
             result=$(cat ${tmpdirBaseImage}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
