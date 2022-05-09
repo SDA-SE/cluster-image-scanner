@@ -68,11 +68,15 @@ hDiff="$(( tDiff/3600 ))" || true
 # day difference
 dDiff="$(( hDiff/24 ))" || true
 echo "dDiff: ${dDiff}"
-JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"imageType\": \"${IMAGE_TYPE}\"}")
+reproducibleBuild=false
+if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
+    reproducibleBuild=true
+fi
+JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"reproducibleBuild\": ${reproducibleBuild}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     infoText="${IMAGE_TYPE} is ${dDiff} days old"
-    if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
+    if [[ ${reproducibleBuild} ]]; then
       infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
