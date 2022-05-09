@@ -89,7 +89,7 @@ if [ "$IS_MINIKUBE" == "true" ]; then
   done
 fi
 
-while [ $(kubectl get pods -n argocd  | grep "1/1" | wc -l) -ne 5 ]; do
+while [ $(kubectl get pods -n argocd  | grep "1/1" | wc -l) -ne 7 ]; do
   echo "waiting for 5 ready pods in argocd"
   kubectl get pods -n argocd
   sleep 3
