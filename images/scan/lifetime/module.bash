@@ -72,8 +72,7 @@ reproducibleBuild=false
 if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
     reproducibleBuild=true
 fi
-#\"reproducibleBuild\": ${reproducibleBuild},
-JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"imageType\": \"${IMAGE_TYPE}\"}")
+JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"reproducibleBuild\": ${reproducibleBuild}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     infoText="${IMAGE_TYPE} is ${dDiff} days old"
