@@ -376,31 +376,62 @@ spec:
 
           tmpdir=$(mktemp -d)
           tmpdirBaseImage=$(mktemp -d)
-          #echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
-          ls -la ${RESULT_PATH} 
+          mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
+          # echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
+          echo "${RESULT_PATH}"
+          ls -la "${RESULT_PATH}" 
           for result in $(find ${RESULT_PATH} -name *.json); do
             team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
             age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
             baseImageAge=$(cat $result | jq -r '.scanResults[] | .["scan-baseimage-lifetime"].age' | grep -v null || true)
             environment=$(cat $result | jq -r '.environment' | sed 's/\s//g' || true)
+            image=$(cat $result | jq -r '.image' | sed 's/\s//g' || true)
+            reproducibleBuildImage="false"
+            reproducibleBuildBaseImage="false"
+            for keyBase64 in $(cat $result | jq -r '.scanResults[]  | @base64'); do
+              key=$(echo ${keyBase64} | base64 -d)
+              if [ "$(echo $key | jq '. | has("scan-lifetime")')" == "true" ] && [ "$(echo "${key}" | jq -r '.["scan-lifetime"] | has("reproducibleBuild")')" == "true" ]; then
+                echo "scan-lifetime found"
+                reproducibleBuildImage=$(echo ${key} | jq -r '.["scan-lifetime"].reproducibleBuild' | grep -v null)
+              else
+                echo "scan-lifetime not found"
+              fi
+              if [ "$(echo ${key} | jq '. | has("scan-baseimage-lifetime")')" == "true"  ] && [ "$(echo "${key}" | jq -r '.["scan-baseimage-lifetime"] | has("reproducibleBuild")')" == "true" ] ; then
+                echo "scan-baseimage-lifetime found"
+                reproducibleBuildBaseImage=$(echo ${key} | jq -r '.["scan-baseimage-lifetime"].reproducibleBuild' | grep -v null)
+              else
+                echo "scan-baseimage-lifetime not found"
+              fi
+            done
+            
             if [ "${age}" != "" ]; then
-              echo ${age} >> ${tmpdir}/${environment}_${team}.txt
+              if [ "${reproducibleBuildImage}" == "true" ]; then
+                echo "Skipping age for ${image} due to reproducibleBuildImage"
+                echo "${image} ${age}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/${environment}_invalid_creation_date_image-lifetime_${team}.txt
+              else
+                echo ${age} >> ${tmpdir}/${environment}_${team}.txt
+              fi
             fi
             if [ "${baseImageAge}" != "" ]; then
-              echo ${baseImageAge} >> ${tmpdirBaseImage}/${environment}_${team}.txt
+              if [ "${reproducibleBuildBaseImage}" == "true" ]; then
+                echo "Skipping baseImageAge for ${image} due to reproducibleBuildImage"
+                echo "${image} ${baseImageAge}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/${environment}_invalid_creation_date_baseimage-lifetime_$${team}.txt
+              else
+                echo ${baseImageAge} >> ${tmpdirBaseImage}/${environment}_${team}.txt
+              fi          
             fi
           done
-
-          mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
-
+          echo "${tmpdir}"
+          ls -la "${tmpdir}"
+          
           for j in $(ls ${tmpdir}); do
             result=$(cat ${tmpdir}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
             filename=$(echo ${j} | sed 's#.txt##g')
             echo "lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/${filename}_lifetime.txt
-            echo "${result} ${filename}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt
+            echo "${result} ${filename}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.csv
           done
-          cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.txt | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.txt
-          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.txt /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.csv
+          cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.csv | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.csv
+          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview-tmp.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/lifetime_overview.csv
 
           for j in $(ls ${tmpdirBaseImage}); do
             result=$(cat ${tmpdirBaseImage}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
@@ -408,11 +439,11 @@ spec:
             echo "baseimage lifetime for images is (avg max min) ${result}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/${filename}_baseimage-lifetime.txt
             echo " ${result} ${filename}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv
           done
-          cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.txt | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.txt
-          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.txt /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.txt 
-  
+          cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.csv
+          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv 
+          
           echo "Start (SCAN_ID): ${SCAN_ID}, end: $(date)" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/infos.txt
-  
+          
           cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           git add * || true
