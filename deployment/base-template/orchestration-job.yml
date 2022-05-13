@@ -216,12 +216,19 @@ spec:
               # shellcheck disable=SC2001
               message=$(echo "${message}" | sed 's#"##g')
 
-              ${SLACK_BIN} chat send --actions '{"type": "button", "style": "primary", "text": "Handle potential vulnerabilities", "url": "'${ddLink}'"}' \
-                --author 'ClusterImageScanner' \
-                --channel "${slack}" \
-                --title "${title}" \
-                --text "${message}"
-              #                --fields 'image: '${image}', app: '${appName}', namespace: '${namespace}', envirnoment: '${environment} \
+              cat slack-template.json \
+                | sed "s|###DD_LINK###|${ddLink}|g" \
+                | sed "s|###IMAGE###|${image}|g" \
+                | sed "s|###APP_NAME###|${appName}|g" \
+                | sed "s|###NAMESPACE###|${namespace}|g" \
+                | sed "s|###ENVIRONMENT###|'${environment}|g" \
+                | sed "s|###MESSAGE###|${message}|g" > /tmp/slack-template.json
+            
+              curl -H "Content-type: application/json" \
+                -d @/tmp/slack-template.json \
+                -H "Authorization: Bearer $SLACK_CLI_TOKEN_SECRET"  \
+                -X POST \
+                ${SLACK_MESSAGE_ENDPOINT}
             else
               echo "slackChannel not set"
             fi
@@ -450,3 +457,5 @@ spec:
           git commit -m "add" || true
 
           git push -f origin master || true
+
+

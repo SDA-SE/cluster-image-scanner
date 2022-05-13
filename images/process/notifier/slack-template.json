@@ -1,12 +1,12 @@
 {
         "channel": "security-notifications-test",
-        "text": "New Paid Time Off request from Fred Enriquez",
+        "author": "ClusterImageScanner",
         "blocks": [
                 {
                         "type": "header",
                         "text": {
                                 "type": "plain_text",
-                                "text": "",
+                                "text": "Potential unhandled vulnerability or misconfiguration detected",
                                 "emoji": true
                         }
                 },
@@ -15,11 +15,7 @@
                         "fields": [
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*Type:*\nPaid Time Off"
-                                },
-                                {
-                                        "type": "mrkdwn",
-                                        "text": "*Created by:*\n<example.com|Fred Enriquez>"
+                                        "text": "###MESSAGE###"
                                 }
                         ]
                 },
@@ -28,7 +24,24 @@
                         "fields": [
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*When:*\nAug 10 - Aug 13"
+                                        "text": "*image:*\n###IMAGE###"
+                                },
+                                {
+                                        "type": "mrkdwn",
+                                        "text": "*app:*\n###APPP_NAME####"
+                                }
+                        ]
+                },
+                {
+                        "type": "section",
+                        "fields": [
+                                {
+                                        "type": "mrkdwn",
+                                        "text": "*namespace:*\n###NAMESPACE###"
+                                },
+                                {
+                                        "type": "mrkdwn",
+                                        "text": "*envirnoment:*\n###ENVIRONMENT###"
                                 }
                         ]
                 },
@@ -40,20 +53,10 @@
                                         "text": {
                                                 "type": "plain_text",
                                                 "emoji": true,
-                                                "text": "Approve"
+                                                "text": "Handle potential vulnerabilities"
                                         },
-                                        "style": "primary",
-                                        "value": "click_me_123"
-                                },
-                                {
-                                        "type": "button",
-                                        "text": {
-                                                "type": "plain_text",
-                                                "emoji": true,
-                                                "text": "Reject"
-                                        },
-                                        "style": "danger",
-                                        "value": "click_me_123"
+                                        "url": "###DD_LINK###",
+                                        "style": "primary"
                                 }
                         ]
                 }
