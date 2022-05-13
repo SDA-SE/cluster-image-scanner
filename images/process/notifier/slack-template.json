@@ -15,7 +15,7 @@
                         "fields": [
                                 {
                                         "type": "mrkdwn",
-                                        "text": "###INFO###"
+                                        "text": "_INFO_"
                                 }
                         ],
                         "accessory": {
