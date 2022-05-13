@@ -204,7 +204,7 @@ spec:
           fi
 
           inform() {
-            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}"
+            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
 
             #slack="#nobody-security" # for testing
             if [ "${slack}" != "" ]; then
@@ -214,21 +214,26 @@ spec:
               fi
               echo "Sending to slack ${slack}"
               # shellcheck disable=SC2001
-              message=$(echo "${message}" | sed 's#"##g')
-
-              cat slack-template.json \
-                | sed "s|###DD_LINK###|${ddLink}|g" \
-                | sed "s|###IMAGE###|${image}|g" \
-                | sed "s|###APP_NAME###|${appName}|g" \
-                | sed "s|###NAMESPACE###|${namespace}|g" \
-                | sed "s|###ENVIRONMENT###|'${environment}|g" \
-                | sed "s|###MESSAGE###|${message}|g" > /tmp/slack-template.json
+              info=$(echo "${info}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
+              ls -la /clusterscanner/
+              cat /clusterscanner/slack-template.json | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
+              sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
+              sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
+              sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
+              sed -i "s#\#\#\#APP_NAME\#\#\##${appName}#g" /tmp/slack-template.json
+              sed -i "s/###NAMESPACE###/${namespace}/g" /tmp/slack-template.json
+              sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json 
+              sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
+              sed -i "s#_INFO_#${infoText}#g" /tmp/slack-template.json
+              #awk -v r="${infoText}" '{gsub(/_INFO_/,r)}1' /tmp/slack-template.json
+              echo "/tmp/slack-template.json:"
+              cat /tmp/slack-template.json
             
               curl -H "Content-type: application/json" \
                 -d @/tmp/slack-template.json \
-                -H "Authorization: Bearer $SLACK_CLI_TOKEN_SECRET"  \
+                -H "Authorization: Bearer $SLACK_CLI_TOKEN"  \
                 -X POST \
-                ${SLACK_MESSAGE_ENDPOINT}
+                "${SLACK_MESSAGE_ENDPOINT}"
             else
               echo "slackChannel not set"
             fi
@@ -267,6 +272,7 @@ spec:
                   echo "in notification for ${image}"
                   ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
                   infoText=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
+                  echo "after ifo"
                   errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
                   status=$(echo "${notification}" | jq -r ".status" | tr -cd '[:alnum:]._ -')
                   ddLinkScheme=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $1}')
@@ -303,12 +309,12 @@ spec:
                     fi
                     title="${title} in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
-                    description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g')
-                    message="${infoText}\n${description}\nSeverity: ${severity}\nScan Job Status: ${status}"
+                    description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-')
+                    message="${infoText}; ${description}"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
                     fi
-                    output=$(inform "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}" || true)
+                    output=$(inform "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${infoText}"  "${severity}" "${status}" || true)
                     echo "${output}"
                     if [ "$(echo "${output}" | grep -c '"ok": false')" -gt 0 ]; then
                       echo "error in slack"
