@@ -1,12 +1,12 @@
 {
-        "channel": "security-notifications-test",
+        "channel": "###SLACK_CHANNEL###",
         "author": "ClusterImageScanner",
         "blocks": [
                 {
                         "type": "header",
                         "text": {
                                 "type": "plain_text",
-                                "text": "Potential unhandled vulnerability or misconfiguration detected",
+                                "text": "###TITLE###",
                                 "emoji": true
                         }
                 },
