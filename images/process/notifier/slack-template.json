@@ -1,6 +1,6 @@
 {
         "channel": "###SLACK_CHANNEL###",
-        "author": "ClusterImageScanner",
+        "author_name": "ClusterImageScanner",
         "blocks": [
                 {
                         "type": "header",
