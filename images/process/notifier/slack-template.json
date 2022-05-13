@@ -41,7 +41,7 @@
                                 },
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*envirnoment:*\n###ENVIRONMENT###"
+                                        "text": "*environment:*\n###ENVIRONMENT###"
                                 }
                         ]
                 },
