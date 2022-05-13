@@ -56,11 +56,11 @@
                         "fields": [
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*nSeverity:*\n###SEVERITY###"
+                                        "text": "*Severity:*\n###SEVERITY###"
                                 },
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*can Job Status:*\n###STATUS###"
+                                        "text": "*scan job status:*\n###STATUS###"
                                 }
                         ]
                 },
