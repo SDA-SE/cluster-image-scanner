@@ -62,4 +62,4 @@ The following figure shows the ArgoWorkflows workflow structure:
 ![multitenant](multitenant-impl.png)
 
 ## Slack Token
-In case slack is used, a Bot should be , invited into the corresponding slack channels and a token via https://my.slack.com/apps/manage/custom-integrations extracted and deployed to kubernetes.
+In case slack is used, an app should be created. The creation of an app including "Bot Tokens" is described in the [slack app documentation](https://api.slack.com/tutorials/tracks/hello-world-bolt). The scope `chat:write` is needed. The created user needs to be invite to all channels in which the user should post messages to.
