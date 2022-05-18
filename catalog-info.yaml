@@ -11,6 +11,9 @@ metadata:
       Discover vulnerabilities and container image misconfiguration in production environments.
     sda.se/federation-scopes: public
     backstage.io/techdocs-ref: url:https://github.com/SDA-SE/cluster-image-scanner/tree/master
+  links:
+    - url: https://github.com/SDA-SE/cluster-image-scanner/
+      title: Github Repository
 spec:
   type: service
   owner: security-journey
