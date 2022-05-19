@@ -34,7 +34,7 @@
                                 },
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*app:*\n###APP_NAME####"
+                                        "text": "*application:*\n###APP_NAME###"
                                 }
                         ]
                 },
@@ -56,7 +56,7 @@
                         "fields": [
                                 {
                                         "type": "mrkdwn",
-                                        "text": "*Severity:*\n###SEVERITY###"
+                                        "text": "*severity:*\n###SEVERITY###"
                                 },
                                 {
                                         "type": "mrkdwn",
