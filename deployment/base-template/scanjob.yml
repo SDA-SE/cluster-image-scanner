@@ -1047,8 +1047,10 @@ spec:
 
           echo "Starting Generic"
           JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}") || true
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")          
           isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
-          if [ "$isFinding" == "true" ]; then
+          if [ "${isFinding}" == "true" ]; then
             DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
             JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Potential unhandled vulnerabilities or misconfigurations found in image\", \"ddLink\": \"${DD_LINK}\"}")
             if [ $(cat /tmp/findings-generic.json  | wc -c) -gt 5 ]; then
@@ -1063,9 +1065,7 @@ spec:
           else
             JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}")
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
-
+          echo "defining uploadResults"
           uploadResults="[{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}, {\"ddDependencyTrackUpload\": ${JSON_DD_DEPENDENCY_TRACK}}]"
           echo "uploadResults: ${uploadResults}"
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += ${uploadResults}")

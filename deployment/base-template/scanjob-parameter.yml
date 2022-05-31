@@ -9,5 +9,90 @@ metadata:
 data:
   SKOPEO_COPY_PARAMETER: "" # e.g. "--src-tls-verify=false "
   SKOPEO_INSPECT_PARAMETER: "" # e.g. "tls-verify=false "
+  SLACK_TEMPLATE: |-
+    {
+      "channel": "###SLACK_CHANNEL###",
+      "author_name": "ClusterImageScanner",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "###TITLE###",
+            "emoji": true
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "_INFO_"
+            }
+          ],
+          "accessory": {
+            "type": "image",
+            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png",
+            "alt_text": "Warning"
+          }
+        
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*image:*\n###IMAGE###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*application:*\n###APP_NAME###"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*namespace:*\n###NAMESPACE###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*environment:*\n###ENVIRONMENT###"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*severity:*\n###SEVERITY###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*scan job status:*\n###STATUS###"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "emoji": true,
+                "text": "Handle potential vulnerabilities"
+              },
+              "url": "###DD_LINK###",
+              "style": "primary"
+            }
+          ]
+        }
+      ]
+    }
+
   #NO_PROXY: "" # e.g. IP of kubernetes.default.svc
   #JAVA_OPTS: "" # e.g. proxy
