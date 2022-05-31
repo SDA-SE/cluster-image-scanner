@@ -214,7 +214,7 @@ spec:
               echo "Sending to slack ${slack}"
               # shellcheck disable=SC2001
               info=$(echo "${info}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
-              messageNoNewline=$(echo ${message} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
+              infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
               ls -la /clusterscanner/
               echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
@@ -224,7 +224,7 @@ spec:
               sed -i "s/###NAMESPACE###/${namespace}/g" /tmp/slack-template.json
               sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json 
               sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
-              sed -i "s#_INFO_#${messageNoNewline}#g" /tmp/slack-template.json
+              sed -i "s#_INFO_#${infoNoNewline}#g" /tmp/slack-template.json
               echo "/tmp/slack-template.json:"
               cat /tmp/slack-template.json
           
@@ -235,7 +235,6 @@ spec:
                   -X POST \
                   "${SLACK_MESSAGE_ENDPOINT}"          
               else
-                echo "In Rocket Chat with user ${ROCKET_CHAT_USER_ID} for Endpoint ${SLACK_MESSAGE_ENDPOINT}"
                 curl -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
                   -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -H "Content-type:application/json" \
@@ -324,6 +323,7 @@ spec:
                     message="${infoText}; ${description}"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
+                      info="${info}; Error: ${errorText}"
                     fi
                     echo "will inform"
                     inform > /tmp/inform.log || true
@@ -335,7 +335,7 @@ spec:
                     if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
                       echo "will wait for 120 seconds"
                       sleep 120 # wait for rate limt
-                      inform "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${slack}" "${email}" "${title}" "${message}"
+                      inform
                     fi
                     sleep 1 # reduce risk of rate limit
                   done
