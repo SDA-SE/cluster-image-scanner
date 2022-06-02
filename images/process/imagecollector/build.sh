@@ -129,7 +129,7 @@ buildah config \
   --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check" \
   --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-track" \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
-  --env IS_SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \
+  --env SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \
   --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
