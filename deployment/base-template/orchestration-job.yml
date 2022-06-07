@@ -56,6 +56,14 @@ spec:
         - - name: git-upload-report
             template: git-upload-report
     #            when: "{{ workflow.parameters.allResultsGitTarget }} == "
+        - - name: generate-response-statistics
+            template: generate-response-statistics
+        - - name: git-upload-response-statistics
+            template: git-upload-response-statistics
+            arguments:
+              artifacts:
+                - name: team-statistics
+                  from: "{{steps.generate-response-statistics.outputs.artifacts.team-statistics}}"
 
     - name: fetch-image-list
       outputs:
@@ -478,3 +486,79 @@ spec:
           git push -f origin master || true
 
 
+    - name: generate-response-statistics
+      outputs:
+        artifacts:
+          - name: team-statistics
+            path: /tmp/team-statistics.csv
+      container:
+        image: "quay.io/sdase/defectdojo-statistic-client:3"
+        imagePullPolicy: Always # TODO IfNotPresent
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.defectDojoConfigMapName }}"
+          - configMapRef:
+              name: "scanjob-env-parameter"
+          - secretRef:
+              name: "{{ workflow.parameters.defectDojoConfigMapName }}"
+
+    - name: git-upload-response-statistics
+      volumes:
+        - name: "{{ workflow.parameters.gitSecretName }}"
+          secret:
+            secretName: "{{ workflow.parameters.gitSecretName }}"
+      inputs:
+        artifacts:
+          - name: team-statistics
+            path: /tmp/team-statistics.csv
+      script:
+        image: "{{ workflow.parameters.imageCollectorImageName }}"
+        volumeMounts:
+          - name: "{{ workflow.parameters.gitSecretName }}"
+            mountPath: "/clusterscanner/github/github_private_key.pem"
+            subPath: "github_private_key.pem"
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: SCAN_ID
+            value: "{{ workflow.parameters.scanId }}"
+          - name: GITHUB_KEY_FILE_PATH
+            value: "/clusterscanner/github/github_private_key.pem"
+          - name: GITHUB_REPOSITORY
+            value: "{{ workflow.parameters.allResultsGitTarget }}"
+          - name: WORKFLOW_DATE
+            value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}"
+        envFrom:
+          - secretRef:
+              name: "{{ workflow.parameters.gitSecretName }}"
+          - configMapRef:
+              name: "scanjob-env-parameter"
+        command: [/bin/bash]
+        source: |
+          set -e
+          cd $HOME
+          source auth.bash # > /dev/null 2>&1
+          source git.bash # > /dev/null 2>&1
+
+          if [ "${GITHUB_REPOSITORY}" == "" ]; then
+            echo "No repo to upload stats"
+            exit 0
+          fi
+
+          gitAuth
+          echo "gitFetch"
+          gitFetch
+
+          
+          mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
+          cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
+          cp /tmp/team-statistics.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}
+          ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
+          
+          git add * || true
+          git commit -m "add response statistics" || true
+
+          git push -f origin master || true
