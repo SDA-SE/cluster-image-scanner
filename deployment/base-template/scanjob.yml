@@ -250,7 +250,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       container:
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:2"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
