@@ -75,7 +75,7 @@ spec:
         - name: tmp
           emptyDir: {}
       container:
-        image: "{{ workflow.parameters.imageSourceFetcherImageName }}"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-image-source-fetcher:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -102,7 +102,7 @@ spec:
             path: /clusterscanner/imageList.json
             mode: 0444
       container:
-        image: "{{ workflow.parameters.workflowRunnerImageName }}"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:2"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         envFrom:
@@ -123,7 +123,7 @@ spec:
             value: "4" # too many jobs create disk pressure
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
-          - name: imageRegistry
+          - name: imageRegistryBase
             value: "{{ workflow.parameters.imageRegistryBase }}"
 
     - name: notify-teams

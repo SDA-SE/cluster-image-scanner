@@ -40,7 +40,7 @@ spec:
       - name: is_scan_dependency_track
       - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
-      - name: imageRegistry
+      - name: imageRegistryBase
       - name: scanjobEnvParameter
 
   templates:
@@ -250,7 +250,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       container:
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-syft:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
