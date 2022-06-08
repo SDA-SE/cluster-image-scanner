@@ -36,33 +36,9 @@ spec:
       - name: dependencyCheckSuppressionsConfigMapName
         value: "suppressions-sda"
       - name: allResultsGitTarget
-        value: "" # github.com/pagel-pro/cluster-image-scanner-all-results
-      - name: baseImageName
-        value: "quay.io/sdase/cluster-image-scanner-base:2"
-      - name: defectDojoClientImageName
-        value: "quay.io/sdase/defectdojo-client:3"
-      - name: imageCollectorImageName
-        value: "quay.io/sdase/cluster-image-scanner-imagecollector:2"
-      - name: scanDistrolessImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-distroless:2"
-      - name: scanDependencyCheckImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-dependency-check:2"
-      - name: scanMalwareImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-malware:2"
-      - name: scanRootImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-runasroot:2"
-      - name: scanLifetimeImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-lifetime:2"
-      - name: scanNewVersionImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-new-version:2"
-      - name: imageSourceFetcherImageName
-        value: "quay.io/sdase/cluster-image-scanner-image-source-fetcher:2"
-      - name: workflowRunnerImageName
-        value: "quay.io/sdase/cluster-image-scanner-workflow-runner:2"
-      - name: scanSyftImageName
-        value: "quay.io/sdase/cluster-image-scanner-scan-syft:2"
-      - name: notifierImageName
-        value: "quay.io/sdase/cluster-image-scanner-notifier:2"
+        value: "github.com/pagel-pro/cluster-image-scanner-all-results"
+      - name: imageRegistryBase
+        value: "quay.io/sdase"
   templates:
     - name: main
       retryStrategy:

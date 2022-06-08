@@ -55,7 +55,7 @@ while read -r line; do
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /clusterscanner/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /clusterscanner/template.yml
-  sed -i "s~###imageRegistry###~${imageRegistry}~" /clusterscanner/template.yml
+  sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /clusterscanner/template.yml
 
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"

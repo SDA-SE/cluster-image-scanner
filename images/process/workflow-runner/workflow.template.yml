@@ -65,8 +65,8 @@ spec:
         value: "###dependencyCheckSuppressionsConfigMapName###"
       - name: new_version_image_filter
         value: "###new_version_image_filter###"
-      - name: imageRegistry
-        value: "###imageRegistry###"
+      - name: imageRegistryBase
+        value: "###imageRegistryBase###"
       - name: scanjobEnvParameter
         value: "scanjob-env-parameter"
 

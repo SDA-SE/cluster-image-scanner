@@ -28,18 +28,7 @@ spec:
       - workflow.parameters.newVersionImageFilter
       - workflow.parameters.dependencyCheckSuppressionsConfigMapName
       - workflow.parameters.allResultsGitTarget
-      - workflow.parameters.baseImageName
-      - workflow.parameters.defectDojoClientImageName
-      - workflow.parameters.imageSourceFetcherImageName
-      - workflow.parameters.imageCollectorImageName
-      - workflow.parameters.workflowRunnerImageName
-      - workflow.parameters.scanDistrolessImageName
-      - workflow.parameters.scanDependencyCheckImageName
-      - workflow.parameters.scanMalwareImageName
-      - workflow.parameters.scanRootImageName
-      - workflow.parameters.scanLifetimeImageName
-      - workflow.parameters.scanNewVersionImageName
-      - workflow.parameters.scanSyftImageName
+      - workflow.parameters.imageRegistryBase
   templates:
     - name: main
       steps:
@@ -135,7 +124,7 @@ spec:
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: imageRegistry
-            value: "{{ workflow.parameters.imageRegistry }}"
+            value: "{{ workflow.parameters.imageRegistryBase }}"
 
     - name: notify-teams
       volumes:
@@ -143,7 +132,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-notifier:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -342,7 +331,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-imagecollector:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -472,7 +461,7 @@ spec:
           - name: team-statistics
             path: /tmp/team-statistics.csv
       container:
-        image: "{{ workflow.parameters.imageRegistry }}/defectdojo-statistic-client:3"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
         imagePullPolicy: Always # TODO IfNotPresent
         command: [/usr/bin/groovy]
         args:
@@ -496,7 +485,7 @@ spec:
           - name: team-statistics
             path: /tmp/team-statistics.csv
       script:
-        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-imagecollector:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
