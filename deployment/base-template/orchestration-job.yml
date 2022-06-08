@@ -342,7 +342,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
-        image: "{{ workflow.parameters.imageCollectorImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -472,7 +472,7 @@ spec:
           - name: team-statistics
             path: /tmp/team-statistics.csv
       container:
-        image: "quay.io/sdase/defectdojo-statistic-client:3"
+        image: "{{ workflow.parameters.imageRegistry }}/defectdojo-statistic-client:3"
         imagePullPolicy: Always # TODO IfNotPresent
         command: [/usr/bin/groovy]
         args:
@@ -496,7 +496,7 @@ spec:
           - name: team-statistics
             path: /tmp/team-statistics.csv
       script:
-        image: "{{ workflow.parameters.imageCollectorImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
