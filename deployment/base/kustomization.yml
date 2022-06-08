@@ -20,11 +20,10 @@ resources:
   - repolist.yml
   - email.yml
   - synchronization.cm.yml
-  - cleanup-scandata.yml
-  - cleanup-unpacked.yml
   - dependency-track.cm.yml
   - dependency-track.secret.yml
-
+#  - cleanup-scandata.yml
+#  - cleanup-unpacked.yml
 configMapGenerator:
   - name: suppressions
     files:
