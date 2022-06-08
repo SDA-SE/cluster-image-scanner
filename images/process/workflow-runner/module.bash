@@ -55,15 +55,8 @@ while read -r line; do
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /clusterscanner/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /clusterscanner/template.yml
-  sed -i "s~###baseImageName###~${baseImageName}~" /clusterscanner/template.yml
-  sed -i "s~###defectDojoClientImageName###~${defectDojoClientImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanDistrolessImageName###~${scanDistrolessImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanDependencyCheckImageName###~${scanDependencyCheckImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanMalwareImageName###~${scanMalwareImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanRootImageName###~${scanRootImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanLifetimeImageName###~${scanLifetimeImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanNewVersionImageName###~${scanNewVersionImageName}~" /clusterscanner/template.yml
-  sed -i "s~###scanSyftImageName###~${scanSyftImageName}~" /clusterscanner/template.yml
+  sed -i "s~###imageRegistry###~${imageRegistry}~" /clusterscanner/template.yml
+
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /clusterscanner/template.yml

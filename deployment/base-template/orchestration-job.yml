@@ -134,28 +134,8 @@ spec:
             value: "4" # too many jobs create disk pressure
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
-          - name: NEW_VERSION_IMAGE_FIILTER
-            value: "{{ workflow.parameters.newVersionImageFilter }}"
-          - name: baseImageName
-            value: "{{ workflow.parameters.baseImageName }}"
-          - name: defectDojoClientImageName
-            value: "{{ workflow.parameters.defectDojoClientImageName }}"
-          - name: scanDistrolessImageName
-            value: "{{ workflow.parameters.scanDistrolessImageName }}"
-          - name: scanDependencyCheckImageName
-            value: "{{ workflow.parameters.scanDependencyCheckImageName }}"
-          - name: scanMalwareImageName
-            value: "{{ workflow.parameters.scanMalwareImageName }}"
-          - name: scanRootImageName
-            value: "{{ workflow.parameters.scanRootImageName }}"
-          - name: scanLifetimeImageName
-            value: "{{ workflow.parameters.scanLifetimeImageName }}"
-          - name: scanNewVersionImageName
-            value: "{{ workflow.parameters.scanNewVersionImageName }}"
-          - name: notifierImageName
-            value: "{{ workflow.parameters.notifierImageName }}"
-          - name: scanSyftImageName
-            value: "{{ workflow.parameters.scanSyftImageName }}"
+          - name: imageRegistry
+            value: "{{ workflow.parameters.imageRegistry }}"
 
     - name: notify-teams
       volumes:
@@ -163,7 +143,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: "{{ workflow.parameters.notifierImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-notifier:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data

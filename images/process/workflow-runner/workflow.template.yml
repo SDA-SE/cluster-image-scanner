@@ -65,24 +65,8 @@ spec:
         value: "###dependencyCheckSuppressionsConfigMapName###"
       - name: new_version_image_filter
         value: "###new_version_image_filter###"
-      - name: baseImageName
-        value: "###baseImageName###"
-      - name: defectDojoClientImageName
-        value: "###defectDojoClientImageName###"
-      - name: scanDistrolessImageName
-        value: "###scanDistrolessImageName###"
-      - name: scanDependencyCheckImageName
-        value: "###scanDependencyCheckImageName###"
-      - name: scanMalwareImageName
-        value: "###scanMalwareImageName###"
-      - name: scanRootImageName
-        value: "###scanRootImageName###"
-      - name: scanLifetimeImageName
-        value: "###scanLifetimeImageName###"
-      - name: scanNewVersionImageName
-        value: "###scanNewVersionImageName###"
-      - name: scanSyftImageName
-        value: "###scanSyftImageName###"
+      - name: imageRegistry
+        value: "###imageRegistry###"
       - name: scanjobEnvParameter
         value: "scanjob-env-parameter"
 

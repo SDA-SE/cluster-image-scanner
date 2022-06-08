@@ -40,15 +40,7 @@ spec:
       - name: is_scan_dependency_track
       - name: new_version_image_filter
       - name: dependencyCheckSuppressionsConfigMapName
-      - name: baseImageName
-      - name: defectDojoClientImageName
-      - name: scanDistrolessImageName
-      - name: scanDependencyCheckImageName
-      - name: scanMalwareImageName
-      - name: scanRootImageName
-      - name: scanLifetimeImageName
-      - name: scanNewVersionImageName
-      - name: scanSyftImageName
+      - name: imageRegistry
       - name: scanjobEnvParameter
 
   templates:
@@ -164,7 +156,7 @@ spec:
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
       script:
-        image: "{{ workflow.parameters.baseImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-base:2"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -258,7 +250,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       container:
-        image: "{{ workflow.parameters.scanSyftImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-syft:2"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
@@ -290,7 +282,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: "{{ workflow.parameters.baseImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-base:2"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         env:
@@ -441,7 +433,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: "{{ workflow.parameters.defectDojoClientImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/defectdojo-client:3"
         volumeMounts:
           - name: scandata
             mountPath: /tmp/dependency-track-results
@@ -497,7 +489,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanDistrolessImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-distroless:2"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         volumeMounts:
@@ -531,7 +523,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanLifetimeImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-lifetime:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -567,7 +559,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanLifetimeImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-lifetime:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -607,7 +599,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanRootImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-runasroot:2"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -641,7 +633,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanNewVersionImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-new-version:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -683,7 +675,7 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
-        image: "{{ workflow.parameters.scanMalwareImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-malware:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -729,7 +721,7 @@ spec:
           - name: results-dependency-check-report
             path: /clusterscanner/data
       container:
-        image: "{{ workflow.parameters.scanDependencyCheckImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-scan-dependency-check:2"
         imagePullPolicy: Always # TODO
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -767,7 +759,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: "{{ workflow.parameters.defectDojoClientImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/defectdojo-client:3"
         volumeMounts:
           - name: scandata
             mountPath: /tmp/dependency-check-results
@@ -816,7 +808,7 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.csv
       script:
-        image: "{{ workflow.parameters.baseImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-base:2"
         volumeMounts:
           - name: scandata
             mountPath: /tmp/results
@@ -870,7 +862,7 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
-        image: "{{ workflow.parameters.defectDojoClientImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/defectdojo-client:3"
         imagePullPolicy: IfNotPresent
         command: [/usr/bin/groovy]
         args:
@@ -943,7 +935,7 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
       script:
-        image: "{{ workflow.parameters.baseImageName }}"
+        image: "{{ workflow.parameters.imageRegistry }}/cluster-image-scanner-base:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
