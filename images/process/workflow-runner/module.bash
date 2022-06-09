@@ -7,7 +7,7 @@ env
 if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
   SERVICE_ACCOUNT_NAME="clusterscanner"
 fi
-jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /clusterscanner/imageListSeparated.json
+jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
 totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
 while read -r line; do
@@ -26,43 +26,43 @@ while read -r line; do
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
-  cp /clusterscanner/workflow.template.yml /clusterscanner/template.yml
+  cp /clusterscanner/workflow.template.yml /tmp/template.yml
   scanjobPrefix="sj-"
-  sed -i "s~###SERVICE_ACCOUNT_NAME###~${SERVICE_ACCOUNT_NAME}~" /clusterscanner/template.yml
-  sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /clusterscanner/template.yml
-  sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /clusterscanner/template.yml
-  sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /clusterscanner/template.yml
-  sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /clusterscanner/template.yml
-  sed -i "s~###SCAN_ID###~${SCAN_ID}~" /clusterscanner/template.yml
-  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /clusterscanner/template.yml
-  sed -i "s~###team###~${team}~" /clusterscanner/template.yml
-  sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /clusterscanner/template.yml
-  sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /clusterscanner/template.yml
-  sed -i "s~###environment###~${environment}~" /clusterscanner/template.yml
-  sed -i "s~###namespace###~${namespace}~" /clusterscanner/template.yml
-  sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /clusterscanner/template.yml
-  sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /clusterscanner/template.yml
-  sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /clusterscanner/template.yml
-  sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /clusterscanner/template.yml
-  sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /clusterscanner/template.yml
-  sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /clusterscanner/template.yml
-  sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /clusterscanner/template.yml
-  sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /clusterscanner/template.yml
-  sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /clusterscanner/template.yml
+  sed -i "s~###SERVICE_ACCOUNT_NAME###~${SERVICE_ACCOUNT_NAME}~" /tmp/template.yml
+  sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /tmp/template.yml
+  sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /tmp/template.yml
+  sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /tmp/template.yml
+  sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /tmp/template.yml
+  sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
+  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
+  sed -i "s~###team###~${team}~" /tmp/template.yml
+  sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /tmp/template.yml
+  sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /tmp/template.yml
+  sed -i "s~###environment###~${environment}~" /tmp/template.yml
+  sed -i "s~###namespace###~${namespace}~" /tmp/template.yml
+  sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /tmp/template.yml
+  sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
+  sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
+  sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
+  sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
+  sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /tmp/template.yml
+  sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
+  sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /tmp/template.yml
+  sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /tmp/template.yml
+  sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /tmp/template.yml
+  sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml
+  sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /tmp/template.yml
+  sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
+  sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /tmp/template.yml
 
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
-  sed -i "s~###workflow_name###~${workflowGeneratedName}~" /clusterscanner/template.yml
+  sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
-  cat /clusterscanner/template.yml
-  kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /clusterscanner/template.yml
+  cat /tmp/template.yml
+  kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /tmp/template.yml
 
   for outdatedJob in $(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" --prefix "${scanjobPrefix}" | grep "Running *1h" | awk '{print $1}'); do
     echo "stopping ${outdatedJob} because it is running since over an hour without getting done"
@@ -78,7 +78,7 @@ while read -r line; do
       sleep 10
     done
   fi
-done < /clusterscanner/imageListSeparated.json
+done < /tmp/imageListSeparated.json
 while [[ "$(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" -l "clusterscanner.sda.org/scan-id=${SCAN_ID}" | tail --lines=+2 | wc -l)" -gt 0 ]]; do
   echo "There are still scans running, waiting another 10 seconds"
   sleep 10
