@@ -72,12 +72,29 @@ spec:
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
+        - name: out
+          emptyDir: {}
         - name: tmp
           emptyDir: {}
       container:
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-image-source-fetcher:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
@@ -85,6 +102,8 @@ spec:
           - name: "{{ workflow.parameters.imageSourceListConfigMapName }}"
             mountPath: /clusterscanner/image-source-list
           - name: tmp
+            mountPath: /tmp
+          - name: out
             mountPath: /clusterscanner/out
         env:
           - name: GITHUB_KEY_FILE_PATH
@@ -96,12 +115,33 @@ spec:
               name: "scanjob-env-parameter"
 
     - name: subflow
+      volumes:
+        - name: tmp
+          emptyDir: {}
       inputs:
         artifacts:
           - name: imageList
             path: /clusterscanner/imageList.json
             mode: 0444
       container:
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:2"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
@@ -131,12 +171,31 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: {}
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:2"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "{{ workflow.parameters.scanId }}"
+          - name: tmp
+            mountPath: /tmp
         imagePullPolicy: Always
         env:
           - name: SLACK_CLI_TOKEN
@@ -327,12 +386,31 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: {}
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "{{ workflow.parameters.scanId }}"
@@ -460,7 +538,28 @@ spec:
         artifacts:
           - name: team-statistics
             path: /tmp/team-statistics.csv
+      volumes:
+        - name: tmp
+          emptyDir: { }
       container:
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
         imagePullPolicy: Always # TODO IfNotPresent
         command: [/usr/bin/groovy]
@@ -480,16 +579,35 @@ spec:
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
+        - name: tmp
+          emptyDir: {}
       inputs:
         artifacts:
           - name: team-statistics
             path: /tmp/team-statistics.csv
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
             subPath: "github_private_key.pem"
+          - name: tmp
+            mountPath: /tmp
         imagePullPolicy: IfNotPresent
         env:
           - name: SCAN_ID

@@ -155,11 +155,30 @@ spec:
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+        - name: tmp
+          emptyDir: { }
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
@@ -249,7 +268,24 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:2"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
@@ -268,6 +304,8 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         imagePullPolicy: Always
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
@@ -281,7 +319,24 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -308,6 +363,8 @@ spec:
           - configMapRef:
               name: "dependency-track"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
@@ -424,6 +481,8 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
@@ -433,8 +492,25 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /tmp/dependency-track-results
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
@@ -442,6 +518,7 @@ spec:
         imagePullPolicy: Always # TODO IfNotPresent
         command: [/usr/bin/groovy]
         args:
+          - "-Dgroovy.grape.autoDownload=false"
           - "/code/defectdojo.groovy"
         workingDir: "/code"
         envFrom:
@@ -483,16 +560,35 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-distroless
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:2"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
@@ -517,16 +613,35 @@ spec:
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-lifetime
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/lifetime"
@@ -550,6 +665,8 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
@@ -559,10 +676,27 @@ spec:
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/baseimage-lifetime"
@@ -593,16 +727,35 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-runasroot
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:2"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/runasroot"
@@ -627,16 +780,35 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-runasroot
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/generic/new-version"
@@ -669,16 +841,35 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-runasroot
             path: /clusterscanner/data
             archiveLogs: true
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:2"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
@@ -713,6 +904,8 @@ spec:
         - name: suppressions
           configMap:
             name: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-dependency-check
@@ -721,10 +914,27 @@ spec:
           - name: results-dependency-check-report
             path: /clusterscanner/data
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-dependency-check:2"
         imagePullPolicy: Always # TODO
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
             subPath: "{{ workflow.parameters.image_id }}"
@@ -750,6 +960,8 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-dd-dependency-check-test-link
@@ -759,8 +971,25 @@ spec:
           - name: findings-file
             path: /code/findings.json
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /tmp/dependency-check-results
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
@@ -801,6 +1030,8 @@ spec:
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
             readOnly: true
+        - name: tmp
+          emptyDir: { }
       outputs:
         artifacts:
           - name: results-generic
@@ -808,8 +1039,25 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.csv
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /tmp/results
             subPath: "results/{{ workflow.parameters.image_id }}/generic"
@@ -861,7 +1109,25 @@ spec:
             path: /code/isFinding
           - name: findings-file
             path: /code/findings.json
+      volumes:
+        - name: tmp
+          emptyDir: { }
       container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         imagePullPolicy: IfNotPresent
         command: [/usr/bin/groovy]
@@ -896,6 +1162,9 @@ spec:
             value: "0" # make the job successful
           - name: DD_MINIMUM_SEVERITY
             value: "Medium"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
 
     - name: results-aggregate
       inputs:
@@ -934,9 +1203,28 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        - name: tmp
+          emptyDir: { }
       script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '1'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "{{ workflow.parameters.SCAN_ID }}"
@@ -1073,4 +1361,3 @@ spec:
           echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
           echo "${JSON_RESULT}"
           echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
-
