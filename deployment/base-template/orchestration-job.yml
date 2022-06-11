@@ -537,7 +537,7 @@ spec:
       outputs:
         artifacts:
           - name: team-statistics
-            path: /tmp/team-statistics.csv
+            path: /tmp/team-response-statistics.csv
       volumes:
         - name: tmp
           emptyDir: { }
@@ -584,7 +584,7 @@ spec:
       inputs:
         artifacts:
           - name: team-statistics
-            path: /tmp/team-statistics.csv
+            path: /tmp/team-response-statistics.csv
       script:
         resources:
           limits:
@@ -642,7 +642,7 @@ spec:
           
           mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
           cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
-          cp /tmp/team-statistics.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}
+          cp /tmp/team-response-statistics.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           
           git add * || true
