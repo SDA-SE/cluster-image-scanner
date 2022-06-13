@@ -163,14 +163,14 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
@@ -276,8 +276,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -327,8 +327,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -497,8 +497,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -573,8 +573,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -626,14 +626,14 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
@@ -681,14 +681,14 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
@@ -740,8 +740,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -793,8 +793,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -854,8 +854,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -919,8 +919,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -976,8 +976,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1044,8 +1044,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1118,8 +1118,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1211,8 +1211,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

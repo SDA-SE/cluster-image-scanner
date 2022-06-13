@@ -86,7 +86,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '1'
-            memory: 128Mi
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -132,8 +132,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -179,8 +179,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -397,8 +397,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -550,8 +550,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -591,8 +591,8 @@ spec:
             cpu: '1'
             memory: 256Mi
           requests:
-            cpu: '1'
-            memory: 128Mi
+            cpu: '0.2'
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
