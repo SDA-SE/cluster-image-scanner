@@ -42,8 +42,8 @@ spec:
                   from: "{{steps.fetch-image-list.outputs.artifacts.image-list-merged}}"
         - - name: notify-teams
             template: notify-teams
-        - - name: git-upload-report
-            template: git-upload-report
+        - - name: generate-lifetime-statistics
+            template: generate-lifetime-statistics
     #            when: "{{ workflow.parameters.allResultsGitTarget }} == "
         - - name: generate-response-statistics
             template: generate-response-statistics
@@ -249,7 +249,7 @@ spec:
               fi
               echo "Sending to slack ${slack}"
               # shellcheck disable=SC2001
-              info=$(echo "${info}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
+              info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
               ls -la /clusterscanner/
               echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
@@ -359,7 +359,7 @@ spec:
                     message="${infoText}; ${description}"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
-                      info="${info}; Error: ${errorText}"
+                      infoText="${infoText}; Error: ${errorText}"
                     fi
                     echo "will inform"
                     inform > /tmp/inform.log || true
@@ -381,7 +381,7 @@ spec:
           done
           echo "${errors}"
 
-    - name: git-upload-report
+    - name: generate-lifetime-statistics
       volumes:
         - name: scandata
           persistentVolumeClaim:
