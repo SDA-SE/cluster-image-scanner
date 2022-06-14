@@ -27,15 +27,9 @@ data:
           "fields": [
             {
               "type": "mrkdwn",
-              "text": "_INFO_"
+              "text": "*Hint*: _INFO_"
             }
-          ],
-          "accessory": {
-            "type": "image",
-            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png",
-            "alt_text": "Warning"
-          }
-        
+          ]
         },
         {
           "type": "section",
