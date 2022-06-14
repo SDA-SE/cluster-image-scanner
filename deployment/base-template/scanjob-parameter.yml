@@ -27,7 +27,7 @@ data:
           "fields": [
             {
               "type": "mrkdwn",
-              "text": "*Hint*: _INFO_"
+              "text": "_INFO_"
             }
           ]
         },
