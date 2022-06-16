@@ -101,6 +101,7 @@ getPods() {
       team=""
       email=""
       slack=""
+      rocketchat=""
       isScanLifetime=""
       isScanBaseimageLifetime=""
       isScanDistroless=""
@@ -129,6 +130,7 @@ getPods() {
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
+          rocketchat=$(echo ${mapping} | jq -rcM '.rocketchat')
           for attributeName in ${configurationsToMap[@]}; do
               setAttributes ${attributeName}
               camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
@@ -163,6 +165,9 @@ getPods() {
       echo "setting namespaceContacts"
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
         slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
+      fi
+      if [ "${rocketchat}" == "" ] || [ "${rocketchat}" == "null" ]; then
+        rocketchat=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/rocketchat"')
       fi
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
           slack="#${team}${DEFAULT_SLACK_POSTFIX}"
@@ -252,6 +257,7 @@ getPods() {
         echo "${podDecoded}" | jq '{
           "email": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'email"],
           "slack": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'slack"],
+          "rocketchat": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'rocketchat"],
           "scm_source_url": .metadata.annotations["'${SCM_URL_ANNOTATION}'"],
           "scm_source_branch": .metadata.annotations["'${SCM_BRANCH_ANNOTATION}'"],
           "scm_release": .metadata.annotations["'${SCM_RELEASE_ANNOTATION}'"],
@@ -354,6 +360,7 @@ getPods() {
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
           if .email == null then .email="'${email}'" else . end |
           if .slack == null then .slack="'${slack}'" else . end |
+          if .rocketchat == null then .rocketchat="'${rocketchat}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
           if .is_scan_lifetime == null then .is_scan_lifetime="'${isScanLifetime}'" else . end |
           if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseimageLifetime}'" else . end |

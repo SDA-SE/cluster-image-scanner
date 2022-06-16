@@ -44,6 +44,7 @@ while read -r line; do
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
+  sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
   sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml

@@ -240,14 +240,9 @@ spec:
           fi
 
           inform() {
-            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
-            if [ "${slack}" != "" ]; then
-              if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-                echo "SLACK_CLI_TOKEN not set, exit"
-                exit 1
-              fi
-              echo "Sending to slack ${slack}"
+            if [ "${slack}" != "" ] || [ "${rocketchat}" != "" ]; then
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
@@ -262,15 +257,14 @@ spec:
               sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
               sed -i "s#_INFO_#${infoNoNewline}#g" /tmp/slack-template.json
               echo "/tmp/slack-template.json:"
-              cat /tmp/slack-template.json
-          
-              if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then
-                curl -H "Content-type: application/json" \
-                  -d @/tmp/slack-template.json \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
-                  -X POST \
-                  "${SLACK_MESSAGE_ENDPOINT}"          
-              else
+              #cat /tmp/slack-template.json
+
+              if [ "${slack}" == "" ]; then
+                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+                  echo "SLACK_CLI_TOKEN not set, exit"
+                  exit 1
+                fi
+                echo "Sending to slack ${slack}"
                 curl -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
                   -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -H "Content-type:application/json" \
@@ -278,10 +272,17 @@ spec:
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
               fi
-            else
-              echo "slackChannel not set"
+              if [ "${rocketchat}" != "" ]; then
+                if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then
+                  echo "No ROCKET_CHAT_USER_ID set"
+                fi
+                curl -H "Content-type: application/json" \
+                  -d @/tmp/slack-template.json \
+                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
+                  -X POST \
+                  "${SLACK_MESSAGE_ENDPOINT}"          
+              fi
             fi
-
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
               echo "Sending to email ${email}"
               if [ "${smtp-auth-password}" != "YOURPASSWORD" ] && [ "${smtp-auth-password}" != "" ] && [ "${smtp-auth-password}" != "smtp_auth_password_SECRET" ]; then
@@ -303,6 +304,7 @@ spec:
             namespace=$(echo "${item}" | jq -r '.namespace'| tr -cd '[:alnum:]._-')
             environment=$(echo "${item}" | jq -r '.environment'| tr -cd '[:alnum:]._-')
             slack=$(echo "${item}" | jq -r '.slack')
+            rocketchat=$(echo "${item}" | jq -r '.rocketchat')
             appName=$(echo "${item}" | jq -r '.appname'| tr -cd '[:alnum:]._-')
             email=$(echo "${item}" | jq -r '.email')
             if [ "${ENFORCE_SLACK_CHANNEL}" != "" ]; then

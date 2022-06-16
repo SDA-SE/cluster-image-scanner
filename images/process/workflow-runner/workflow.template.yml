@@ -41,6 +41,8 @@ spec:
         value: "###image_id###"
       - name: slack
         value: "###slack###"
+      - name: rocketchat
+        value: "###rocketchat###"
       - name: email
         value: "###email###"
       - name: is_scan_baseimage_lifetime
