@@ -507,7 +507,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -982,7 +982,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -1121,7 +1121,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
         imagePullPolicy: Always # IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
