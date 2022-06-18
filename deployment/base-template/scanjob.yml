@@ -1129,7 +1129,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # IfNotPresent
         command: [/usr/bin/groovy]
         args:
           - "/code/defectdojo.groovy"
