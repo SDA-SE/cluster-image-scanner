@@ -564,10 +564,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
         imagePullPolicy: Always # TODO IfNotPresent
-        command: [/usr/bin/groovy]
-        args:
-          - "/code/defectdojo.groovy"
-        workingDir: "/code"
+        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.defectDojoConfigMapName }}"
