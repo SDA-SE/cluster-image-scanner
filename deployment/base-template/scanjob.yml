@@ -486,11 +486,11 @@ spec:
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
-            path: /tmp/defectDojoTestLink.txt
+            path: /code/defectDojoTestLink.txt
           - name: is-finding-file
-            path: /tmp/isFinding
+            path: /code/isFinding
           - name: findings-file
-            path: /tmp/findings.json
+            path: /code/findings.json
       container:
         resources:
           limits:
@@ -507,7 +507,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -516,7 +516,11 @@ spec:
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
             readOnly: true
         imagePullPolicy: Always # TODO IfNotPresent
-        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
+        command: [/usr/bin/groovy]
+        args:
+          - "-Dgroovy.grape.autoDownload=false"
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
@@ -961,11 +965,11 @@ spec:
       outputs:
         artifacts:
           - name: results-dd-dependency-check-test-link
-            path: /tmp/defectDojoTestLink.txt
+            path: /code/defectDojoTestLink.txt
           - name: is-finding-file
-            path: /tmp/isFinding
+            path: /code/isFinding
           - name: findings-file
-            path: /tmp/findings.json
+            path: /code/findings.json
       container:
         resources:
           limits:
@@ -982,7 +986,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -991,7 +995,10 @@ spec:
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
             readOnly: true
         imagePullPolicy: Always # TODO IfNotPresent
-        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
@@ -1097,11 +1104,11 @@ spec:
       outputs:
         artifacts:
           - name: results-dd-generic-test-link
-            path: /tmp/defectDojoTestLink.txt
+            path: /code/defectDojoTestLink.txt
           - name: is-finding-file
-            path: /tmp/isFinding
+            path: /code/isFinding
           - name: findings-file
-            path: /tmp/findings.json
+            path: /code/findings.json
       volumes:
         - name: tmp
           emptyDir: { }
@@ -1121,9 +1128,12 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.111"
-        imagePullPolicy: Always # IfNotPresent
-        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
+        imagePullPolicy: IfNotPresent
+        command: [/usr/bin/groovy]
+        args:
+          - "/code/defectdojo.groovy"
+        workingDir: "/code"
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
