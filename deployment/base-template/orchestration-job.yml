@@ -638,10 +638,8 @@ spec:
           echo "gitFetch"
           gitFetch
 
-          
           mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
-          cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
-          cp /tmp/team-response-statistics.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}
+          cat /tmp/team-response-statistics.csv >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           
           git add * || true
