@@ -29,7 +29,7 @@ cleanup() {
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
-base_image="anchore/syft:v0.37.7"
+base_image="anchore/syft:v0.48.1"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
