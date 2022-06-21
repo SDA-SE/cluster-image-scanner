@@ -897,9 +897,6 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
-        - name: suppressions
-          configMap:
-            name: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
         - name: tmp
           emptyDir: { }
       outputs:
@@ -938,8 +935,6 @@ spec:
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
-          - name: suppressions
-            mountPath: /tmp/suppressions
         env:
           - name: IMAGE_BY_HASH
             value: "{{ workflow.parameters.image_id }}"
