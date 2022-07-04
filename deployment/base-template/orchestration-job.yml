@@ -242,6 +242,8 @@ spec:
           inform() {
             echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
+            if [ "${rocketchat}" == "null" ]; then rocketchat=""; fi
+            if [ "${slack}" == "null" ]; then slack=""; fi
             if [ "${slack}" != "" ] || [ "${rocketchat}" != "" ]; then
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
@@ -325,7 +327,7 @@ spec:
                   ddLinkDomain=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $2}')
                   ddLinkBase="${ddLinkScheme}//${ddLinkDomain}"
                   for findingBase in $(echo "${notification}" | jq -rcM '.findings[] | @base64'); do
-                    echo "In findingBase"
+                    echo "In findingBase ${image}"
                     finding=$(echo "${findingBase}" | base64 -d)
                     findingId=$(echo "${finding}" | jq -r '.id' | tr -cd '[:alnum:]._ -')
                     if [ "${findingId}" != "null" ] && [ "${findingId}" != "" ]; then
@@ -355,15 +357,16 @@ spec:
                       fi
                     fi
                     title="${title} in ${image}"
-                    echo "$title"
+                    echo "$title in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
                     message="${infoText}; ${description}"
+                    echo "created message, will create error"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
                       infoText="${infoText}; Error: ${errorText}"
                     fi
-                    echo "will inform"
+                    echo "will inform ${image}"
                     inform > /tmp/inform.log || true
                     cat /tmp/inform.log
                     if [ "$(cat /tmp/inform.log | grep -c '"ok": false')" -gt 0 ]; then
