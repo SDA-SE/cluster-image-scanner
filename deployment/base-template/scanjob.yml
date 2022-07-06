@@ -912,7 +912,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: Mi
+            memory: 368Mi
           requests:
             cpu: '0.2'
             memory: 128Mi
@@ -967,7 +967,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 368Mi
+            memory: 256Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
