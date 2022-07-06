@@ -48,8 +48,8 @@ spec:
       retryStrategy:
         limit: 1
         retryPolicy: "Always"
-        affinity:
-          nodeAntiAffinity: {}
+#        affinity:
+#          nodeAntiAffinity: {}
       dag:
         tasks:
           - name: imagefetcher
@@ -286,7 +286,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:cataloger"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
@@ -436,18 +436,19 @@ spec:
           fi
 
           echo "Fetching ${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export"
-
-          exit 0
-          ## In development: Check for new package version
-          purl="^(?:(?!pkg:deb).)*$"
-          purl="pkg:maven.*"
-          purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
-          curl -v "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export?purl=${purlEncodedValue}" \
+          
+          
+          
+          
+          #purl="^(?:(?!pkg:deb).)*$"
+          #purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
+          curl -v "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export" \
            --silent \
            --show-error \
            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
            --output ${exportFilePath}
-
+          exit 0
+          ## In development: Check for new package version
           DEFAULT_NPM_BASE_URL="https://registry.npmjs.org";
           NPM_API_LATEST_URL="/-/package/%s/dist-tags";
           # http://localhost:8071/api/v1/component/project/bc33ac48-fb26-4142-99c3-96fdb0f07066?searchText=&sortOrder=asc&pageSize=100&pageNumber=1
@@ -543,9 +544,10 @@ spec:
             value: "0"
           - name: EXIT_CODE_ON_MISSING_REPORT
             value: "0" # make the job successful
-          - name: DD_MINIMUM_SEVERITY
+          - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
-
+          - name: UNHANDLED_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+            value: '[ {"npm": {"critical": 1, "high": 3, "medium": 100}}, {"os": {"critical": 1, "high": 3, "medium": 100}} ]'
 
     - name: scan-distroless
       volumes:
@@ -910,10 +912,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -965,7 +967,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 368Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
