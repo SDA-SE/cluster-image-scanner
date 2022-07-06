@@ -319,6 +319,7 @@ spec:
                 while IFS= read -r notification; do
                   echo "in notification for ${image}"
                   ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
+                  echo "after defining ddLinkTest"
                   infoText=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
                   echo "after defining info"
                   errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
