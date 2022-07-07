@@ -177,10 +177,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 368Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -320,6 +320,7 @@ spec:
                   echo "in notification for ${image}"
                   ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
                   echo "after defining ddLinkTest"
+                  echo "${notification}" | jq -r ".infoText"
                   infoText=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
                   echo "after defining info"
                   errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
