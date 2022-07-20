@@ -29,6 +29,7 @@ spec:
       - name: appversion
       - name: appname
       - name: slack
+      - name: rocketchat
       - name: is_scan_lifetime
       - name: is_scan_baseimage_lifetime
       - name: is_scan_distroless
@@ -546,8 +547,8 @@ spec:
             value: "0" # make the job successful
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
-          - name: UNHANDLED_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
-            value: '[ {"npm": {"critical": 1, "high": 3, "medium": 100}}, {"os": {"critical": 1, "high": 3, "medium": 100}} ]'
+          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+            value: '[ {"npm": {"critical": 1, "high": 3, "medium": 100}}, {"deb": {"critical": 1, "high": 3, "medium": 100}}, {"maven": {"critical": 1, "high": 1, "medium": 1}} ]'
 
     - name: scan-distroless
       volumes:
@@ -1245,6 +1246,7 @@ spec:
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.rocketchat = "{{ workflow.parameters.rocketchat }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
 
