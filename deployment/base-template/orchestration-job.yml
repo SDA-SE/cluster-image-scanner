@@ -298,6 +298,7 @@ spec:
             fi
           }
           errors=""
+          echo "Will iterate over files in ${RESULT_PATH}"
           for file in "${RESULT_PATH}"/**/*.json; do
             echo "found file ${file}"
             item=$(cat "${file}")
