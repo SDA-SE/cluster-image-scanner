@@ -30,6 +30,8 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
 base_image="anchore/syft:v0.48.1"
+base_image="quay.io/sdase/cluster-image-scanner-scan-syft:cataloger"
+
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
@@ -89,3 +91,4 @@ then
 fi
 
 cleanup
+

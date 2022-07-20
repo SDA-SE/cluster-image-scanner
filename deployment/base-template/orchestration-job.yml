@@ -268,19 +268,24 @@ spec:
                 fi
                 echo "Sending to slack ${slack}"
                 curl -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-                  -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -H "Content-type:application/json" \
+                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \          
                   -X POST \
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
               fi
               if [ "${rocketchat}" != "" ]; then
-                if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then
+                if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
                   echo "No ROCKET_CHAT_USER_ID set"
                 fi
+                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+                  echo "No SLACK_CLI_TOKEN set"
+                fi          
+                echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
                 curl -H "Content-type: application/json" \
                   -d @/tmp/slack-template.json \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
+                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}"  \
+                  -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -X POST \
                   "${SLACK_MESSAGE_ENDPOINT}"          
               fi
