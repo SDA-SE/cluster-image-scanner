@@ -343,6 +343,7 @@ spec:
                     else
                       ddLink="${ddLinkTest}"
                     fi
+                    echo "findingId ${findingId}"
                     title=$(echo "${finding}" | jq -r '.title' | cut -c1-50 | sed 's#{##g'| sed 's#}##g') #| tr -cd '[:alnum:]._ <>-')
                     if [ "$title" == "Image Has a New Version" ]; then
                       scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null)
@@ -369,7 +370,7 @@ spec:
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
                     message="${infoText}; ${description}"
-                    echo "created message, will create error"
+                    echo "created message, will create error if exists"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
                       message="${message}\nError: ${errorText}"
                       infoText="${infoText}; Error: ${errorText}"
