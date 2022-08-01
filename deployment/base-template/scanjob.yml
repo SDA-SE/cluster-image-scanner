@@ -287,7 +287,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:cataloger"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:2"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
