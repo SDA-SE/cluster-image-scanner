@@ -443,7 +443,7 @@ spec:
           
           #purl="^(?:(?!pkg:deb).)*$"
           #purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
-          curl -v "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export" \
+          curl "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export" \
            --silent \
            --show-error \
            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
