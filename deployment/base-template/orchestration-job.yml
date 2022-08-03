@@ -686,9 +686,6 @@ spec:
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
-        env:
-          - name:
-            value: "{{ workflow.parameters.dependencyTrackDaysToCleanupDeactivateAnInactiveProject}}"
         envFrom:
           - secretRef:
               name: "dependency-track"
