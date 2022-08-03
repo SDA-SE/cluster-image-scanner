@@ -53,6 +53,8 @@ spec:
               artifacts:
                 - name: team-statistics
                   from: "{{steps.generate-response-statistics.outputs.artifacts.team-statistics}}"
+        - - name: cleanup-dependency-track
+            template: cleanup-dependency-track
 
     - name: fetch-image-list
       outputs:
@@ -659,3 +661,76 @@ spec:
           git commit -m "add response statistics" || true
 
           git push -f origin master || true
+          
+
+    - name: cleanup-dependency-track
+      volumes:
+        - name: tmp
+          emptyDir: { }
+      script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '0.2'
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        command: [/bin/bash]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name:
+            value: "{{ workflow.parameters.dependencyTrackDaysToCleanupDeactivateAnInactiveProject}}"
+        envFrom:
+          - secretRef:
+              name: "dependency-track"
+          - configMapRef:
+              name: "scanjob-env-parameter"
+          - configMapRef:
+              name: "dependency-track"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        source: |
+          if [ "${DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD} -eq 0 ]; then
+            echo "DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD is set 0, exit"
+            exit
+          fi
+          now=$(date +"%s");
+          oneDayInSec=86400;
+          maxAge=$(($now-$oneDayInSec*$DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD));
+          # TODO: Paging in case this uses up to much RAM
+          curl "${DEPENDENCY_TRACK_URL}/api/v1/project?excludeInactive=true&=" \
+          --silent \
+          --show-error \
+          --header 'Accept: application/json' \
+          -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+          | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
+          
+          for uuid in $(cat /tmp/projects-to-set-inactive); do
+            echo "UUID $uuid"
+            name=$(curl  \
+              -H 'Content-Type: application/json' \
+              -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+              --silent \
+              --show-error \
+            "${DEPENDENCY_TRACK_URL}/api/v1/project/${uuid}" | jq '.name')
+            nameParameterUrlEncoded=$(printf %s "${name}" | jq -sRr @uri)
+            echo '{ "name": "'${nameParameterUrlEncoded}'", "uuid": "'${uuid}'", "active": false}' > /tmp/tmpfile
+            echo "After a test period, we will set ${nameParameterUrlEncoded} with UUID ${uuid} to active=false"
+            #curl -X "PUT" \
+            #  -H 'Content-Type: application/json' \
+            #  -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            #  -d @/tmp/tmpfile \
+            #  --silent \
+            #  --show-error \
+            #  "${DEPENDENCY_TRACK_URL}/api/v1/project"
+          done
