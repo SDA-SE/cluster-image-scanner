@@ -10,7 +10,7 @@ spec:
     key: default-v1
   ttlStrategy:
     secondsAfterSuccess: 3600
-    secondsAfterFailure: 86400
+    secondsAfterFailure: 8640
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
