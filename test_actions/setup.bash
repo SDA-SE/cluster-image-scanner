@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # shellcheck disable=SC2026,SC2154
 
 wait_for_pods_ready () {
@@ -32,7 +33,8 @@ wait_for_pods_ready () {
   done
 }
 
-source secrets/env.env
+if [ ! -e ${SECRETS_PATH} ]; then echo "Error, SECRETS_PATH doesn't exists"; exit 1; fi
+source ${SECRETS_PATH}
 
 DEPLOYMENT_PATH=../deployment
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
@@ -71,16 +73,20 @@ kubectl apply -f tmp.yml
 rm tmp.yml
 
 if ! which mc > /dev/null 2>&1; then
-  curl -sLO https://dl.min.io/client/mc/release/linux-amd64/mc
-  chmod +x mc
-  mv ./mc /usr/local/bin/mc
+  mkdir tmp || true
+  curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc --output ./tmp/mc
+  chmod +x ./tmp/mc
+  PATH=$PATH:./tmp
 fi
 
 if ! which argo > /dev/null 2>&1; then
-  curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.13/argo-linux-amd64.gz
+  mkdir tmp || true
+  curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.3.8/argo-linux-amd64.gz
   gunzip argo-linux-amd64.gz
   chmod +x argo-linux-amd64
-  mv ./argo-linux-amd64 /usr/local/bin/argo
+  mv ./argo-linux-amd64 ./tmp/argo
+  argo=./tmp/argo
+  PATH=$PATH:./tmp
 fi
 
 sleep 30
