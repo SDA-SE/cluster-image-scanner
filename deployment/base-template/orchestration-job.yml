@@ -699,18 +699,22 @@ spec:
         source: |
           if [ "${DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD} -eq 0 ]; then
             echo "DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD is set 0, exit"
-            exit
+            exit 0
+          fi
+          if [ "${DEPENDENCY_TRACK_URL}" == "" ]; then
+            echo "DEPENDENCY_TRACK_URL is empty, exit"
+            exit 0
           fi
           now=$(date +"%s");
           oneDayInSec=86400;
-          maxAge=$(($now-$oneDayInSec*$DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD));
+          maxAge=$(($now-$oneDayInSec*$DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD));
+          echo "maxAge: ${maxAge}"
           # TODO: Paging in case this uses up to much RAM
           curl "${DEPENDENCY_TRACK_URL}/api/v1/project?excludeInactive=true&=" \
           --silent \
           --show-error \
           --header 'Accept: application/json' \
-          -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
-          | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
+          -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
           
           for uuid in $(cat /tmp/projects-to-set-inactive); do
             echo "UUID $uuid"
