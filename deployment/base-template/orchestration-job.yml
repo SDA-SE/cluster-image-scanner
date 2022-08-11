@@ -269,9 +269,9 @@ spec:
                   exit 1
                 fi
                 echo "Sending to slack ${slack}"
-                curl -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
+                curl \
                   -H "Content-type:application/json" \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \          
+                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
                   -X POST \
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
