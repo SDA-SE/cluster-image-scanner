@@ -5,6 +5,7 @@ resources:
   - scanjob.yml
   - orchestration-job.yml
   - scanjob-parameter.yml
+  - test-job.yml
 
 
 commonLabels:

@@ -10,7 +10,7 @@ spec:
     key: default-v1
   ttlStrategy:
     secondsAfterSuccess: 3600
-    secondsAfterFailure: 8640
+    secondsAfterFailure: 7200
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
@@ -275,10 +275,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 512Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

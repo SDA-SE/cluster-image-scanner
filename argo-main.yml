@@ -6,7 +6,7 @@ spec:
   serviceAccountName: clusterscanner
   ttlStrategy:
     secondsAfterSuccess: 3600
-    secondsAfterFailure: 86400
+    secondsAfterFailure: 7200
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
@@ -47,7 +47,11 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: orchestration-job
+#        - - name: orchestration-job
+#            templateRef:
+#              name: orchestration-job-template
+#              template: main
+        - - name: test-job
             templateRef:
-              name: orchestration-job-template
+              name: test-job-template
               template: main

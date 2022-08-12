@@ -127,15 +127,17 @@ mc mb local/local || true
 echo "submitting argo-main.yml"
 argo submit -n clusterscanner ../argo-main.yml
 
-sleep 5
-workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
-argo -n clusterscanner wait "${workflow}"
-
-rm -Rf ./tmp || true
-
 if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "Token:"
   server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
   echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
   echo "${server}"
 fi
+
+
+sleep 5
+workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
+argo -n clusterscanner wait "${workflow}"
+
+rm -Rf ./tmp || true
+

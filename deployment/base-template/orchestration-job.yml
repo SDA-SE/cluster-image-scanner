@@ -726,11 +726,11 @@ spec:
           echo "maxAge: ${maxAge}"
           # TODO: Paging in case this uses up to much RAM
           content=$(curl "${DEPENDENCY_TRACK_URL}/api/v1/project?excludeInactive=true&=" \
-          --silent \
-          --show-error \
-          --header 'Accept: application/json' \
-          -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}")
-          echo | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
+            --silent \
+            --show-error \
+            --header 'Accept: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}")
+          echo $content | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
           
           for uuid in $(cat /tmp/projects-to-set-inactive); do
             echo "UUID $uuid"
