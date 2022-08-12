@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: artifact-repositories
+  namespace: clusterscanner
+data:
+  default-v1: |
+    s3:
+      bucket: local
+      endpoint: minio-hl.clusterscanner.svc:9000
+      insecure: true
+      accessKeySecret:
+        name: s3-cred
+        key: accesskey
+      secretKeySecret:
+        name: s3-cred
+        key: secretkey

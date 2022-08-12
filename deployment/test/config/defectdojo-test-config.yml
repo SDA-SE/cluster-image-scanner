@@ -8,8 +8,8 @@ data:
   DD_BRANCHES_TO_KEEP: '*'
   DD_REPORT_PATH: "/tmp/dependency-check-results/dependency-check-report.xml"
   DD_LEAD: "4"
-  DD_USER: "clusterscanner"
-  DD_URL: "https://defectdojo-test.tools.sda-se.io/"
+  DD_USER: "clusterscanner-test"
+  DD_URL: "http://192.168.2.114:8081/"
   DD_IMPORT_TYPE: 'import'
   DD_IS_MARKED_AS_ACTIVE: 'true'
   DD_IS_MARKED_AS_INACTIVE: 'false'

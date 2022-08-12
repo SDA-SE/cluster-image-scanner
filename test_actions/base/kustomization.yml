@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: clusterscanner
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ../../deployment/overlays/test-local/
+  - minio.auth.yml
+  - minio.tenant.yml
+  - auth.yml
+
+commonLabels:
+  app.kubernetes.io/name: clusterscanner
+  app.kubernetes.io/instance: org.sda
+
+configMapGenerator:
+  - name: suppressions-sda
+    files:
+      - ../../test/suppressions.xml
+
+patches:
+  - path: artifacts.yml
+  - patch: |-
+      - op: replace
+        path: /data/DD_USER
+        value: "clusterscanner-test"
+    target:
+      kind: ConfigMap
+      name: defectdojo
+      namespace: clusterscanner
+  - patch: |-
+      - op: replace
+        path: /data/DD_URL
+        value: "http://192.168.2.114:8081/"
+    target:
+      kind: ConfigMap
+      name: defectdojo
+      namespace: clusterscanner
