@@ -263,14 +263,14 @@ spec:
               #echo "/tmp/slack-template.json:"
               #cat /tmp/slack-template.json
               if [ "${slack}" != "" ]; then
-                if [ "${SLACK_CLI_TOKEN}" != "" ]; then
+                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
                   echo "SLACK_CLI_TOKEN not set, exit"
                   exit 1
                 fi
                 echo "Sending to slack ${slack}"
                 curl \
                   -H "Content-type:application/json" \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
+                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
                   -X POST \
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
@@ -401,7 +401,6 @@ spec:
             done
           done
           echo "${errors}"
-
 
     - name: generate-lifetime-statistics
       volumes:
