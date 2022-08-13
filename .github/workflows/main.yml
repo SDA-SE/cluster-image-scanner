@@ -306,21 +306,35 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   test_minikube:
-
+#    needs:
+#      [
+#        build_image_base,
+#        build_imagecollector,
+#        build_imagesourcefetcher,
+#        build_workflowrunner,
+#        build_dependencycheck,
+#        build_distroless,
+#        build_lifetime,
+#        build_runasroot,
+#        build_new-version,
+#        build_malware,
+#        build_notifier,
+#        build_syft
+#      ]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-#      - name: install k3s
-#        run: |
-#          curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE=777 sh -
-#          mkdir -p ~/.kube
-#          cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-      - uses: debianmaster/actions-k3s@master
-        id: k3s
-        with:
-          version: 'latest'
+      - name: install k3s
+        run: |
+          curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE=777 sh -
+          mkdir -p ~/.kube
+          cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+#      - uses: debianmaster/actions-k3s@master
+#        id: k3s
+#        with:
+#          version: 'latest'
       - name: setup
         env:
           DD_TOKEN_SECRET: "${{secrets.DD_TOKEN_SECRET}}"
