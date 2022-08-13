@@ -306,21 +306,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   test_minikube:
-    needs:
-      [
-        build_image_base,
-        build_imagecollector,
-        build_imagesourcefetcher,
-        build_workflowrunner,
-        build_dependencycheck,
-        build_distroless,
-        build_lifetime,
-        build_runasroot,
-        build_new-version,
-        build_malware,
-        build_notifier,
-        build_syft
-      ]
+
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 120
