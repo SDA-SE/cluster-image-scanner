@@ -141,12 +141,15 @@ sleep 5
 argo list workflows -A
 workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
 echo "will wait for workflow ${workflow}"
-#pod=$(argo get ${workflow} -n clusterscanner | grep orch | awk '{print $4}' | grep orch)
 
 until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
 do
-  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do argo get --no-utf8 $i -n clusterscanner;done
-  #kubectl describe pod $pod -n clusterscanner
+  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do 
+    argo get --no-utf8 $i -n clusterscanner;
+    pod=$(argo get $i -n clusterscanner | grep -v NAME | grep -i RUNNING | awk '{print $4}')
+    kubectl describe pod $pod -n clusterscanner
+  done
+  
   sleep 30;
 done
 rm -Rf ./tmp || true
