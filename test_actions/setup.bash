@@ -44,6 +44,7 @@ wait_for_pods_ready () {
       exit 1
     fi
     echo "waiting for ${name} to be up"
+    argo list workflows -A
     sleep "${sleep}"
   done
 }
