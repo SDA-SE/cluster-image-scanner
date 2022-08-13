@@ -335,6 +335,8 @@ jobs:
           DD_USER_PLACEHOLDER: "${{secrets.DD_USER_PLACEHOLDER}}"
           SLACK_CLI_TOKEN_SECRET: "${{secrets.SLACK_CLI_TOKEN_SECRET}}"
         run: |
+          pwd
+          ls
           cd test_actions
           ./setup.bash
       - name: test
