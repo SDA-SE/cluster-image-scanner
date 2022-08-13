@@ -42,7 +42,7 @@ wait_for_pods_ready () {
   done
 }
 
-if [ ! -e ${SECRETS_PATH} ]; then echo "Error, SECRETS_PATH doesn't exists"; exit 1; fi
+if [ ! -e "${SECRETS_PATH}" ] && [ "${DD_TOKEN_SECRET}" == "" ]; then echo "Error, SECRETS_PATH doesn't exists and env variables not set"; exit 1; fi
 source ${SECRETS_PATH}
 
 DEPLOYMENT_PATH=../deployment
@@ -50,8 +50,8 @@ sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/confi
 sed -i "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 
 sed -i "s#DD_TOKEN_SECRET#${DD_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.env
-sed -i "s#http://localhost:8081#${DD_URL_SECRET}#" base/kustomization.yml
-sed -i "s#DD_USER: \"clusterscanner\"#DD_USER: \"${DD_USER_SECRET}\"#" base/kustomization.yml
+sed -i "s#http://localhost:8081#${DD_URL_PLACEHOLDER}#" base/kustomization.yml
+sed -i "s#DD_USER: \"clusterscanner\"#DD_USER: \"${DD_USER_PLACEHOLDER}\"#" base/kustomization.yml
 
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
