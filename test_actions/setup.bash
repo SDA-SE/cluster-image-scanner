@@ -21,7 +21,7 @@ wait_for_pods_ready () {
   local name="${1}"; shift
   local namespace="${1}"; shift
   local count="${1}"; shift
-  local sleep="${1}"; shift
+  local sleep="${1}";
   local attempt_num=0
   until [[ $(kubectl -n "${namespace}" get pods -o json | jq '.items | length') -ge "${count}" ]]
   do
