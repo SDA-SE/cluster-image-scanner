@@ -325,6 +325,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: start minikube
         id: minikube
         uses: medyagh/setup-minikube@master          
