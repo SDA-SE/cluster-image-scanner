@@ -151,7 +151,7 @@ do
     echo "########################################################################################################$pod"
     kubectl describe pod $pod -n clusterscanner
     echo "-------------------------------------------------------------------------------------------"
-    kubectl logs $pod -n clusterscanner init
+    kubectl logs $pod -n clusterscanner -c init
   done
   
   sleep 30;
