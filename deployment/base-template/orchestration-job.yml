@@ -263,7 +263,7 @@ spec:
               #echo "/tmp/slack-template.json:"
               #cat /tmp/slack-template.json
               if [ "${slack}" != "" ]; then
-                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+                if [ "${SLACK_CLI_TOKEN}" != "" ]; then
                   echo "SLACK_CLI_TOKEN not set, exit"
                   exit 1
                 fi
@@ -274,6 +274,8 @@ spec:
                   -X POST \
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
+              else
+                echo "Slack not configured in collector"          
               fi
               if [ "${rocketchat}" != "" ]; then
                 if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
@@ -285,10 +287,12 @@ spec:
                 echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
                 curl -H "Content-type: application/json" \
                   -d @/tmp/slack-template.json \
-                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}"  \
+                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
                   -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -X POST \
-                  "${SLACK_MESSAGE_ENDPOINT}"          
+                  "${SLACK_MESSAGE_ENDPOINT}"
+               else
+                echo "rocketchat not configured in collector"          
               fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
