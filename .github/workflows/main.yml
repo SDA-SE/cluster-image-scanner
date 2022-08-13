@@ -319,6 +319,7 @@ jobs:
         build_new-version,
         build_malware,
         build_notifier,
+        build_syft
       ]
     if: always()
     runs-on: ubuntu-latest
@@ -331,7 +332,14 @@ jobs:
           mkdir -p ~/.kube
           cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
       - name: setup
+        env:
+          DD_TOKEN_SECRET=${{secrets.DD_TOKEN_SECRET}}
+          DD_URL_PLACEHOLDER=${{secrets.DD_URL_PLACEHOLDER}}
+          DD_USER_PLACEHOLDER=${{secrets.DD_USER_PLACEHOLDER}}
+          SLACK_CLI_TOKEN_SECRET=${{secrets.SLACK_CLI_TOKEN_SECRET}}
         run: |
+          
+          export 
           cd test_actions
           ./setup.bash
       - name: test
