@@ -149,9 +149,9 @@ do
     set +e
     pod=$(argo get $i -n clusterscanner | grep -v NAME | grep "sj-lord" | awk '{print $4}')
     echo "########################################################################################################$pod"
-    kubectl describe pod $pod -n clusterscanner
+    #kubectl describe pod $pod -n clusterscanner
     echo "-------------------------------------------------------------------------------------------"
-    kubectl logs $pod -n clusterscanner -c init
+    #kubectl logs $pod -n clusterscanner -c init
   done
   
   sleep 30;
