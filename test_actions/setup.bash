@@ -24,6 +24,7 @@ wait_for_pods_ready () {
   local sleep="${1}"; shift
   local max_attempts="${1}"
   local attempt_num=0
+
   until [[ $(kubectl -n "${namespace}" get pods -o json | jq '.items | length') -ge "${count}" ]]
   do
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
@@ -44,11 +45,6 @@ wait_for_pods_ready () {
       exit 1
     fi
     echo "waiting for ${name} to be up"
-    if which argo
-    then
-        argo list workflows -A
-        echo "argo not found"
-    fi
     sleep "${sleep}"
   done
 }
@@ -122,7 +118,6 @@ sleep 30
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
 sleep 10
-
 echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
 kubectl -n clusterscanner port-forward svc/minio-hl 9000:9000 &
@@ -142,10 +137,11 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "${server}"
 fi
 
-
 sleep 5
+argo list workflows -A
 workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
-argo -n clusterscanner wait "${workflow}"
+echo "will wait for workflow ${workflow}"
+argo -n clusterscanner wait -v "${workflow}"
 
 rm -Rf ./tmp || true
 
