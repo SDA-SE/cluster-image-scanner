@@ -148,8 +148,10 @@ do
     argo get --no-utf8 $i -n clusterscanner;
     set +e
     pod=$(argo get $i -n clusterscanner | grep -v NAME | grep "sj-lord" | awk '{print $4}')
-    echo "##########################################################################$pod"
+    echo "########################################################################################################$pod"
     kubectl describe pod $pod -n clusterscanner
+    echo -------------------------------------------------------------------------------------------"
+    kubectl logs $pod -n clusterscanner init
   done
   
   sleep 30;
