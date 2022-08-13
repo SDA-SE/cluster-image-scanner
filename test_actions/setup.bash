@@ -44,8 +44,9 @@ wait_for_pods_ready () {
       exit 1
     fi
     echo "waiting for ${name} to be up"
-    if ! argo list workflows -A
+    if which argo
     then
+        argo list workflows -A
         echo "argo not found"
     fi
     sleep "${sleep}"
