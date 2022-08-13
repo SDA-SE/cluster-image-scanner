@@ -146,7 +146,9 @@ until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
 do
   for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do 
     argo get --no-utf8 $i -n clusterscanner;
+    set +e
     pod=$(argo get $i -n clusterscanner | grep -v NAME | awk '{print $4}')
+    echo "##########################################################################$pod"
     kubectl describe pod $pod -n clusterscanner
   done
   
