@@ -10,6 +10,12 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   read -n 1 -s
 fi
 
+if [ "${SECRETS_PATH}" != "" ]; then
+  source ${SECRETS_PATH}
+elif [ "${DD_TOKEN_SECRET}" == "" ]; then
+  echo "Error, SECRETS_PATH doesn't exists and env variables not set";
+  exit 1;
+fi
 
 wait_for_pods_ready () {
   local name="${1}"; shift
@@ -41,9 +47,6 @@ wait_for_pods_ready () {
     sleep "${sleep}"
   done
 }
-
-if [ ! -e "${SECRETS_PATH}" ] && [ "${DD_TOKEN_SECRET}" == "" ]; then echo "Error, SECRETS_PATH doesn't exists and env variables not set"; exit 1; fi
-source ${SECRETS_PATH}
 
 DEPLOYMENT_PATH=../deployment
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
