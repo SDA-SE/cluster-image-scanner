@@ -68,7 +68,9 @@ sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEP
 sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#${DEPSCAN_DB_PASSWORD_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#${DEPSCAN_DB_CONNECTSRING_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-
+echo "DEPSCAN_DB_DRIVER_PLACEHOLDER $DEPSCAN_DB_DRIVER_PLACEHOLDER"
+echo "DEPSCAN_DB_USERNAME_PLACEHOLDER $DEPSCAN_DB_USERNAME_PLACEHOLDER"
+echo "DEPSCAN_DB_CONNECTSRING_PLACEHOLDER $DEPSCAN_DB_CONNECTSRING_PLACEHOLDER"
 sed -i "s#smtp_SECRET#${smtp_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp_auth_SECRET#${smtp_auth_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp_auth-user_SECRET#${smtp_auth_user_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
@@ -146,11 +148,7 @@ until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
 do
   for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do 
     argo get --no-utf8 $i -n clusterscanner;
-    #pod=$(argo get $i -n clusterscanner | grep -v NAME | grep "sj-lord" | awk '{print $4}')
-    echo "########################################################################################################$pod"
-    #kubectl describe pod $pod -n clusterscanner
-    echo "-------------------------------------------------------------------------------------------"
-    #kubectl logs $pod -n clusterscanner -c init
+    echo "######################################################################################################## argo get"
   done
   sleep 60;
 done
@@ -161,7 +159,12 @@ do
 done
 if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
   echo "ERRORs during workflow execution"
+  for pod in $(kubectl get pod -n clusterscanner | grep -v | grep -v Completed | awk '{print $2}')
+      echo "######################################################################################################## pod logs"
+      kubectl logs ${pod} -n clusterscanner
+  done
   exit 1
 fi
+
 rm -Rf ./tmp || true
 
