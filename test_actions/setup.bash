@@ -146,14 +146,12 @@ until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
 do
   for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do 
     argo get --no-utf8 $i -n clusterscanner;
-    set +e
     #pod=$(argo get $i -n clusterscanner | grep -v NAME | grep "sj-lord" | awk '{print $4}')
     echo "########################################################################################################$pod"
     #kubectl describe pod $pod -n clusterscanner
     echo "-------------------------------------------------------------------------------------------"
     #kubectl logs $pod -n clusterscanner -c init
   done
-  
   sleep 60;
 done
 until [[ $(argo list -A | grep test-job-| grep Running | wc -l) -ne "1" ]]
@@ -161,6 +159,9 @@ do
   argo list --no-utf8 -n clusterscanner -A;
   sleep 30;
 done
-argo list workflows -A
+if [ argo list workflows -A | grep -i error | wc -l -ne 0 ]; then
+  echo "ERRORs during workflow execution"
+  exit 1
+fi
 rm -Rf ./tmp || true
 
