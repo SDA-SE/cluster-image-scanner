@@ -154,12 +154,12 @@ do
   done
   sleep 60;
 done
-until [[ $(argo list -A | grep test-job-| grep Running | wc -l) -ne "1" ]]
+until [[ $(argo list -A | grep test-job-| grep -c Running) -ne 1 ]]
 do
   argo list --no-utf8 -n clusterscanner -A;
   sleep 30;
 done
-if [ argo list workflows -A | grep -i error | wc -l -ne 0 ]; then
+if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
   echo "ERRORs during workflow execution"
   exit 1
 fi

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: test-job-template
+  name: delete-test-products-template
   namespace: clusterscanner
 spec:
   activeDeadlineSeconds: 3600
@@ -22,10 +22,10 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: test-defectdojo-findings
-            template: test-defectdojo-findings
+        - - name: delete-test-products
+            template: delete-test-products
 
-    - name: test-defectdojo-findings
+    - name: delete-test-products
       volumes:
         - name: tmp
           emptyDir: { }
@@ -47,7 +47,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"
         imagePullPolicy: Always # TODO IfNotPresent
-        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.uploadValidation.MainValidation" ]
+        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.deleteTestProduct.MainDeleteProduct" ]
         volumeMounts:
           - name: tmp
             mountPath: /tmp

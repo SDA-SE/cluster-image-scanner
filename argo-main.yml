@@ -47,6 +47,10 @@ spec:
   templates:
     - name: main
       steps:
+        - - name: delete-test-products
+            templateRef:
+              name: delete-test-products-template
+              template: main
         - - name: orchestration-job
             templateRef:
               name: orchestration-job-template
