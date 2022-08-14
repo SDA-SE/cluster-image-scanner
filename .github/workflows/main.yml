@@ -329,7 +329,7 @@ jobs:
       - name: start minikube
         id: minikube
         uses: medyagh/setup-minikube@master          
-      - name: setup
+      - name: setup, execute and run test
         env:
           DD_TOKEN_SECRET: "${{secrets.DD_TOKEN_SECRET}}"
           DD_URL_PLACEHOLDER: "${{secrets.DD_URL_PLACEHOLDER}}"
@@ -340,5 +340,3 @@ jobs:
           ls
           cd test_actions
           ./setup.bash
-      - name: test
-        run: kubectl get pods -A
