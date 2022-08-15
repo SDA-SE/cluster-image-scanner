@@ -15,19 +15,4 @@ data:
   DD_IS_MARKED_AS_INACTIVE: 'false'
   DD_DEDUPLICATION_ON_ENGAGEMENT: 'true'
   DD_SOURCE_CODE_MANAGEMENT_URI: 'https://github.com/SDA-SE'
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: defectdojo-test
-  namespace: clusterscanner
-stringData:
-    DD_TOKEN: dGVzdHVzZXI=
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: defectdojo
-  namespace: clusterscanner
-stringData:
-  DD_TOKEN: dGVzdHVzZXI=
+

@@ -3,7 +3,8 @@ kind: Kustomization
 
 resources:
   - ../test
-  - defectdojo.secret.yml
+  - defectdojo-test.secret.yml
+  - defectdojo-test.cm.yml
   - slack.yml
   - rbac.yml
 
