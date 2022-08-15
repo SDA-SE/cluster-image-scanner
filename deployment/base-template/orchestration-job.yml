@@ -350,28 +350,28 @@ spec:
                     fi
                     echo "findingId ${findingId}"
                     title=$(echo "${finding}" | jq -r '.title' | cut -c1-50 | sed 's#{##g'| sed 's#}##g') #| tr -cd '[:alnum:]._ <>-')
-#                    if [ "$title" == "Image Has a New Version" ]; then
-#                      echo "In new version"
-#                      echo "item: ${item}"
-#                      scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null) # doesn't work
-#                      echo "scanResultFindingFinishedAt ${scanResultFindingFinishedAt}"
-#                      t1=$(date --date="${scanResultFindingFinishedAt}" +%s)
-#                      # Current date
-#                      dt2=$(date +%Y-%m-%d\ %H:%M:%S)
-#                      # Compute the seconds since epoch for date 2
-#                      t2=$(date --date="${dt2}" +%s)
-#                      # difference in dates in seconds
-#                      tDiff="$(( t2-t1 ))"
-#                      # hour difference
-#                      hDiff="$(( tDiff/3600 ))" || true
-#                      # day difference
-#                      dDiff="$(( hDiff/24 ))" || true
-#                      echo "t1: ${t1}, t2: ${t2}, dDiff: ${dDiff}"
-#                      if [ ${dDiff} -lt ${SCAN_NEW_VERSION_TOLERANCE_DAYS} ]; then
-#                        echo "${dDiff} is less than ${SCAN_NEW_VERSION_MAX_TOLERANCE_DAYS}, skipping notification of ${image} in ${namespace} on ${environment}"
-#                        continue
-#                      fi
-#                    fi
+                    #                    if [ "$title" == "Image Has a New Version" ]; then
+                    #                      echo "In new version"
+                    #                      echo "item: ${item}"
+                    #                      scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null) # doesn't work
+                    #                      echo "scanResultFindingFinishedAt ${scanResultFindingFinishedAt}"
+                    #                      t1=$(date --date="${scanResultFindingFinishedAt}" +%s)
+                    #                      # Current date
+                    #                      dt2=$(date +%Y-%m-%d\ %H:%M:%S)
+                    #                      # Compute the seconds since epoch for date 2
+                    #                      t2=$(date --date="${dt2}" +%s)
+                    #                      # difference in dates in seconds
+                    #                      tDiff="$(( t2-t1 ))"
+                    #                      # hour difference
+                    #                      hDiff="$(( tDiff/3600 ))" || true
+                    #                      # day difference
+                    #                      dDiff="$(( hDiff/24 ))" || true
+                    #                      echo "t1: ${t1}, t2: ${t2}, dDiff: ${dDiff}"
+                    #                      if [ ${dDiff} -lt ${SCAN_NEW_VERSION_TOLERANCE_DAYS} ]; then
+                    #                        echo "${dDiff} is less than ${SCAN_NEW_VERSION_MAX_TOLERANCE_DAYS}, skipping notification of ${image} in ${namespace} on ${environment}"
+                    #                        continue
+                    #                      fi
+                    #                    fi
                     title="${title} in ${image}"
                     echo "$title in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
