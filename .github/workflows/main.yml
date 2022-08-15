@@ -322,7 +322,7 @@ jobs:
 #        build_new-version,
 #        build_malware,
 #        build_notifier,
-#        build_syft
+#        build_syft,
 #      ]
     if: always()
     runs-on: ubuntu-latest
