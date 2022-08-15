@@ -242,6 +242,7 @@ spec:
           fi
 
           inform() {
+            set +e
             echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
             if [ "${rocketchat}" == "null" ]; then rocketchat=""; fi
@@ -306,6 +307,7 @@ spec:
             else
               echo "Hint: email not set"
             fi
+            set -e
           }
           errors=""
           echo "Will iterate over files in ${RESULT_PATH}"
@@ -382,8 +384,7 @@ spec:
                     fi
                     echo "will inform ${image}"
                     set +e
-                    inform &> /tmp/inform.log
-                    cat /tmp/inform.log
+                    inform 
                     set -e
                     if [ "$(cat /tmp/inform.log | grep -c '"ok": false')" -gt 0 ]; then
                       echo "error in slack"

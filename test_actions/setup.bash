@@ -157,12 +157,7 @@ do
 #  done
   sleep 60;
 done
-until [[ $(argo list -A | grep test-job-| grep -c Running) -ne 1 ]]
-do
-  argo list --no-utf8 -n clusterscanner -A;
-  sleep 30;
-done
-if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
+if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
   echo "ERRORs during workflow execution"
   for pod in $(kubectl get pod -n clusterscanner | grep "Error\|Failed" | awk '{print $1}'); do
       echo "######################################################################################################## pod logs $pod"
