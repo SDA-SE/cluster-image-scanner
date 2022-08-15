@@ -32,7 +32,7 @@ patches:
   - patch: |-
       - op: replace
         path: /data/DD_URL
-        value: "http://192.168.2.114:8081/"
+        value: "http://localhost:8081/"
     target:
       kind: ConfigMap
       name: defectdojo
