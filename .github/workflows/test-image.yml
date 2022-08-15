@@ -2,8 +2,8 @@ name: Build Test Image
 
 on:
   push:
-    branches:
-      - master
+#    branches:
+#      - master
   pull_request:
 jobs:
   build_test-image:
