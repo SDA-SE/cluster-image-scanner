@@ -7,6 +7,7 @@ on:
   pull_request:
 jobs:
   build_test-image:
+    name: Build test image
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
