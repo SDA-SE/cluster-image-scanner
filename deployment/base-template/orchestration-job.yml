@@ -242,7 +242,6 @@ spec:
           fi
 
           inform() {
-            set +e
             echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
             if [ "${rocketchat}" == "null" ]; then rocketchat=""; fi
@@ -307,7 +306,6 @@ spec:
             else
               echo "Hint: email not set"
             fi
-            set -e
           }
           errors=""
           echo "Will iterate over files in ${RESULT_PATH}"
@@ -355,6 +353,7 @@ spec:
                     if [ "$title" == "Image Has a New Version" ]; then
                       echo "In new version" 
                       scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null)
+                      echo "scanResultFindingFinishedAt ${scanResultFindingFinishedAt}"
                       t1=$(date --date="${scanResultFindingFinishedAt}" +%s)
                       # Current date
                       dt2=$(date +%Y-%m-%d\ %H:%M:%S)
@@ -383,18 +382,7 @@ spec:
                       infoText="${infoText}; Error: ${errorText}"
                     fi
                     echo "will inform ${image}"
-                    set +e
                     inform 
-                    set -e
-                    if [ "$(cat /tmp/inform.log | grep -c '"ok": false')" -gt 0 ]; then
-                      echo "error in slack"
-                      errors="${errors}\n${output}"
-                    fi
-                    if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
-                      echo "will wait for 120 seconds"
-                      sleep 120 # wait for rate limt
-                      inform
-                    fi
                     sleep 1 # reduce risk of rate limit
                   done
                 done <<< "${notifications}"
