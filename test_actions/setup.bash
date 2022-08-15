@@ -162,14 +162,14 @@ do
   argo list --no-utf8 -n clusterscanner -A;
   sleep 30;
 done
-if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
-  echo "ERRORs during workflow execution"
-  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating | grep -v Completed | grep -v Pending |  grep -v NAME | grep -v Running | awk '{print $1}'); do
-      echo "######################################################################################################## pod logs"
-      kubectl logs ${pod} -n clusterscanner || true
-  done
-  exit 1
-fi
-
+#if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
+#  echo "ERRORs during workflow execution"
+#  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating | grep -v Completed | grep -v Pending |  grep -v NAME | grep -v Running | awk '{print $1}'); do
+#      echo "######################################################################################################## pod logs $pod"
+#      kubectl logs ${pod} -n clusterscanner || true
+#  done
+#  exit 1
+#fi
+argo list workflows -A
 rm -Rf ./tmp || true
 
