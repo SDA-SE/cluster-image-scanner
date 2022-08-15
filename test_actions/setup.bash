@@ -53,9 +53,9 @@ DEPLOYMENT_PATH=../deployment
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 
-sed -i "s#DD_TOKEN_SECRET#${DD_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.env
-sed -i "s#http://localhost:8081#${DD_URL_PLACEHOLDER}#" base/kustomization.yml
-sed -i "s#DD_USER: \"clusterscanner\"#DD_USER: \"${DD_USER_PLACEHOLDER}\"#" base/kustomization.yml
+sed -i "s#DD_TOKEN_SECRET#${DD_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.secret.env
+sed -i "s#DD_URL_PLACEHOLDER#${DD_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
+sed -i "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
 
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
@@ -68,9 +68,7 @@ sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEP
 sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#${DEPSCAN_DB_PASSWORD_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#${DEPSCAN_DB_CONNECTSRING_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-echo "DEPSCAN_DB_DRIVER_PLACEHOLDER $DEPSCAN_DB_DRIVER_PLACEHOLDER"
-echo "DEPSCAN_DB_USERNAME_PLACEHOLDER $DEPSCAN_DB_USERNAME_PLACEHOLDER"
-echo "DEPSCAN_DB_CONNECTSRING_PLACEHOLDER $DEPSCAN_DB_CONNECTSRING_PLACEHOLDER"
+
 sed -i "s#smtp_SECRET#${smtp_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp_auth_SECRET#${smtp_auth_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
 sed -i "s#smtp_auth-user_SECRET#${smtp_auth_user_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env

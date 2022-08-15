@@ -14,23 +14,6 @@ generatorOptions:
 
 patches:
   - path: artifacts.yml
-  - patch: |-
-      - op: replace
-        path: /data/DD_URL
-        value: "http://localhost:8081/"
-    target:
-      kind: ConfigMap
-      name: defectdojo
-      namespace: clusterscanner
-
-  - patch: |-
-      - op: replace
-        path: /data/DD_URL
-        value: "http://localhost:8081/"
-    target:
-      kind: ConfigMap
-      name: defectdojo-test
-      namespace: clusterscanner
 
 secretGenerator:
   - name: email
@@ -50,7 +33,7 @@ secretGenerator:
     behavior: replace
     type: Secret
     envs:
-      - config-source/defectdojo.env
+      - config-source/defectdojo.secret.env
   - name: s3-cred
     namespace: clusterscanner
     behavior: replace
@@ -95,3 +78,9 @@ configMapGenerator:
     behavior: replace
     envs:
       - config-source/dependency-track.cm.env
+
+  - name: defectdojo
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/defectdojo.cm.env
