@@ -45,7 +45,7 @@ clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the 
 Filters like `skip_regex` and `namespace_filter` are implemented with [grep](https://www.gnu.org/software/grep/manual/grep.html).
 
 ## Via Labels
-Additionally, the following **labels** can be used:
+Additionally, the following **labels** can be used at the pod:
 
 ```
 app.kubernetes.io/name: "ring-calling-service" # defaults to image
