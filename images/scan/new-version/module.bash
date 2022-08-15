@@ -19,6 +19,7 @@ function testNewImageAndReport {
   cp /clusterscanner/new-version.csv "${ARTIFACTS_PATH}/new-version.csv"
   sed -i "s|###INFOTEXT###|${infoText}|g" "${ARTIFACTS_PATH}/new-version.csv"
   sed -i "s/###TITLE###/Image Has a New Version/" "${ARTIFACTS_PATH}/new-version.csv"
+  sed -i "s/###SEVERITY###/Low/" "${ARTIFACTS_PATH}/new-version.csv"
 
   scan_result_post
   exit 0
