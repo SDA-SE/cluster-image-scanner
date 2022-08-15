@@ -27,7 +27,7 @@ secretGenerator:
     behavior: replace
     type: Secret
     envs:
-      - config-source/defectdojo.env
+      - config-source/defectdojo-test.secret.env
   - name: defectdojo
     namespace: clusterscanner
     behavior: replace
@@ -84,3 +84,9 @@ configMapGenerator:
     behavior: replace
     envs:
       - config-source/defectdojo.cm.env
+
+  - name: defectdojo-test
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/defectdojo-test.cm.env
