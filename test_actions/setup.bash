@@ -58,7 +58,7 @@ sed -i "s#DD_URL_PLACEHOLDER#${DD_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays
 sed -i "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
 sed -i "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.secret.env
 sed -i "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
-sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
+sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
 
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
@@ -151,10 +151,10 @@ do
     argo get --no-utf8 $i -n clusterscanner;
     echo "######################################################################################################## argo get"
   done
-  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating  | grep -v Pending | grep -v Completed | grep -v NAME | awk '{print $1}'); do
-      echo "######################################################################################################## pod logs $pod"
-      kubectl logs ${pod} -n clusterscanner || true
-  done
+#  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating  | grep -v Pending | grep -v Completed | grep -v NAME | awk '{print $1}'); do
+#      echo "######################################################################################################## pod logs $pod"
+#      kubectl logs ${pod} -n clusterscanner || true
+#  done
   sleep 60;
 done
 until [[ $(argo list -A | grep test-job-| grep -c Running) -ne 1 ]]
