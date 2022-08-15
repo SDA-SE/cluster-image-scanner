@@ -159,9 +159,9 @@ do
 done
 if [ $(argo list workflows -A | grep -c -i "Error\|Failed")  -ne 0 ]; then
   echo "ERRORs during workflow execution"
-  for pod in $(kubectl get pod -n clusterscanner | grep -v Failed | grep -v Completed | awk '{print $2}'); do
+  for pod in $(kubectl get pod -n clusterscanner | grep -v Failed | grep -v Completed | grep -v NAME | awk '{print $1}'); do
       echo "######################################################################################################## pod logs"
-      kubectl logs ${pod} -n clusterscanner
+      kubectl logs ${pod} -n clusterscanner || true
   done
   exit 1
 fi
