@@ -48,7 +48,7 @@ buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install -y "${
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"
-cp ./logstash-core/lib/jars/log4j-core-2.14.0.jar "${mnt}/vulnerable-files/log4j-core-2.14.0.jar"
+cp log4j-core-2.14.0.jar "${mnt}/vulnerable-files/log4j-core-2.14.0.jar"
 echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "${mnt}/vulnerable-files/eicar.txt"
 find $mnt
 
