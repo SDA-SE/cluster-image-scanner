@@ -13,7 +13,7 @@ counter=0
 while read -r line; do
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
   if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
-    echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
+    echo "Skipping Image due to skip=true: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
     continue
   fi
   if [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "" ]] || [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "null" ]]; then
