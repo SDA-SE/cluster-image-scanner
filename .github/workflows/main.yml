@@ -1,4 +1,4 @@
-name: Build
+name: Build Image and Test with Minikube
 
 on:
   push:
