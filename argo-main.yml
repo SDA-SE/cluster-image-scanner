@@ -3,6 +3,9 @@ kind: Workflow
 metadata:
   generateName: orchestration-
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
   serviceAccountName: clusterscanner
   ttlStrategy:
     secondsAfterSuccess: 3600
