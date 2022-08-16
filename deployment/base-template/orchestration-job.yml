@@ -234,7 +234,7 @@ spec:
               name: "scanjob-env-parameter"
         command: [/bin/bash]
         source: |
-          #set -e
+          set -e
           shopt -s globstar nullglob
 
           if [ "${RESULT_PATH}" == "" ]; then
@@ -260,9 +260,8 @@ spec:
               sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json 
               sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
               sed -i "s#_INFO_#${infoNoNewline}#g" /tmp/slack-template.json
-              echo "/tmp/slack-template.json:"
+              #echo "/tmp/slack-template.json:"
               #cat /tmp/slack-template.json
-
               if [ "${slack}" != "" ]; then
                 if [ "${SLACK_CLI_TOKEN}" == "" ]; then
                   echo "SLACK_CLI_TOKEN not set, exit"
@@ -271,12 +270,12 @@ spec:
                 echo "Sending to slack ${slack}"
                 curl \
                   -H "Content-type:application/json" \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}"  \
+                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
                   -X POST \
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
               else
-                echo "Slack not configured in collector"
+                echo "Slack not configured in collector"          
               fi
               if [ "${rocketchat}" != "" ]; then
                 if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
@@ -288,12 +287,12 @@ spec:
                 echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
                 curl -H "Content-type: application/json" \
                   -d @/tmp/slack-template.json \
-                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}"  \
+                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
                   -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
                   -X POST \
-                  "${SLACK_MESSAGE_ENDPOINT}"          
+                  "${SLACK_MESSAGE_ENDPOINT}"
                else
-                echo "rocketchat not configured in collector"
+                echo "rocketchat not configured in collector"          
               fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
@@ -341,7 +340,7 @@ spec:
                   ddLinkDomain=$(echo "${ddLinkTest}" | tr '/' ' ' | awk '{print $2}')
                   ddLinkBase="${ddLinkScheme}//${ddLinkDomain}"
                   for findingBase in $(echo "${notification}" | jq -rcM '.findings[] | @base64'); do
-                    echo "In findingBase ${image}"
+                    echo "In findingBase for ${image}"
                     finding=$(echo "${findingBase}" | base64 -d)
                     findingId=$(echo "${finding}" | jq -r '.id' | tr -cd '[:alnum:]._ -')
                     if [ "${findingId}" != "null" ] && [ "${findingId}" != "" ]; then
@@ -351,26 +350,28 @@ spec:
                     fi
                     echo "findingId ${findingId}"
                     title=$(echo "${finding}" | jq -r '.title' | cut -c1-50 | sed 's#{##g'| sed 's#}##g') #| tr -cd '[:alnum:]._ <>-')
-                    if [ "$title" == "Image Has a New Version" ]; then
-                      scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null)
-                      t1=$(date --date="${scanResultFindingFinishedAt}" +%s)
-
-                      # Current date
-                      dt2=$(date +%Y-%m-%d\ %H:%M:%S)
-                      # Compute the seconds since epoch for date 2
-                      t2=$(date --date="${dt2}" +%s)
-                      # difference in dates in seconds
-                      tDiff="$(( t2-t1 ))"
-                      # hour difference
-                      hDiff="$(( tDiff/3600 ))" || true
-                      # day difference
-                      dDiff="$(( hDiff/24 ))" || true
-                      echo "t1: ${t1}, t2: ${t2}, dDiff: ${dDiff}"
-                      if [ ${dDiff} -lt ${SCAN_NEW_VERSION_TOLERANCE_DAYS} ]; then
-                        echo "${dDiff} is less than ${SCAN_NEW_VERSION_MAX_TOLERANCE_DAYS}, skipping notification of ${image} in ${namespace} on ${environment}"
-                        continue
-                      fi
-                    fi
+                    #                    if [ "$title" == "Image Has a New Version" ]; then
+                    #                      echo "In new version"
+                    #                      echo "item: ${item}"
+                    #                      scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null) # doesn't work
+                    #                      echo "scanResultFindingFinishedAt ${scanResultFindingFinishedAt}"
+                    #                      t1=$(date --date="${scanResultFindingFinishedAt}" +%s)
+                    #                      # Current date
+                    #                      dt2=$(date +%Y-%m-%d\ %H:%M:%S)
+                    #                      # Compute the seconds since epoch for date 2
+                    #                      t2=$(date --date="${dt2}" +%s)
+                    #                      # difference in dates in seconds
+                    #                      tDiff="$(( t2-t1 ))"
+                    #                      # hour difference
+                    #                      hDiff="$(( tDiff/3600 ))" || true
+                    #                      # day difference
+                    #                      dDiff="$(( hDiff/24 ))" || true
+                    #                      echo "t1: ${t1}, t2: ${t2}, dDiff: ${dDiff}"
+                    #                      if [ ${dDiff} -lt ${SCAN_NEW_VERSION_TOLERANCE_DAYS} ]; then
+                    #                        echo "${dDiff} is less than ${SCAN_NEW_VERSION_MAX_TOLERANCE_DAYS}, skipping notification of ${image} in ${namespace} on ${environment}"
+                    #                        continue
+                    #                      fi
+                    #                    fi
                     title="${title} in ${image}"
                     echo "$title in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
@@ -382,17 +383,7 @@ spec:
                       infoText="${infoText}; Error: ${errorText}"
                     fi
                     echo "will inform ${image}"
-                    inform > /tmp/inform.log || true
-                    cat /tmp/inform.log
-                    if [ "$(cat /tmp/inform.log | grep -c '"ok": false')" -gt 0 ]; then
-                      echo "error in slack"
-                      errors="${errors}\n${output}"
-                    fi
-                    if [ "$(echo "${output}" | grep -c ratelimited)" -gt 0 ]; then
-                      echo "will wait for 120 seconds"
-                      sleep 120 # wait for rate limt
-                      inform
-                    fi
+                    inform 
                     sleep 1 # reduce risk of rate limit
                   done
                 done <<< "${notifications}"
@@ -458,6 +449,14 @@ spec:
         source: |
           set -e
           cd $HOME
+          
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GITHUB_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST or GITHUB_INSTALLATION_ID not configured, skipping"
+            exit 0
+          fi
+          echo "GITHUB_REPOSITORY $GITHUB_REPOSITORY"
+          env
+          
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
@@ -644,6 +643,11 @@ spec:
         source: |
           set -e
           cd $HOME
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GITHUB_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST or GITHUB_INSTALLATION_ID not configured, skipping"
+            exit 0
+          fi
+          
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
@@ -701,7 +705,7 @@ spec:
           - name: tmp
             mountPath: /tmp
         source: |
-          if [ "${DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD} -eq 0 ]; then
+          if [ "${DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD}" == "0" ]; then
             echo "DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD is set 0, exit"
             exit 0
           fi
@@ -711,14 +715,15 @@ spec:
           fi
           now=$(date +"%s");
           oneDayInSec=86400;
-          maxAge=$(($now-$oneDayInSec*$DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD));
+          maxAge=$(($now-$oneDayInSec*${DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD}));
           echo "maxAge: ${maxAge}"
           # TODO: Paging in case this uses up to much RAM
-          curl "${DEPENDENCY_TRACK_URL}/api/v1/project?excludeInactive=true&=" \
-          --silent \
-          --show-error \
-          --header 'Accept: application/json' \
-          -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
+          content=$(curl "${DEPENDENCY_TRACK_URL}/api/v1/project?excludeInactive=true&=" \
+            --silent \
+            --show-error \
+            --header 'Accept: application/json' \
+            -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}")
+          echo $content | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
           
           for uuid in $(cat /tmp/projects-to-set-inactive); do
             echo "UUID $uuid"

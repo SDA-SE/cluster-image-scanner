@@ -7,6 +7,9 @@ on:
   pull_request:
   schedule:
     - cron: "30 6 * * *"
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   shellcheck:
@@ -304,3 +307,43 @@ jobs:
           image-name: cluster-image-scanner-notifier
           registry-user: ${{ secrets.QUAY_IO_CLUSTERSCANNER_USERNAME }}
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
+
+  test_minikube:
+#    needs:
+#      [
+#        build_image_base,
+#        build_imagecollector,
+#        build_imagesourcefetcher,
+#        build_workflowrunner,
+#        build_dependencycheck,
+#        build_distroless,
+#        build_lifetime,
+#        build_runasroot,
+#        build_new-version,
+#        build_malware,
+#        build_notifier,
+#        build_syft,
+#      ]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - name: start minikube
+        id: minikube
+        uses: medyagh/setup-minikube@master          
+      - name: setup, execute and run test
+        env:
+          DD_TOKEN_SECRET: "${{secrets.DD_TOKEN_SECRET}}"
+          DD_URL_PLACEHOLDER: "${{secrets.DD_URL_PLACEHOLDER}}"
+          DD_USER_PLACEHOLDER: "${{secrets.DD_USER_PLACEHOLDER}}"
+          SLACK_CLI_TOKEN_SECRET: "${{secrets.SLACK_CLI_TOKEN_SECRET}}"
+          DEPSCAN_DB_DRIVER_PLACEHOLDER: "${{secrets.DEPSCAN_DB_DRIVER_PLACEHOLDER}}"
+          DEPSCAN_DB_USERNAME_PLACEHOLDER: "${{secrets.DEPSCAN_DB_USERNAME_PLACEHOLDER}}"
+          DEPSCAN_DB_CONNECTSRING_PLACEHOLDER: "${{secrets.DEPSCAN_DB_CONNECTSRING_PLACEHOLDER}}"
+          DEPSCAN_DB_PASSWORD_PLACEHOLDER: "${{secrets.DEPSCAN_DB_PASSWORD_PLACEHOLDER}}"
+        run: |
+          pwd
+          ls
+          cd test_actions
+          ./setup.bash
