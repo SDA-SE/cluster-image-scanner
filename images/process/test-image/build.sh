@@ -31,7 +31,7 @@ build_dir="${dir}/build"
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
 
-base_image="quay.io/sdase/cluster-image-scanner-base:2"
+base_image="scratch"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
@@ -44,7 +44,7 @@ dnf_opts=(
   "--quiet"
 )
 
-buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf install -y "${dnf_opts[@]}" curl git openssl openssh
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"
