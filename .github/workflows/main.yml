@@ -75,7 +75,7 @@ jobs:
 
   changes_pr:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    #if: github.event_name == 'pull_request'
     outputs:
       base: true
       imagesourcefetcher: true
