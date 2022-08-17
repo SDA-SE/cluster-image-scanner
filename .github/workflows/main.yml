@@ -91,35 +91,6 @@ jobs:
       syft: true
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
-        id: filter
-        with:
-          base: "master" # ignored in PRs
-          filters: |
-            base:
-              - 'images/base/**'
-            imagesourcefetcher:
-              - 'images/process/image-source-fetcher/**'
-            imagecollector:
-              - 'images/process/imagecollector/**'
-            workflowrunner:
-              - 'images/process/workflow-runner/**'
-            notifier:
-              - 'images/process/notifier/**'
-            dependencycheck:
-              - 'images/scan/dependency-check/**'
-            distroless:
-              - 'images/scan/distroless/**'
-            lifetime:
-              - 'images/scan/lifetime/**'
-            malware:
-              - 'images/scan/malware/**'
-            runasroot:
-              - 'images/scan/runasroot/**'
-            new-version:
-              - 'images/scan/new-version/**'
-            syft:
-              - 'images/scan/syft/**'
 
   build_image_base:
     needs: [changes, changes_pr]
