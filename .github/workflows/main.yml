@@ -25,75 +25,7 @@ jobs:
           exclude: "./.git/*"
           shellcheck_flags: "--external-sources --exclude=SC1090,SC1091,SC2116,SC2015"
 
-  changes:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || !(github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
-    outputs:
-      base: ${{ steps.filter.outputs.base }}
-      imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
-      imagecollector: ${{ steps.filter.outputs.imagecollector }}
-      notifier: ${{ steps.filter.outputs.notifier }}
-      workflowrunner: ${{ steps.filter.outputs.workflowrunner }}
-      dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
-      distroless: ${{ steps.filter.outputs.distroless }}
-      lifetime: ${{ steps.filter.outputs.lifetime }}
-      malware: ${{ steps.filter.outputs.malware }}
-      runasroot: ${{ steps.filter.outputs.runasroot }}
-      new-version: ${{ steps.filter.outputs.new-version }}
-      syft: ${{ steps.filter.outputs.syft }}
-    steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
-        id: filter
-        with:
-          base: "master" # ignored in PRs
-          filters: |
-            base:
-              - 'images/base/**'
-            imagesourcefetcher:
-              - 'images/process/image-source-fetcher/**'
-            imagecollector:
-              - 'images/process/imagecollector/**'
-            workflowrunner:
-              - 'images/process/workflow-runner/**'
-            notifier:
-              - 'images/process/notifier/**'
-            dependencycheck:
-              - 'images/scan/dependency-check/**'
-            distroless:
-              - 'images/scan/distroless/**'
-            lifetime:
-              - 'images/scan/lifetime/**'
-            malware:
-              - 'images/scan/malware/**'
-            runasroot:
-              - 'images/scan/runasroot/**'
-            new-version:
-              - 'images/scan/new-version/**'
-            syft:
-              - 'images/scan/syft/**'
-
-  changes_pr:
-    runs-on: ubuntu-latest
-    #if: github.event_name == 'pull_request'
-    outputs:
-      base: true
-      imagesourcefetcher: true
-      imagecollector: true
-      notifier: true
-      workflowrunner: true
-      dependencycheck: true
-      distroless: true
-      lifetime: true
-      malware: true
-      runasroot: true
-      new-version: true
-      syft: true
-    steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-
   build_image_base:
-    needs: [changes, changes_pr]
     runs-on: ubuntu-latest
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
@@ -107,7 +39,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_imagecollector:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -127,7 +59,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_imagesourcefetcher:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -147,7 +79,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_workflowrunner:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -167,7 +99,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_dependencycheck:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -187,7 +119,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_distroless:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -207,7 +139,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_lifetime:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -227,7 +159,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_runasroot:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -247,7 +179,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_new-version:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -267,7 +199,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_malware:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -287,7 +219,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_syft:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -307,7 +239,7 @@ jobs:
           registry-token: ${{ secrets.QUAY_IO_CLUSTERSCANNER_TOKEN }}
 
   build_notifier:
-    needs: [changes, build_image_base]
+    needs: [build_image_base]
     runs-on: ubuntu-latest
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
@@ -315,7 +247,6 @@ jobs:
       (github.event_name == 'schedule') ||
       (always() &&
       (needs.build_image_base.result == 'success' ||
-      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
       ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
@@ -329,7 +260,17 @@ jobs:
   test_minikube:
     needs:
       [
+        build_image_base,
+        build_imagecollector,
+        build_imagesourcefetcher,
         build_workflowrunner,
+        build_dependencycheck,
+        build_distroless,
+        build_lifetime,
+        build_runasroot,
+        build_new-version,
+        build_malware,
+        build_notifier,
       ]
     if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
     runs-on: ubuntu-latest
