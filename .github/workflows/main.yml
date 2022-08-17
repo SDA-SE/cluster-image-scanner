@@ -45,7 +45,7 @@ jobs:
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
         id: filter
         with:
-          base: "master" # ignored in PRs
+          #base: "master" # ignored in PRs
           filters: |
             base:
               - 'images/base/**'
@@ -311,7 +311,7 @@ jobs:
       [
         build_workflowrunner,
       ]
-    if: always()
+    if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
