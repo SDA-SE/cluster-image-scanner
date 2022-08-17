@@ -122,7 +122,7 @@ jobs:
               - 'images/scan/syft/**'
 
   build_image_base:
-    needs: changes, changes_pr
+    needs: [changes, changes_pr]
     runs-on: ubuntu-latest
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
     if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
