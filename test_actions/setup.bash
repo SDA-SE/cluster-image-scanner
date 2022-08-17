@@ -49,6 +49,13 @@ wait_for_pods_ready () {
   done
 }
 
+BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
+  BRANCH_TO_DOCKER="2"
+fi
+sed "s/###clusterImageScannerImageTag###/${BRANCH_TO_DOCKER}/" ../argo-main.yml
+
+
 DEPLOYMENT_PATH=../deployment
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
@@ -135,7 +142,7 @@ argo submit -n clusterscanner ../argo-main.yml
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "Token:"
-  server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
+  server=$(kubectl get pods -n clusterscanner | grep argo-server | awk "{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
   echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
   echo "${server}"
 fi
