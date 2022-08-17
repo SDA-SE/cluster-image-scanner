@@ -112,6 +112,7 @@ getPods() {
       isScanNewVersion=""
       scanLifetimeMaxDays=""
       scanLifetimeMaxDays=""
+      dependencyTrackNotificationThresholds=""
 
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
@@ -248,6 +249,10 @@ getPods() {
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
+      dependencyTrackNotificationThresholds=$(echo "${namespaceAnnotations}" | jq -r ".[\"${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION}\"]")
+      if [ "${dependencyTrackNotificationThresholds}" == "" ] || [ "${dependencyTrackNotificationThresholds}" == "null" ]; then
+        dependencyTrackNotificationThresholds="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_DEFAULT}"
+      fi
 
       # TODO in the future maybe not only running pods
       pods=$(kubectl get pods --namespace=${namespace} --field-selector=status.phase=Running --output json)
@@ -277,6 +282,7 @@ getPods() {
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
           "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
+          "dependency_track_notification_thresholds": .metadata.annotations["'${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
         for container in $(echo "${podDecoded}" | jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
@@ -371,6 +377,7 @@ getPods() {
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${imageBase}'" else . end |
+          if .dependency_track_notification_thresholds == null then .dependency_track_notification_thresholds="'${dependencyTrackNotificationThresholds}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end
           ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"

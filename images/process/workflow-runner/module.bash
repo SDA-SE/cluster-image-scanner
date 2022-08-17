@@ -2,14 +2,13 @@
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
 set -e
 
-ls -la
-env
 if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
   SERVICE_ACCOUNT_NAME="clusterscanner"
 fi
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
 totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
+echo "Found ${totalCount} entries in /clusterscanner/imageList.json"
 while read -r line; do
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
   if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
@@ -18,7 +17,6 @@ while read -r line; do
   fi
   if [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "" ]] || [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "null" ]]; then
     echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment') because it is null"
-    echo "DATA_JSON: ${DATA_JSON}"
     continue
   fi
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
@@ -38,6 +36,7 @@ while read -r line; do
   team=$(echo "${DATA_JSON}" | jq -r .team)
   cp /clusterscanner/workflow.template.yml /tmp/template.yml
   scanjobPrefix="sj-"
+  echo "Replacing placeholders in template"
   sed -i "s~###SERVICE_ACCOUNT_NAME###~${SERVICE_ACCOUNT_NAME}~" /tmp/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /tmp/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /tmp/template.yml
@@ -70,7 +69,7 @@ while read -r line; do
   sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /tmp/template.yml
   sed -i "s~###clusterImageScannerImageTag###~${clusterImageScannerImageTag}~" /tmp/template.yml
 
-
+  echo "Setting workflow name"
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
