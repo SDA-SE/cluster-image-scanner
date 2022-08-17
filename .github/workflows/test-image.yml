@@ -12,7 +12,7 @@ jobs:
     # run on base image change
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
 #    if: |
-#      (github.event_name == 'schedule' && github.ref == 'master') ||
+#      (github.event_name == 'schedule') ||
 #      (always() &&
 #      (needs.build_image_base.result == 'success' ||
 #      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
