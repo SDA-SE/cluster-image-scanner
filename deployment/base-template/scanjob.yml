@@ -548,7 +548,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
-            value: '[ {"npm": {"critical": 1, "high": 3, "medium": 100}}, {"deb": {"critical": 1, "high": 3, "medium": 100}}, {"maven": {"critical": 1, "high": 1, "medium": 1}} ]'
+            value: '[ {"maven": {"critical": 1, "high": 1, "medium": 1}}, {"npm": {"critical": 1, "high": 1, "medium": 100}}, {"deb": {"critical": 1, "high": 10, "medium": 100}}, {"rpm": {"critical": 1, "high": 10, "medium": 100}}, {"alpine": {"critical": 1, "high": 10, "medium": 100}} ]'
 
     - name: scan-distroless
       volumes:
