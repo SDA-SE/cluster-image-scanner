@@ -28,7 +28,12 @@ jobs:
   build_image_base:
     runs-on: ubuntu-latest
     # do not execute for PRs that origin from forks due to security concerns and missing secrets
-    if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
+    if: |
+      (github.event_name == 'schedule') ||
+      (always() &&
+      (needs.build_image_base.result == 'success' ||
+      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.imagecollector == 'true')) &&
+      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -272,6 +277,7 @@ jobs:
         build_new-version,
         build_malware,
         build_notifier,
+        build_syft
       ]
     if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
     runs-on: ubuntu-latest
