@@ -331,7 +331,7 @@ jobs:
       [
         build_workflowrunner,
       ]
-    if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' &|| (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)) }}"
+    if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
