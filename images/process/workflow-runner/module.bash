@@ -24,12 +24,7 @@ while read -r line; do
   is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
   dependencyTrackNotificationThresholds=$(echo "${DATA_JSON}" | jq -r '.dependencyTrackNotificationThresholds')
   if [ "${dependencyTrackNotificationThresholds}" == "null" ] || [ "${dependencyTrackNotificationThresholds}" == "" ]; then
-    dependencyTrackNotificationThresholds='[
-      {"maven": {"critical": 1, "high": 1, "medium": 100}},
-      {"npm": {"critical": 1, "high": 1, "medium": 100}},
-      {"deb": {"critical": 1, "high": 10, "medium": 100}},
-      {"rpm": {"critical": 1, "high": 10, "medium": 100}},
-      {"alpine": {"critical": 1, "high": 10, "medium": 100}} ]'
+    dependencyTrackNotificationThresholds="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_DEFAULT}"
   fi
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)

@@ -281,7 +281,7 @@ getPods() {
           "is_scan_dependency_track": .metadata.annotations["'${SCAN_DEPENDENCY_TRACK_ANNOTATION}'"],
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
           "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
-          "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"]
+          "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"],
           "dependency_track_notification_thresholds": .metadata.annotations["'${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
@@ -361,6 +361,21 @@ getPods() {
             skip="true"
           fi
 
+          currentDependencyTrackNotificationThresholds=$(jq -r '.dependency_track_notification_thresholds' /tmp/container.json)
+          echo "currentDependencyTrackNotificationThresholds: ${currentDependencyTrackNotificationThresholds}"
+          if [ "${currentDependencyTrackNotificationThresholds}" == "" ] ||[ "${currentDependencyTrackNotificationThresholds}" == "null" ]; then
+              if [ "${dependencyTrackNotificationThresholds}" == "" ]; then
+                if [ $(cat /tmp/meta.json  | jq '.dependency_track_notification_thresholds') == "null" ]; then
+                  echo "Removing dependency_track_notification_thresholds from meta.json"
+                  cat /tmp/meta.json | jq 'del(.dependency_track_notification_thresholds)' > /tmp/tmp.json
+                  mv /tmp/tmp.json /tmp/meta.json
+                fi
+              else
+                jq '. | add |  if .dependency_track_notification_thresholds == null then .dependency_track_notification_thresholds="'${dependencyTrackNotificationThresholds}'" else . end' /tmp/meta.json > /tmp/tmp.json
+                mv /tmp/tmp.json /tmp/meta.json
+              fi
+          fi
+
           echo "will combine both in ${namespace}"
           jq -s '. | add |
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
@@ -377,7 +392,6 @@ getPods() {
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${imageBase}'" else . end |
-          if .dependency_track_notification_thresholds == null then .dependency_track_notification_thresholds="'${dependencyTrackNotificationThresholds}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end
           ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
