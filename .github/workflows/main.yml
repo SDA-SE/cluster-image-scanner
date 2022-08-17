@@ -77,18 +77,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
     outputs:
-      base: ${{ steps.filter.outputs.base }}
-      imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
-      imagecollector: ${{ steps.filter.outputs.imagecollector }}
-      notifier: ${{ steps.filter.outputs.notifier }}
-      workflowrunner: ${{ steps.filter.outputs.workflowrunner }}
-      dependencycheck: ${{ steps.filter.outputs.dependencycheck }}
-      distroless: ${{ steps.filter.outputs.distroless }}
-      lifetime: ${{ steps.filter.outputs.lifetime }}
-      malware: ${{ steps.filter.outputs.malware }}
-      runasroot: ${{ steps.filter.outputs.runasroot }}
-      new-version: ${{ steps.filter.outputs.new-version }}
-      syft: ${{ steps.filter.outputs.syft }}
+      base: true
+      imagesourcefetcher: true
+      imagecollector: true
+      notifier: true
+      workflowrunner: true
+      dependencycheck: true
+      distroless: true
+      lifetime: true
+      malware: true
+      runasroot: true
+      new-version: true
+      syft: true
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
@@ -360,7 +360,7 @@ jobs:
       [
         build_workflowrunner,
       ]
-    if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)) }}"
+    if: "${{ (github.event_name == 'schedule') || (needs.changes.outputs.base == 'true' &|| (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)) }}"
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
