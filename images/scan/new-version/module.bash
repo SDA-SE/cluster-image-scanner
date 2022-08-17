@@ -35,10 +35,11 @@ if [[ "${IMAGE}" =~ "@sha256" ]]; then
   exit 0
 fi
 
-echo "Analysing IMAGE: ${IMAGE}"
+
 
 # Is image tag (simple) semantic (normally, - would be allowed)
 imageTag=$(echo "${IMAGE}" |  sed 's#.*/.*:##')
+echo "Analysing IMAGE: ${IMAGE} with tag ${imageTag}"
 if ! [[ "${imageTag}" =~ ^v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
   echo "${IMAGE} has tag ${imageTag} which is not (simple) semantic, stopping test (exit code 0)"
   exit 0

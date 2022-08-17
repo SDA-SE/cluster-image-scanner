@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "IMAGE: ${IMAGE}, IMAGE_ID: ${IMAGE_ID}"
+
 function scan_result_post {
   if ${IS_USE_CACHE} ; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"cachedUsedAt\": \"$(date --rfc-3339=ns)\"}")
