@@ -24,6 +24,15 @@ while read -r line; do
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
   IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
   is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
+  dependencyTrackNotificationThresholds=$(echo "${DATA_JSON}" | jq -r '.dependencyTrackNotificationThresholds') # Test-Mode
+  if [ "${dependencyTrackNotificationThresholds}" == "null" ] || [ "${dependencyTrackNotificationThresholds}" == "" ]; then
+    dependencyTrackNotificationThresholds='[
+      {"maven": {"critical": 1, "high": 1, "medium": 1}},
+      {"npm": {"critical": 1, "high": 1, "medium": 100}},
+      {"deb": {"critical": 1, "high": 10, "medium": 100}},
+      {"rpm": {"critical": 1, "high": 10, "medium": 100}},
+      {"alpine": {"critical": 1, "high": 10, "medium": 100}} ]'
+  fi
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
@@ -41,6 +50,7 @@ while read -r line; do
   sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /tmp/template.yml
   sed -i "s~###environment###~${environment}~" /tmp/template.yml
   sed -i "s~###namespace###~${namespace}~" /tmp/template.yml
+  sed -i "s~###dependencyTrackNotificationThresholds###~${dependencyTrackNotificationThresholds}~" /tmp/template.yml
   sed -i "s~###scm_source_branch###~$(echo "${DATA_JSON}" | jq -r .scm_source_branch)~" /tmp/template.yml
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
@@ -58,6 +68,8 @@ while read -r line; do
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /tmp/template.yml
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
   sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /tmp/template.yml
+  sed -i "s~###clusterImageScannerImageTag###~${clusterImageScannerImageTag}~" /tmp/template.yml
+
 
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
