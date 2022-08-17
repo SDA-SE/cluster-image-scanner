@@ -24,10 +24,10 @@ while read -r line; do
   IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
   IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
   is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
-  dependencyTrackNotificationThresholds=$(echo "${DATA_JSON}" | jq -r '.dependencyTrackNotificationThresholds') # Test-Mode
+  dependencyTrackNotificationThresholds=$(echo "${DATA_JSON}" | jq -r '.dependencyTrackNotificationThresholds')
   if [ "${dependencyTrackNotificationThresholds}" == "null" ] || [ "${dependencyTrackNotificationThresholds}" == "" ]; then
     dependencyTrackNotificationThresholds='[
-      {"maven": {"critical": 1, "high": 1, "medium": 1}},
+      {"maven": {"critical": 1, "high": 1, "medium": 100}},
       {"npm": {"critical": 1, "high": 1, "medium": 100}},
       {"deb": {"critical": 1, "high": 10, "medium": 100}},
       {"rpm": {"critical": 1, "high": 10, "medium": 100}},
@@ -61,7 +61,7 @@ while read -r line; do
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /tmp/template.yml
   sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_^check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
   sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /tmp/template.yml
   sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /tmp/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml

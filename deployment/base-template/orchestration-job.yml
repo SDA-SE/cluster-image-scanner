@@ -30,6 +30,7 @@ spec:
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
       - workflow.parameters.clusterImageScannerImageTag
+
   templates:
     - name: main
       steps:
