@@ -54,7 +54,7 @@ if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
   BRANCH_TO_DOCKER="2"
 fi
 echo "clusterImageScannerImageTag: ${BRANCH_TO_DOCKER}"
-sed -i "s/###clusterImageScannerImageTag###/${BRANCH_TO_DOCKER}/g" ../argo-main.yml
+sed -i "s~###clusterImageScannerImageTag###~${BRANCH_TO_DOCKER}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment

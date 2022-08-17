@@ -273,7 +273,7 @@ jobs:
         build_lifetime,
         build_runasroot,
         build_new-version,
-        #build_malware, # too expensive to wait
+        #build_malware, # takes too long to wait
         build_notifier,
         build_syft
       ]
