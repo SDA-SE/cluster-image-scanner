@@ -27,7 +27,7 @@ jobs:
 
   changes:
     runs-on: ubuntu-latest
-    if: "${{ (github.event_name == 'schedule') || !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}"
+    if: github.event_name == 'schedule' || !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
     outputs:
       base: ${{ steps.filter.outputs.base }}
       imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
@@ -75,7 +75,7 @@ jobs:
 
   changes_pr:
     runs-on: ubuntu-latest
-    if: "github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork }}"
+    if: github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
     outputs:
       base: ${{ steps.filter.outputs.base }}
       imagesourcefetcher: ${{ steps.filter.outputs.imagesourcefetcher }}
