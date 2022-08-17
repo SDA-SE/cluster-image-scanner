@@ -40,13 +40,10 @@ spec:
         value: "suppressions-sda"
       - name: allResultsGitTarget
         value: "" # "github.com/SDA-SE/cluster-image-scanner-test-results"
-      - name: baseImageName
-        value: "quay.io/sdase/cluster-image-scanner-base:2"
-      - name: defectDojoClientImageName
-        value: "quay.io/sdase/defectdojo-client:3"
       - name: imageRegistryBase
         value: "quay.io/sdase"
-
+      - name: clusterImageScannerImageTag
+        value: "###clusterImageScannerImageTag###"
   templates:
     - name: main
       steps:
