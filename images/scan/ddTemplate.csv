@@ -2,4 +2,4 @@
 ###INFOTEXT###
 Image ###IMAGE###
 Cluster ###CLUSTER###
-Namespace ###NAMESPACE###","###Response###","###Relevance###",,TRUE,FALSE
+Namespace ###NAMESPACE###","###Response###","###Relevance###","###References###",TRUE,FALSE

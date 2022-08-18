@@ -18,6 +18,7 @@ _imageUser=$(skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} docker://"${IMA
 
 if [[ "xX${_imageUser,,}" =~ ^xX(root|0) ]]; then
     cp /clusterscanner/runAsRoot.csv "${ARTIFACTS_PATH}/runAsRoot.csv"
+    sed -i "s~###References###~~" "${ARTIFACTS_PATH}/runAsRoot.csv"
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc  ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Image is potentially running as root\"}")
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc  ". += {\"status\": \"completed\", \"finding\": false}")
