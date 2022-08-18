@@ -31,7 +31,7 @@ while read -r line; do
   team=$(echo "${DATA_JSON}" | jq -r .team)
   cp /clusterscanner/workflow.template.yml /tmp/template.yml
   scanjobPrefix="sj-"
-  echo "Replacing placeholders in template"
+  echo "Replacing placeholders in template, clusterImageScannerImageTag ${clusterImageScannerImageTag}, dependencyTrackNotificationThresholds: ${dependencyTrackNotificationThresholds}"
   sed -i "s~###SERVICE_ACCOUNT_NAME###~${SERVICE_ACCOUNT_NAME}~" /tmp/template.yml
   sed -i "s~###REGISTRY_SECRET###~${REGISTRY_SECRET}~" /tmp/template.yml
   sed -i "s~###DEPENDENCY_SCAN_CM###~${DEPENDENCY_SCAN_CM}~" /tmp/template.yml
