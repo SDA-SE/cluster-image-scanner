@@ -122,6 +122,7 @@ buildah config \
   --env DEFAULT_SCAN_LIFETIME_MAX_DAYS="14" \
   --env DEFAULT_SCAN_BASEIMAGE_LIFETIME="true" \
   --env DEFAULT_SCAN_NEW_VERSION="true" \
+  --env DEFAULT_CONTAINER_TYPE="application" \
   --env SCAN_LIFETIME_MAX_DAYS_ANNOTATION="clusterscanner.sdase.org/max-lifetime" \
   --env SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime" \
   --env SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless" \
@@ -134,7 +135,7 @@ buildah config \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter" \
-  --env DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION="clusterscanner.sdase.org/dependency-track-notification-thresholds" \
+  --env CONTAINER_TYPE_ANNOTATION="clusterscanner.sdase.org/container-type" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \
   --env HOME="/home/code" \

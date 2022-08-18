@@ -112,7 +112,7 @@ getPods() {
       isScanNewVersion=""
       scanLifetimeMaxDays=""
       scanLifetimeMaxDays=""
-      dependencyTrackNotificationThresholds=""
+      containerType=""
 
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
@@ -249,9 +249,9 @@ getPods() {
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
-      dependencyTrackNotificationThresholds=$(echo "${namespaceAnnotations}" | jq -r ".[\"${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION}\"]")
-      if [ "${dependencyTrackNotificationThresholds}" == "" ] || [ "${dependencyTrackNotificationThresholds}" == "null" ]; then
-        dependencyTrackNotificationThresholds="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_DEFAULT}"
+      containerType=$(echo "${namespaceAnnotations}" | jq -r ".[\"${CONTAINER_TYPE_ANNOTATION}\"]")
+      if [ "${containerType}" == "" ] || [ "${containerType}" == "null" ]; then
+        containerType="${DEFAULT_CONTAINER_TYPE}"
       fi
 
       # TODO in the future maybe not only running pods
@@ -282,7 +282,7 @@ getPods() {
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
           "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
           "scan_lifetime_max_days": .metadata.annotations["'${SCAN_LIFETIME_MAX_DAYS_ANNOTATION}'"],
-          "dependency_track_notification_thresholds": .metadata.annotations["'${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_ANNOTATION}'"]
+          "container_type": .metadata.annotations["'${CONTAINER_TYPE_ANNOTATION}'"]
           }
           ' > /tmp/meta.json
         for container in $(echo "${podDecoded}" | jq -rcM 'select(.status.containerStatuses != null) | .status.containerStatuses[] | @base64'); do
@@ -361,20 +361,20 @@ getPods() {
             skip="true"
           fi
 
-          currentDependencyTrackNotificationThresholds=$(jq -r '.dependency_track_notification_thresholds' /tmp/container.json)
-          echo "currentDependencyTrackNotificationThresholds: ${currentDependencyTrackNotificationThresholds}"
-          if [ "${currentDependencyTrackNotificationThresholds}" == "" ] ||[ "${currentDependencyTrackNotificationThresholds}" == "null" ]; then
-              if [ "${dependencyTrackNotificationThresholds}" == "" ]; then
-                if [ $(cat /tmp/meta.json  | jq '.dependency_track_notification_thresholds') == "null" ]; then
-                  echo "Removing dependency_track_notification_thresholds from meta.json"
-                  cat /tmp/meta.json | jq 'del(.dependency_track_notification_thresholds)' > /tmp/tmp.json
-                  mv /tmp/tmp.json /tmp/meta.json
-                fi
-              else
-                jq '. | add |  if .dependency_track_notification_thresholds == null then .dependency_track_notification_thresholds="'${dependencyTrackNotificationThresholds}'" else . end' /tmp/meta.json > /tmp/tmp.json
-                mv /tmp/tmp.json /tmp/meta.json
-              fi
-          fi
+#          currentcontainerType=$(jq -r '.dependency_track_notification_thresholds' /tmp/container.json)
+#          echo "currentcontainerType: ${currentcontainerType}"
+#          if [ "${currentcontainerType}" == "" ] ||[ "${currentcontainerType}" == "null" ]; then
+#              if [ "${containerType}" == "" ]; then
+#                if [ $(cat /tmp/meta.json  | jq '.dependency_track_notification_thresholds') == "null" ]; then
+#                  echo "Removing dependency_track_notification_thresholds from meta.json"
+#                  cat /tmp/meta.json | jq 'del(.dependency_track_notification_thresholds)' > /tmp/tmp.json
+#                  mv /tmp/tmp.json /tmp/meta.json
+#                fi
+#              else
+#                jq '. | add |  if .dependency_track_notification_thresholds == null then .dependency_track_notification_thresholds="'${containerType}'" else . end' /tmp/meta.json > /tmp/tmp.json
+#                mv /tmp/tmp.json /tmp/meta.json
+#              fi
+#          fi
 
           echo "will combine both in ${namespace}"
           jq -s '. | add |
@@ -393,6 +393,7 @@ getPods() {
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${imageBase}'" else . end |
           if .app_version == null then .app_version="'${imageTag}'" else . end |
+          if .container_type == null then .container_type="'${containerType}'" else . end |
           if .scm_release == null then .scm_release=.app_version else . end
           ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
         done

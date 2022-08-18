@@ -71,8 +71,8 @@ spec:
         value: "###imageRegistryBase###"
       - name: scanjobEnvParameter
         value: "scanjob-env-parameter"
-      - name: "dependencyTrackNotificationThresholds"
-        value: "###dependencyTrackNotificationThresholds###"
+      - name: "containerType"
+        value: "###containerType###"
       - name: "clusterImageScannerImageTag"
         value: "###clusterImageScannerImageTag###"
 
