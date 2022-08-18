@@ -75,7 +75,7 @@ fi
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"reproducibleBuild\": ${reproducibleBuild}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
-    infoText="${IMAGE_TYPE} is ${dDiff} days old"
+    infoText="Image is too old"
     if [ "${reproducibleBuild}"  == "true" ]; then
       infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
@@ -85,6 +85,8 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     sed -i "s/###SEVERITY###/Medium/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###BUILDDATE###/${dt1}/" "${ARTIFACTS_PATH}/lifetime.csv"
+    sed -i "s~###References###~${IMAGE_TYPE} is ${dDiff} days old~" "${ARTIFACTS_PATH}/lifetime.csv"
+
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi

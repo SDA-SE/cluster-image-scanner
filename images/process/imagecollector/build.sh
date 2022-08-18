@@ -107,6 +107,7 @@ buildah config \
   --env SCM_BRANCH_ANNOTATION="scm.sdase.org/source_branch" \
   --env SCM_RELEASE_ANNOTATION="scm.sdase.org/release" \
   --env CONTACT_DEFAULT_EMAIL="" \
+  --env DEFAULT_CONTACT_SLACK="" \
   --env APP_NAME_LABEL="app.kubernetes.io/name" \
   --env APP_VERSION_LABEL="app.kubernetes.io/version" \
   --env DEFAULT_SKIP="false" \
@@ -122,6 +123,7 @@ buildah config \
   --env DEFAULT_SCAN_LIFETIME_MAX_DAYS="14" \
   --env DEFAULT_SCAN_BASEIMAGE_LIFETIME="true" \
   --env DEFAULT_SCAN_NEW_VERSION="true" \
+  --env DEFAULT_CONTAINER_TYPE="application" \
   --env SCAN_LIFETIME_MAX_DAYS_ANNOTATION="clusterscanner.sdase.org/max-lifetime" \
   --env SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime" \
   --env SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless" \
@@ -134,6 +136,7 @@ buildah config \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter" \
+  --env CONTAINER_TYPE_ANNOTATION="clusterscanner.sdase.org/container-type" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \
   --env HOME="/home/code" \

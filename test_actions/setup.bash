@@ -49,6 +49,14 @@ wait_for_pods_ready () {
   done
 }
 
+BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
+  BRANCH_TO_DOCKER="2"
+fi
+echo "clusterImageScannerImageTag: ${BRANCH_TO_DOCKER}"
+sed -i "s~###clusterImageScannerImageTag###~${BRANCH_TO_DOCKER}~g" ../argo-main.yml
+
+
 DEPLOYMENT_PATH=../deployment
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
@@ -135,7 +143,8 @@ argo submit -n clusterscanner ../argo-main.yml
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "Token:"
-  server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}'); kubectl -n clusterscanner exec pod/$server -- argo auth token
+  server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}');
+  kubectl -n clusterscanner exec pod/$server -- argo auth token
   echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
   echo "${server}"
 fi
@@ -147,7 +156,7 @@ echo "will wait for workflow ${workflow}"
 
 until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
 do
-  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do 
+  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do
     argo get --no-utf8 $i -n clusterscanner;
     echo "######################################################################################################## argo get"
   done
@@ -157,14 +166,14 @@ do
 #  done
   sleep 60;
 done
+argo list workflows -A
 if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
   echo "ERRORs during workflow execution"
-  for pod in $(kubectl get pod -n clusterscanner | grep "Error\|Failed" | awk '{print $1}'); do
-      echo "######################################################################################################## pod logs $pod"
+  for pod in $(kubectl get pod -n clusterscanner | grep "Error\|Failed\|InvalidImageName" | awk '{print $1}'); do
+      echo "######################################################################################################## pod logs ${pod}"
       kubectl logs ${pod} -n clusterscanner || true
   done
   exit 1
 fi
-argo list workflows -A
 rm -Rf ./tmp || true
 

@@ -29,6 +29,8 @@ spec:
       - workflow.parameters.dependencyCheckSuppressionsConfigMapName
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
+      - workflow.parameters.clusterImageScannerImageTag
+
   templates:
     - name: main
       steps:
@@ -79,7 +81,7 @@ spec:
         - name: tmp
           emptyDir: {}
       container:
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-image-source-fetcher:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-image-source-fetcher:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         resources:
@@ -144,7 +146,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         envFrom:
@@ -167,6 +169,8 @@ spec:
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: imageRegistryBase
             value: "{{ workflow.parameters.imageRegistryBase }}"
+          - name: clusterImageScannerImageTag
+            value: "{{ workflow.parameters.clusterImageScannerImageTag }}"
 
     - name: notify-teams
       volumes:
@@ -191,7 +195,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:{{ workflow.parameters.clusterImageScannerImageTag }}"
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
@@ -418,7 +422,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -617,7 +621,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
         volumeMounts:
           - name: "{{ workflow.parameters.gitSecretName }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
@@ -691,7 +695,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         envFrom:

@@ -43,6 +43,7 @@ spec:
       - name: dependencyCheckSuppressionsConfigMapName
       - name: imageRegistryBase
       - name: scanjobEnvParameter
+      - name: containerType
 
   templates:
     - name: main
@@ -61,9 +62,16 @@ spec:
           - name: scan-dependency-track
             depends: sbom-generation
             template: scan-dependency-track
-          - name: results-dependency-track-dd-upload
+          - name: dependency-track-notification-thresholds
             depends: scan-dependency-track
+            template: dependency-track-notification-thresholds
+          - name: results-dependency-track-dd-upload
+            depends: dependency-track-notification-thresholds
             template: results-dependency-track-dd-upload
+            arguments:
+              parameters:
+                - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+                  value: "{{tasks.dependency-track-notification-thresholds.outputs.result}}"
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
@@ -174,7 +182,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -287,7 +295,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
@@ -329,7 +337,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -338,14 +346,14 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         env:
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_dependency_track }}"
-          - name: PROJECT_NAME
-            value: "{{ workflow.parameters.environment }} | {{ workflow.parameters.namespace }} | {{ workflow.parameters.appname }}"
+          - name: APP_NAME
+            value: "{{ workflow.parameters.appname }}"
           - name: VERSION
             value: "{{ workflow.parameters.appversion }}"
           - name: DD_BRANCH_NAME
@@ -375,6 +383,8 @@ spec:
             echo "Dependency Track scan is disabled"
             exit 0
           fi
+          PROJECT_NAME=$(echo "${DD_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${APP_NAME}~" )
+          echo "PROJECT_NAME: ${PROJECT_NAME}"
           bomPath="/clusterscanner/data/bom.json"
           exportFilePath="/clusterscanner/data/findings.json"
           if [ "${DEPENDENCY_TRACK_KEY}" == "" ]; then
@@ -477,6 +487,62 @@ spec:
 
           fi
 
+    - name: dependency-track-notification-thresholds
+      volumes:
+        - name: tmp
+          emptyDir: { }
+      script:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '0.2'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        command: [/bin/bash]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: CONTAINER_TYPE
+            value: "{{ workflow.parameters.containerType }}"
+          - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION
+            value: '[
+              {"maven": {"critical": 1, "high": 1, "medium": 100}},
+              {"npm": {"critical": 1, "high": 1, "medium": 100}},
+              {"deb": {"critical": 2, "high": 10, "medium": 100}},
+              {"rpm": {"critical": 2, "high": 10, "medium": 100}},
+              {"alpine": {"critical": 2, "high": 10, "medium": 100}} ]'
+          - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY
+            value: '[
+              {"maven": {"critical": 1, "high": 999, "medium": 9999}},
+              {"npm": {"critical": 1, "high": 9999, "medium": 9999}},
+              {"deb": {"critical": 10, "high": 100, "medium": 9999}},
+              {"rpm": {"critical": 10, "high": 100, "medium": 9999}},
+              {"alpine": {"critical": 10, "high": 100, "medium": 9999}} ]'
+        envFrom:
+          - configMapRef:
+              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        source: |
+          set -e
+          if [ "${CONTAINER_TYPE}" == "application" ]; then
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
+          elif [ "${CONTAINER_TYPE}" == "application" ]; then
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}"
+          else
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
+          fi
+
 
     - name: results-dependency-track-dd-upload
       volumes:
@@ -485,6 +551,9 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
+      inputs:
+        parameters:
+          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
@@ -547,8 +616,9 @@ spec:
             value: "0" # make the job successful
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
-          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
-            value: '[ {"maven": {"critical": 1, "high": 1, "medium": 1}}, {"npm": {"critical": 1, "high": 1, "medium": 100}}, {"deb": {"critical": 1, "high": 10, "medium": 100}}, {"rpm": {"critical": 1, "high": 10, "medium": 100}}, {"alpine": {"critical": 1, "high": 10, "medium": 100}} ]'
+          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER
+            value: "{{input.parameters.UNHANDLED_DEP_TRACK_SEVERITY_FILTER"
+
 
     - name: scan-distroless
       volumes:
@@ -573,7 +643,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -582,7 +652,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: Always
         volumeMounts:
@@ -635,7 +705,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -690,7 +760,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -749,7 +819,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -793,7 +863,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -802,7 +872,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -854,7 +924,7 @@ spec:
             memory: 1792Mi
           requests:
             cpu: '0.2'
-            memory: 1200Mi
+            memory: 1500Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -863,7 +933,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -916,7 +986,7 @@ spec:
             memory: 368Mi
           requests:
             cpu: '0.2'
-            memory: 128Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -925,7 +995,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-dependency-check:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-dependency-check:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always # TODO
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -1045,7 +1115,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -1209,7 +1279,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:2"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
