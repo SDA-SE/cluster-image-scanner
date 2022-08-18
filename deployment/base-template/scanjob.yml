@@ -611,7 +611,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
-            value: "{{steps.dependency-track-notification-thresholds.outputs.results}}"
+            value: "{{steps.dependency-track-notification-thresholds.outputs.result}}"
 
     - name: scan-distroless
       volumes:
