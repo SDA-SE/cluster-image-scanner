@@ -167,14 +167,14 @@ getPods() {
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
         slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
       fi
-      if [ "${rocketchat}" == "" ] || [ "${rocketchat}" == "null" ]; then
-        rocketchat=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/rocketchat"')
-      fi
-      if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
-          slack="#${team}${DEFAULT_SLACK_POSTFIX}"
+      if [ "${slack}" == "null" ]; then
+        slack="${DEFAULT_CONTACT_SLACK}"
       fi
       if [ "${slack}" != "#.*" ]; then
         echo "WARN: The given slack channel '${slack}' doesn't start with #"
+      fi
+      if [ "${rocketchat}" == "" ] || [ "${rocketchat}" == "null" ]; then
+        rocketchat=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/rocketchat"')
       fi
       if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
         email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"' | sed 's# ##g')

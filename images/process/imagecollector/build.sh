@@ -107,6 +107,7 @@ buildah config \
   --env SCM_BRANCH_ANNOTATION="scm.sdase.org/source_branch" \
   --env SCM_RELEASE_ANNOTATION="scm.sdase.org/release" \
   --env CONTACT_DEFAULT_EMAIL="" \
+  --env DEFAULT_CONTACT_SLACK="" \
   --env APP_NAME_LABEL="app.kubernetes.io/name" \
   --env APP_VERSION_LABEL="app.kubernetes.io/version" \
   --env DEFAULT_SKIP="false" \

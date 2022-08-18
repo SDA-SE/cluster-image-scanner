@@ -1,7 +1,7 @@
 name: Build Image and Test with Minikube
 
 on:
-  push:
+  #push:
   pull_request:
   schedule:
     - cron: "30 6 * * *"
