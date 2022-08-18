@@ -55,7 +55,7 @@ while read -r line; do
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /tmp/template.yml
   sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_^check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
   sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /tmp/template.yml
   sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /tmp/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml
