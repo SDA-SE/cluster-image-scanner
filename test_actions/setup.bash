@@ -22,12 +22,12 @@ fi
 
 
 
-echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME##}"
-IMAGE_VERSION=$(echo ${GITHUB_REF_NAME} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+IMAGE_VERSION=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
 if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
-  IMAGE_VERSION="2"
+  IMAGE_VERSION="${BRANCH}"
 fi
-if [ "${GITHUB_REF_NAME}" == "master" ]; then # locally
+if [ "${BRANCH}" == "master" ]; then
   IMAGE_VERSION="2"
 fi
 echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
