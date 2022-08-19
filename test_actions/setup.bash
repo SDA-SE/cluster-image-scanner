@@ -49,12 +49,16 @@ wait_for_pods_ready () {
   done
 }
 
-BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+echo "GITHUB_REF##*/: ${GITHUB_REF##*/}"
+IMAGE_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
 if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
-  BRANCH_TO_DOCKER="2"
+  IMAGE_VERSION="2"
 fi
-echo "clusterImageScannerImageTag: ${BRANCH_TO_DOCKER}"
-sed -i "s~###clusterImageScannerImageTag###~${BRANCH_TO_DOCKER}~g" ../argo-main.yml
+if [ "${GITHUB_REF##*/}" == "master" ]; then # locally
+  IMAGE_VERSION="2"
+fi
+echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
+sed -i "s~###clusterImageScannerImageTag###~${IMAGE_VERSION}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment
