@@ -49,6 +49,7 @@ buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_o
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"
 cp log4j-core-2.14.0.jar "${mnt}/vulnerable-files/log4j-core-2.14.0.jar"
+cp module.bash "${mnt}/module.bash"
 echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "${mnt}/vulnerable-files/eicar.txt"
 find $mnt
 
@@ -69,7 +70,7 @@ buildah config \
   --label "${oci_prefix}.title=${TITLE}" \
   --label "${oci_prefix}.description=${DESCRIPTION}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
-  --user 0 \
+  --entrypoint "/module.bash" \
   "${ctr}"
 
 buildah commit --timestamp "1655294536" --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
