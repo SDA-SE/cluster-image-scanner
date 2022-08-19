@@ -38,7 +38,7 @@ clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
 clusterscanner.sdase.org/is-scan-dependency-track: "false" # Boolean
 clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
 clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean
-clusterscanner.sdase.org/is-scan-malware: "false" # Boolean, scan to be implemented
+clusterscanner.sdase.org/is-scan-malware: "true"
 
 clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the lifetime scan
 ```

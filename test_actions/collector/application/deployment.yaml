@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "test-deployment"
+  namespace: "shire"
+  labels:
+    app: test-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      annotations:
+        team: "fellowship-of-the-ring"
+        slack: "#security-notifications-test"
+        clusterscanner.sdase.org/skip: "false"
+        clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-dependency-track: "false" # Boolean
+        clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-malware: "true"
+      labels:
+        app: test-app
+    spec:
+      containers:
+        - name: test-image
+          image: quay.io/sdase/cluster-image-scanner-test-image:2.0.22
