@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 # shellcheck disable=SC2026,SC2154
+
+source library.bash
+
 for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
@@ -17,44 +20,14 @@ elif [ "${DD_TOKEN_SECRET}" == "" ]; then
   exit 1;
 fi
 
-wait_for_pods_ready () {
-  local name="${1}"; shift
-  local namespace="${1}"; shift
-  local count="${1}"; shift
-  local sleep="${1}"; shift
-  local max_attempts="${1}"
-  local attempt_num=0
 
-  until [[ $(kubectl -n "${namespace}" get pods -o json | jq '.items | length') -ge "${count}" ]]
-  do
-    if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
-    then
-      echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
-      exit 1
-    fi
-    echo "waiting for ${name} to be created"
-    sleep "${sleep}"
-  done
-  until [[ $(kubectl -n "${namespace}" get pods -o json | jq '.items[].status.conditions[].status=="True"' | grep -c false) -eq "0" ]]
-  do
-    if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
-    then
-      echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
-      exit 1
-    fi
-    echo "waiting for ${name} to be up"
-    sleep "${sleep}"
-  done
-}
 
-echo "GITHUB_REF##*/: ${GITHUB_REF##*/}"
-IMAGE_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME##}"
+IMAGE_VERSION=$(echo ${GITHUB_REF_NAME} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
 if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
   IMAGE_VERSION="2"
 fi
-if [ "${GITHUB_REF##*/}" == "master" ]; then # locally
+if [ "${GITHUB_REF_NAME}" == "master" ]; then # locally
   IMAGE_VERSION="2"
 fi
 echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
@@ -131,6 +104,8 @@ fi
 sleep 30
 
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
+
+./application/setup.bash
 
 sleep 10
 echo "adding port-forward"
