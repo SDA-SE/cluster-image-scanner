@@ -51,7 +51,6 @@ rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"
 cp log4j-core-2.14.0.jar "${mnt}/vulnerable-files/log4j-core-2.14.0.jar"
 cp module.bash "${mnt}/module.bash"
-cp module.bash "${mnt}/module.bash"
 cp "${mnt_ctr}/usr/bin/sleep" "${mnt}/usr/bin/sleep"
 echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "${mnt}/vulnerable-files/eicar.txt"
 find $mnt
