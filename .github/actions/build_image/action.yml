@@ -20,8 +20,10 @@ runs:
       shell: bash
       run: |
         source ./test_actions/library.bash
-        echo "GITHUB_BASE_REF${GITHUB_BASE_REF##*/}"
-        exit;
+        echo "GITHUB_HEAD_REF ${GITHUB_HEAD_REF##*/}"
+        echo "GITHUB_REF ${GITHUB_REF##*/}"
+        env
+        exit 1;
         cd ${{ inputs.image-path }}
         chmod +x ./build.sh
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true
