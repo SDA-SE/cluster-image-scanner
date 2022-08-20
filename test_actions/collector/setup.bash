@@ -5,6 +5,8 @@ DEPLOYMENT_PATH=../../deployment
 source ${HOME}/.clusterscanner/secrets
 source ./library.bash
 
+sed -i "s~###clusterImageScannerImageTag###~${VERSION}~" configmap.yaml
+
 kubectl apply -k ./collector/application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
 
