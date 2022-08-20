@@ -14,10 +14,5 @@ commonLabels:
   app.kubernetes.io/name: clusterscanner
   app.kubernetes.io/instance: org.sda
 
-configMapGenerator:
-  - name: suppressions-sda
-    files:
-      - ../../test/suppressions.xml
-
 patches:
   - path: artifacts.yml
