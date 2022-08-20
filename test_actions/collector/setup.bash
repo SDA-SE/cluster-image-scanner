@@ -1,11 +1,11 @@
 #!/bin/bash
-
+set -e
 DEPLOYMENT_PATH=../../deployment
 
 source ${HOME}/.clusterscanner/secrets
-source ../library.bash
+source ./library.bash
 
-kubectl apply -k application
+kubectl apply -k ./collector/application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
 
 sed -i "s#GITHUB_APP_ID_PLACEHOLDER#$GITHUB_APP_ID_PLACEHOLDER#" configmap.yaml

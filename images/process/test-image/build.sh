@@ -44,7 +44,7 @@ dnf_opts=(
   "--quiet"
 )
 
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash sleep
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"

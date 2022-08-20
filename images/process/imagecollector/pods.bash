@@ -132,6 +132,7 @@ getPods() {
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
           rocketchat=$(echo ${mapping} | jq -rcM '.rocketchat' | sed "s/^null//")
+          containerType=$(echo "${mapping}" | jq -rcM ".container_type" | sed "s/^null//")
           for attributeName in ${configurationsToMap[@]}; do
               setAttributes ${attributeName}
               camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
