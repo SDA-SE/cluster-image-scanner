@@ -113,6 +113,7 @@ getPods() {
       scanLifetimeMaxDays=""
       scanLifetimeMaxDays=""
       containerType=""
+      skip=${DEFAULT_SKIP}
 
       echo "Processing namespace ${namespace}"
       namespaceAnnotations=$(kubectl get namespace "${namespace}" -o jsonpath='{.metadata.annotations}' 2>&1 || true)
@@ -133,6 +134,7 @@ getPods() {
           slack=$(echo ${mapping} | jq -rcM '.slack')
           rocketchat=$(echo ${mapping} | jq -rcM '.rocketchat' | sed "s/^null//")
           containerType=$(echo "${mapping}" | jq -rcM ".container_type" | sed "s/^null//")
+          skip=$(echo "${mapping}" | jq -rcM ".skip" | sed "s/^null/${DEFAULT_SKIP}/")
           for attributeName in ${configurationsToMap[@]}; do
               setAttributes ${attributeName}
               camelCaseVariableName=$(echo "${attributeName}" | sed -r 's/(^|_)([a-z])/\U\2/g'| sed 's/\b\(.\)/\L&/g')
@@ -326,7 +328,6 @@ getPods() {
             imageBase="${imageBaseArray[0]}"
           fi
           echo "imageBase: ${imageBase}"
-          skip=${DEFAULT_SKIP}
           if [ "${skipNamespace}" == "true" ] || [ "${skipNamespace}" == "false" ]; then
             skip=${skipNamespace}
           else
