@@ -8,9 +8,9 @@ for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   minikube delete
-  minikube start --memory=5384 --cpus=8 --vm-driver kvm2 --disk-size 25GB
-  echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
-  read -n 1 -s
+  minikube start --memory=4384 --cpus=8 --vm-driver kvm2 --disk-size 25GB
+  #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
+  #read -n 1 -s
 fi
 
 if [ "${SECRETS_PATH}" != "" ]; then
@@ -34,6 +34,8 @@ sed -i "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overla
 sed -i "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.secret.env
 sed -i "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
 sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
+
+echo "test-all=${GITHUB_TARGET_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
 
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 

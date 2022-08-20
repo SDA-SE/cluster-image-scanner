@@ -28,7 +28,7 @@ spec:
                 - name: CLUSTER_NAME
                   value: "minikube"
                 - name: GITHUB_REPOSITORY
-                  value: "github.com/pagel-pro/cluster-image-scanner-test-targets.git"
+                  value: "###GITHUB_REPOSITORY###"
                 - name: GITHUB_APP_ID
                   valueFrom:
                     configMapKeyRef:

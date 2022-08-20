@@ -5,14 +5,13 @@ DEPLOYMENT_PATH=../../deployment
 source ${HOME}/.clusterscanner/secrets
 source ../library.bash
 
-sed -i "s~###clusterImageScannerImageTag###~${VERSION}~" application/deployment.yaml
+sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
+sed -i "s~###VERSION###~${VERSION}~g" job.yml
+sed -i "s~###GITHUB_TARGET_REPOSITORY###~${GITHUB_TARGET_REPOSITORY}~g" job.yml
 
 kubectl apply -k ./application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
-until [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Running) -eq 0 ]; do
-  echo "Running"
-  sleep 5
-done
+
 
 
 
@@ -24,6 +23,6 @@ kubectl apply -k .
 
 kubectl create secret generic github --from-file="keyfile=${GH_PRIVATE_KEY_PATH}" -n cluster-image-scanner-image-collector
 
-
+wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
 
 
