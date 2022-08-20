@@ -22,6 +22,8 @@ spec:
           env:
             - name: CLUSTER_NAME
               value: "lord-of-the-rings"
+            - name: DEFAULT_SKIP
+              value: true
             - name: GITHUB_REPOSITORY
               value: "###GIT_TARGET_REPOSITORY###"
             - name: GITHUB_APP_ID
