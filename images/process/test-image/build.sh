@@ -30,6 +30,7 @@ build_dir="${dir}/build"
 
 base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
+mnt="$( buildah mount "${mnt_ctr}" )"
 
 base_image="scratch"
 ctr="$( buildah from --pull --quiet "${base_image}")"
@@ -44,12 +45,14 @@ dnf_opts=(
   "--quiet"
 )
 
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash sleep
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash
 buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 mkdir "${mnt}/vulnerable-files/"
 cp log4j-core-2.14.0.jar "${mnt}/vulnerable-files/log4j-core-2.14.0.jar"
 cp module.bash "${mnt}/module.bash"
+cp module.bash "${mnt}/module.bash"
+cp "${mnt_ctr}/usr/bin/sleep" "${mnt}/usr/bin/sleep"
 echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > "${mnt}/vulnerable-files/eicar.txt"
 find $mnt
 
