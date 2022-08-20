@@ -15,13 +15,13 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             runAsUser: 1001
-          image: quay.io/sdase/cluster-image-scanner-imagecollector:2
+          image: "quay.io/sdase/cluster-image-scanner-imagecollector:###VERSION###"
           imagePullPolicy: Always
           env:
             - name: CLUSTER_NAME
-              value: "minikube"
+              value: "lord-of-the-rings"
             - name: GITHUB_REPOSITORY
-              value: "github.com/pagel-pro/cluster-image-scanner-test-targets.git"
+              value: "###GITHUB_TARGET_REPOSITORY###"
             - name: GITHUB_APP_ID
               valueFrom:
                 configMapKeyRef:
