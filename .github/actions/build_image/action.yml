@@ -19,13 +19,7 @@ runs:
     - name: create and push an image
       shell: bash
       run: |
+        source ./test_action/library.bash
         cd ${{ inputs.image-path }}
         chmod +x ./build.sh
-        BRANCH=$(git rev-parse --abbrev-ref HEAD)
-        if [ "${BRANCH}" == "master" ]; then
-          VERSION="2.0.${GITHUB_RUN_NUMBER}"
-        else
-          BRANCH_TO_DOCKER=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-          VERSION="${BRANCH_TO_DOCKER}.${GITHUB_RUN_NUMBER}"
-        fi
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true

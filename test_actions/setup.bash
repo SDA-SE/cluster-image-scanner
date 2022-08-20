@@ -20,18 +20,8 @@ elif [ "${DD_TOKEN_SECRET}" == "" ]; then
   exit 1;
 fi
 
-
-
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-IMAGE_VERSION=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
-  IMAGE_VERSION="${BRANCH}"
-fi
-if [ "${BRANCH}" == "master" ] || [ "${BRANCH}" == "head" ]; then
-  IMAGE_VERSION="2"
-fi
-echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
-sed -i "s~###clusterImageScannerImageTag###~${IMAGE_VERSION}~g" ../argo-main.yml
+echo "clusterImageScannerImageTag: ${VERSION}"
+sed -i "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment
