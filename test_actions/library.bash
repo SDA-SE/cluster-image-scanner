@@ -72,7 +72,7 @@ if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
   export MAJOR=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
   export PATCH=""
   if [ "${GITHUB_RUN_NUMBER}" != "" ]; then
-    export MAJOR=$(echo ${GITHUB_BASE_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+    export MAJOR=$(echo ${GITHUB_HEAD_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
     export MINOR=".${GITHUB_RUN_NUMBER}"
   else
     export MINOR=""
