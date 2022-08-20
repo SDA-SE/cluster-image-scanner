@@ -19,7 +19,7 @@ runs:
     - name: create and push an image
       shell: bash
       run: |
-        source ./test_action/library.bash
+        source ./test_actions/library.bash
         cd ${{ inputs.image-path }}
         chmod +x ./build.sh
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true
