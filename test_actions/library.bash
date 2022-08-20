@@ -39,12 +39,13 @@ export PATCH="${GITHUB_RUN_NUMBER}"
 export VERSION="${MAJOR}.${MINOR}.${PATCH}"
 if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
   export BRANCH_TO_DOCKER=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-  export MINOR="${BRANCH_TO_DOCKER}"
+  export MAJOR="${BRANCH_TO_DOCKER}"
+  export PATCH=""
   if [ "${GITHUB_RUN_NUMBER}" != "" ]; then
-    export PATCH=".${GITHUB_RUN_NUMBER}"
+    export MINOR=".${GITHUB_RUN_NUMBER}"
   else
-    export PATCH=""
+    export MINOR=""
   fi
-  export VERSION="${MAJOR}.${MINOR}${PATCH}"
+  export VERSION="${MAJOR}${MINOR}${PATCH}"
 fi
 
