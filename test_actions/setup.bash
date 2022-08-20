@@ -8,7 +8,7 @@ for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   minikube delete
-  minikube start --memory=29384 --cpus=8 --vm-driver kvm2 --disk-size 150GB
+  minikube start --memory=8384 --cpus=8 --vm-driver kvm2 --disk-size 20GB
   echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   read -n 1 -s
 fi
@@ -27,7 +27,7 @@ IMAGE_VERSION=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-
 if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
   IMAGE_VERSION="${BRANCH}"
 fi
-if [ "${BRANCH}" == "master" ]; then
+if [ "${BRANCH}" == "master" ] || [ "${BRANCH}" == "head" ]; then
   IMAGE_VERSION="2"
 fi
 echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
@@ -105,7 +105,7 @@ sleep 30
 
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
-./application/setup.bash
+./collector/setup.bash
 
 sleep 10
 echo "adding port-forward"

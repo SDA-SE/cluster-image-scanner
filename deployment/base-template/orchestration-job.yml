@@ -254,7 +254,6 @@ spec:
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              ls -la /clusterscanner/
               echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
               sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
@@ -377,7 +376,7 @@ spec:
                     #                      fi
                     #                    fi
                     title="${title} in ${image}"
-                    echo "$title in ${image}"
+                    echo "${title} in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
                     message="${infoText}; ${description}"

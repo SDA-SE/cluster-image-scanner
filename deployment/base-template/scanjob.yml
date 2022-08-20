@@ -537,7 +537,7 @@ spec:
           set -e
           if [ "${CONTAINER_TYPE}" == "application" ]; then
             echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
-          elif [ "${CONTAINER_TYPE}" == "application" ]; then
+          elif [ "${CONTAINER_TYPE}" == "third-party" ]; then
             echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}"
           else
             echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
