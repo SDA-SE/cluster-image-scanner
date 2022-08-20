@@ -12,9 +12,9 @@ sed -i "s~###GIT_TARGET_REPOSITORY###~${GIT_TARGET_REPOSITORY}~g" job.yml
 kubectl apply -k ./application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
 
-sed -i "s#GITHUB_APP_ID_PLACEHOLDER#$GITHUB_APP_ID_PLACEHOLDER#" configmap.yaml
-sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#$GITHUB_APP_LOGIN_PLACEHOLDER#" configmap.yaml
-sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#$GITHUB_INSTALLATION_ID_PLACEHOLDER#" configmap.yaml
+sed -i "s#GITHUB_APP_ID_PLACEHOLDER#${GH_APP_ID}#" configmap.yaml
+sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#$GH_APP_LOGIN#" configmap.yaml
+sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" configmap.yaml
 
 kubectl apply -k .
 if [ -e "${GH_PRIVATE_KEY_PATH}" ]; then
@@ -27,3 +27,4 @@ fi
 wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
 
 
+kubectl delete namespace shire

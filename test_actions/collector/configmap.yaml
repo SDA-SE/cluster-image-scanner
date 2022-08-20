@@ -12,7 +12,10 @@ data:
         {
           "namespaces": [
             {"namespace_filter": "argo", "description": "used for deployment"},
-            {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"}
+            {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"},
+            {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"},
+            {"namespace_filter": "minio", "description": "minio to store workflow artifacts"}
+    
           ],
           "configurations": {
             "skip": "true",
@@ -24,6 +27,7 @@ data:
             "is_scan_dependency_check": "true",
             "is_scan_runasroot": "true",
             "slack": "#security-notifications-test",
+            "container_type": "third-party",
             "team": "operations"
           }
         }

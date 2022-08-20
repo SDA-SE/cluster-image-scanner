@@ -40,7 +40,7 @@ echo "test-all=${GIT_TARGET_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-loca
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
 sed -i "s#GITHUB_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#${GITHUB_APP_LOGIN_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 if [ -e ${GH_PRIVATE_KEY_PATH} ]; then
   cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
