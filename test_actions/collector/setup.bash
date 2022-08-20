@@ -9,6 +9,12 @@ sed -i "s~###clusterImageScannerImageTag###~${VERSION}~" application/deployment.
 
 kubectl apply -k ./application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
+until [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Running) -eq 0 ]; do
+  echo "Running"
+  sleep 5
+done
+
+
 
 sed -i "s#GITHUB_APP_ID_PLACEHOLDER#$GITHUB_APP_ID_PLACEHOLDER#" configmap.yaml
 sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#$GITHUB_APP_LOGIN_PLACEHOLDER#" configmap.yaml

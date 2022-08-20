@@ -8,7 +8,7 @@ for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   minikube delete
-  minikube start --memory=8384 --cpus=8 --vm-driver kvm2 --disk-size 20GB
+  minikube start --memory=5384 --cpus=8 --vm-driver kvm2 --disk-size 25GB
   echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   read -n 1 -s
 fi

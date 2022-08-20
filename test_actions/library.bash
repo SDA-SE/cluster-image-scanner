@@ -38,8 +38,7 @@ export MINOR="0"
 export PATCH="${GITHUB_RUN_NUMBER}"
 export VERSION="${MAJOR}.${MINOR}.${PATCH}"
 if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
-  export BRANCH_TO_DOCKER=
-  export MAJOR="${BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+  export MAJOR=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
   export PATCH=""
   if [ "${GITHUB_RUN_NUMBER}" != "" ]; then
     export MAJOR=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
@@ -50,4 +49,3 @@ if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
   export VERSION="${MAJOR}${MINOR}${PATCH}"
 fi
 
-echo "VERSION: ${VERSION}"
