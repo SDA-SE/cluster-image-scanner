@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      activeDeadlineSeconds: 3600
       serviceAccountName: image-collector
       automountServiceAccountToken: true # mount cluster-scan
       restartPolicy: Never
