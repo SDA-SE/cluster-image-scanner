@@ -43,12 +43,14 @@ sed -i "s#GITHUB_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/t
 sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 if [ -f ${GH_PRIVATE_KEY_PATH} ]; then
+  ls -la ${GH_PRIVATE_KEY_PATH}
   cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
 fi
 if [ "${GH_PRIVATE_KEY}" != "" ]; then
   echo "${GH_PRIVATE_KEY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
-  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 fi
+export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
+
 
 sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
