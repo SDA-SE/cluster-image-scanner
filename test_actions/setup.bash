@@ -2,7 +2,7 @@
 set -e
 # shellcheck disable=SC2026,SC2154
 
-source library.bash
+source ./library.bash
 
 for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
 
@@ -42,14 +42,15 @@ sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/
 sed -i "s#GITHUB_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-if [ -f ${GH_PRIVATE_KEY_PATH} ]; then
+if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY}" == "" ]; then
   ls -la ${GH_PRIVATE_KEY_PATH}
   cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 fi
 if [ "${GH_PRIVATE_KEY}" != "" ]; then
   echo "${GH_PRIVATE_KEY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 fi
-export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 
 
 sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
