@@ -2,7 +2,9 @@
 set -e
 DEPLOYMENT_PATH=../../deployment
 
-source ${HOME}/.clusterscanner/secrets
+if [ "${SECRETS_PATH}" != "" ]; then
+  source ${SECRETS_PATH}
+fi
 source ../library.bash
 
 sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
