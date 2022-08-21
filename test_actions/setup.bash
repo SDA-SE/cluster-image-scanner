@@ -109,7 +109,7 @@ sleep 30
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
 cd collector
-#./setup.bash
+./setup.bash
 cd ..
 sleep 10
 echo "adding port-forward"
