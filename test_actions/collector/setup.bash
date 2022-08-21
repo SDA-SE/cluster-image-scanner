@@ -29,4 +29,4 @@ fi
 wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
 
 
-kubectl delete namespace shire
+#kubectl delete namespace shire
