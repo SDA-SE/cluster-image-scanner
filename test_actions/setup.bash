@@ -44,16 +44,15 @@ sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/
 sed -i "s#GH_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GH_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
 sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY}" == "" ]; then
-  ls -la ${GH_PRIVATE_KEY_PATH}
+
+if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY_BASE64}" == "" ]; then
   cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
   export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 fi
-if [ "${GH_PRIVATE_KEY}" != "" ]; then
-  echo "${GH_PRIVATE_KEY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+if [ "${GH_PRIVATE_KEY_BASE64}" != "" ]; then
+  echo "${GH_PRIVATE_KEY_BASE64}" | base64 -d > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
   export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
 fi
-
 
 sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
