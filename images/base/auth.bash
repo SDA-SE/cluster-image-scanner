@@ -38,14 +38,13 @@ sp_authorize() {
     fi
     createJWT
     echo "Creating GH_TOKEN"
-    curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GH_INSTALLATION_ID}"/access_tokens | jq -r '.token'
-    GH_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GH_INSTALLATION_ID}"/access_tokens | jq -r '.token' | tr -d \" || true)
-    if [ ${GH_TOKEN} == "ghs*" ]; then
+    GH_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GH_INSTALLATION_ID}"/access_tokens | jq -r '.token' | tr -d \")
+    if [[ ${GH_TOKEN} =~ ghs_.* ]]; then
       echo "Created GH_TOKEN"
       return 0
     else
       echo "Couldn't create GH_TOKEN"
-      echo "GH_TOKEN: ${GH_TOKEN}" | sed 's/g//g'
+      #echo "GH_TOKEN: ${GH_TOKEN}" | sed 's/g//g'
       return 1
     fi
 }
