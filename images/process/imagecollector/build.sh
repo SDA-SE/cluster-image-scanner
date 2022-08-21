@@ -92,8 +92,8 @@ bill_of_materials_hash="$( (
 
 oci_prefix="org.opencontainers.image"
 buildah config \
-  --env GITHUB_APP_ID="SET-ME" \
-  --env GITHUB_REPOSITORY="SET-ME" \
+  --env GH_APP_ID="SET-ME" \
+  --env GH_REPOSITORY="SET-ME" \
   --env GIT_SSH_REPOSITORY_HOST="SET-ME" \
   --env GIT_REPOSITORY_PATH="SET-ME" \
   --env CLUSTER_NAME="DEPRECATED" \

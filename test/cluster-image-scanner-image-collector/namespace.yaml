@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cluster-image-scanner-image-collector
-  annotations:
-    contact.sdase.org/team: "security-journey"
-    app.kubernetes.io/name: "cluster-image-scanner"
-    clusterscanner.sdase.org/namespace_filter: "^cluster-image-scanner-image-collector$" # a better option is skip

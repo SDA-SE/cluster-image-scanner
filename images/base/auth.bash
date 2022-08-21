@@ -8,7 +8,7 @@ createJWT() {
     payload=$(
         cat <<EOF
 {
-    "iss": ${GITHUB_APP_ID}
+    "iss": ${GH_APP_ID}
 }
 EOF
     )
@@ -25,26 +25,26 @@ EOF
     payload_base64=$(echo -n "${payload}" | jq -c . | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
     header_payload=$(echo -n "${header_base64}.${payload_base64}")
-    echo "Creating Signature with header_payload $header_payload AND GITHUB_KEY_FILE_PATH: $GITHUB_KEY_FILE_PATH"
-    ls -la $GITHUB_KEY_FILE_PATH
-    signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GITHUB_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+    echo "Creating Signature with header_payload $header_payload AND GH_KEY_FILE_PATH: $GH_KEY_FILE_PATH"
+    ls -la $GH_KEY_FILE_PATH
+    signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GH_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
     export CLUSTER_SCAN_JWT="${header_payload}.${signature}"
 }
 
 sp_authorize() {
-    if [ "${GITHUB_APP_ID}" == "" ]; then
-      echo "GITHUB_APP_ID is empty, not creating github token"
+    if [ "${GH_APP_ID}" == "" ]; then
+      echo "GH_APP_ID is empty, not creating github token"
       return 1
     fi
     createJWT
     createdGithubToken=true
-    GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GITHUB_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
+    GH_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GH_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
     if ${createdGithubToken} ]; then
-      echo "Couldn't create GITHUB_TOKEN"
+      echo "Couldn't create GH_TOKEN"
       return 1
     else
-      echo "Created GITHUB_TOKEN"
+      echo "Created GH_TOKEN"
       return 0
     fi
 }
@@ -60,8 +60,8 @@ sp_getfile() {
 
     command="curl -L --output \"${dst}\" --header \"Accept: ${accept}\""
 
-    if [ "${GITHUB_TOKEN}" != "" ]; then
-      command="${command} --header \"Authorization: token ${GITHUB_TOKEN}\""
+    if [ "${GH_TOKEN}" != "" ]; then
+      command="${command} --header \"Authorization: token ${GH_TOKEN}\""
     fi
     command="${command} \"${src}\""
     echo "debug: Using command ${command}"

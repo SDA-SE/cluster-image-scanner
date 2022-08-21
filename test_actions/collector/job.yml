@@ -23,14 +23,14 @@ spec:
               value: "lord-of-the-rings"
             - name: DEFAULT_SKIP
               value: "true"
-            - name: GITHUB_REPOSITORY
+            - name: GH_REPOSITORY
               value: "###GIT_TARGET_REPOSITORY###"
-            - name: GITHUB_APP_ID
+            - name: GH_APP_ID
               valueFrom:
                 configMapKeyRef:
                   name: collector-upload-repository
                   key: collector.upload.github.appid
-            - name: GITHUB_INSTALLATION_ID
+            - name: GH_INSTALLATION_ID
               valueFrom:
                 configMapKeyRef:
                   name: collector-upload-repository
