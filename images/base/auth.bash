@@ -39,6 +39,7 @@ sp_authorize() {
     fi
     createJWT
     createdGithubToken=true
+    echo "Creating GH_TOKEN"
     GH_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations/"${GH_INSTALLATION_ID}"/access_tokens | jq '.token' | tr -d \" || createdGithubToken=false)
     if ${createdGithubToken} ]; then
       echo "Couldn't create GH_TOKEN"

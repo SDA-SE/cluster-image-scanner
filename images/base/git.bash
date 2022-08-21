@@ -11,6 +11,7 @@ if [ $(echo "${GH_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
 fi
 
 createJWT() {
+  echo "Creating JWT"
   if [ "${GH_KEY_FILE_PATH}" == "" ]; then
     export GH_KEY_FILE_PATH="/etc/github/keyfile"
   fi
