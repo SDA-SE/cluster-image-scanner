@@ -23,6 +23,6 @@ runs:
         cd ${{ inputs.image-path }}
         
         find . -type f -name "*.bash" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
-
+        find . -type f -name "*.sh" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
         chmod +x ./build.sh
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true
