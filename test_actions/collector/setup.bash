@@ -13,7 +13,7 @@ kubectl apply -k ./application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
 
 sed -i "s#GH_APP_ID_PLACEHOLDER#${GH_APP_ID}#" configmap.yaml
-sed -i "s#GH_APP_LOGIN_PLACEHOLDER#$GH_APP_LOGIN#" configmap.yaml
+sed -i "s#GH_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" configmap.yaml
 sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" configmap.yaml
 
 kubectl apply -k .

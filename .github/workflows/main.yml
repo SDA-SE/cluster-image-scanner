@@ -296,10 +296,10 @@ jobs:
           DEPSCAN_DB_CONNECTSRING_PLACEHOLDER: "${{secrets.DEPSCAN_DB_CONNECTSRING_PLACEHOLDER}}"
           DEPSCAN_DB_PASSWORD_PLACEHOLDER: "${{secrets.DEPSCAN_DB_PASSWORD_PLACEHOLDER}}"
           GH_PRIVATE_KEY_BASE64: "${{secrets.GH_PRIVATE_KEY_BASE64}}"
-          GH_APP_LOGIN: "${{secrets.GH_APP_LOGIN}}"
-          GH_APP_ID: "${{secrets.GH_APP_ID}}"
-          GH_INSTALLATION_ID: "${{secrets.GH_INSTALLATION_ID}}"
-          GIT_TARGET_REPOSITORY: "${{secrets.GIT_TARGET_REPOSITORY}}"
+          GH_APP_LOGIN: "SDA-SE"
+          GH_APP_ID: "143160"
+          GH_INSTALLATION_ID: "19959424"
+          GIT_TARGET_REPOSITORY: "https://api.github.com/repos/SDA-SE/cluster-image-scanner-sda-internal-test-images/tarball"
         run: |
           pwd
           ls
