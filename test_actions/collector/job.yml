@@ -24,7 +24,7 @@ spec:
             - name: DEFAULT_SKIP
               value: "true"
             - name: GH_REPOSITORY
-              value: "###GIT_TARGET_REPOSITORY###"
+              value: "###GIT_COLLECTOR_REPOSITORY###"
             - name: GH_APP_ID
               valueFrom:
                 configMapKeyRef:
