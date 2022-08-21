@@ -22,7 +22,7 @@ spec:
         clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
         clusterscanner.sdase.org/is-scan-dependency-track: "false" # Boolean
         clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
-        clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean
+        clusterscanner.sdase.org/is-scan-new-version: "false" # Boolean
         clusterscanner.sdase.org/is-scan-malware: "true"
       labels:
         app: test-app
