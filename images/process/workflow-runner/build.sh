@@ -73,7 +73,7 @@ buildah config \
   --label "${oci_prefix}.title=${TITLE}" \
   --label "${oci_prefix}.description=${DESCRIPTION}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
-  --env "GITHUB_KEY_FILE_PATH=/clusterscanner/github/github_private_key.pem" \
+  --env "GH_KEY_FILE_PATH=/clusterscanner/github/github_private_key.pem" \
   --env "MAX_RUNNING_JOBS_IN_QUEUE=5" \
   --env "JOB_EXECUTION_NAMESPACE=clusterscanner" \
   --env DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_DEFAULT='[{"maven": {"critical": 1, "high": 1, "medium": 100}},{"npm": {"critical": 1, "high": 1, "medium": 100}},                                                                {"deb": {"critical": 1, "high": 10, "medium": 100}},{"rpm": {"critical": 1, "high": 10, "medium": 100}},                                                                {"alpine": {"critical": 1, "high": 10, "medium": 100}} ]' \

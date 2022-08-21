@@ -19,12 +19,10 @@ runs:
     - name: create and push an image
       shell: bash
       run: |
+        source ./test_actions/library.bash
         cd ${{ inputs.image-path }}
+        
+        find . -type f -name "*.bash" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
+        find . -type f -name "*.sh" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
         chmod +x ./build.sh
-        if [ "${GITHUB_REF##*/}" == "master" ]; then
-          VERSION="2.0.${GITHUB_RUN_NUMBER}"
-        else
-          BRANCH_TO_DOCKER=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-          VERSION="${BRANCH_TO_DOCKER}.${GITHUB_RUN_NUMBER}"
-        fi
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true

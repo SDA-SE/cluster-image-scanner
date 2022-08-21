@@ -92,8 +92,8 @@ bill_of_materials_hash="$( (
 
 oci_prefix="org.opencontainers.image"
 buildah config \
-  --env GITHUB_APP_ID="SET-ME" \
-  --env GITHUB_REPOSITORY="SET-ME" \
+  --env GH_APP_ID="SET-ME" \
+  --env GH_REPOSITORY="SET-ME" \
   --env GIT_SSH_REPOSITORY_HOST="SET-ME" \
   --env GIT_REPOSITORY_PATH="SET-ME" \
   --env CLUSTER_NAME="DEPRECATED" \
@@ -129,7 +129,7 @@ buildah config \
   --env SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless" \
   --env SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware" \
   --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check" \
-  --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-track" \
+  --env SCAN_DEPENDENCY_TRACK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-track" \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
   --env SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \
   --env NAMESPACE_SKIP_IMAGE_REGEX_ANNOTATION="clusterscanner.sdase.org/skip_regex" \

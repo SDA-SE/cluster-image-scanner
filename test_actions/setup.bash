@@ -2,16 +2,7 @@
 set -e
 # shellcheck disable=SC2026,SC2154
 
-source library.bash
-
-for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
-
-if [ "${IS_MINIKUBE}" == "true" ]; then
-  minikube delete
-  minikube start --memory=29384 --cpus=8 --vm-driver kvm2 --disk-size 150GB
-  echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
-  read -n 1 -s
-fi
+source ./library.bash
 
 if [ "${SECRETS_PATH}" != "" ]; then
   source ${SECRETS_PATH}
@@ -21,17 +12,18 @@ elif [ "${DD_TOKEN_SECRET}" == "" ]; then
 fi
 
 
+for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
 
-echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME##}"
-IMAGE_VERSION=$(echo ${GITHUB_REF_NAME} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-if [ "${GITHUB_RUN_NUMBER}" == "" ]; then # locally
-  IMAGE_VERSION="2"
+if [ "${IS_MINIKUBE}" == "true" ]; then
+  minikube delete
+  minikube start --memory=4384 --cpus=8 --vm-driver kvm2 --disk-size 25GB
+  #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
+  #read -n 1 -s
 fi
-if [ "${GITHUB_REF_NAME}" == "master" ]; then # locally
-  IMAGE_VERSION="2"
-fi
-echo "clusterImageScannerImageTag: ${IMAGE_VERSION}"
-sed -i "s~###clusterImageScannerImageTag###~${IMAGE_VERSION}~g" ../argo-main.yml
+
+
+echo "clusterImageScannerImageTag: ${VERSION}"
+sed -i "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment
@@ -43,14 +35,24 @@ sed -i "s#DD_URL_PLACEHOLDER#${DD_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays
 sed -i "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
 sed -i "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.secret.env
 sed -i "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
-sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
+sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
+
+echo "test-all=${GIT_SOURCE_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
 
 sed -i "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
 
-sed -i "s#GITHUB_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-sed -i "s#GITHUB_APP_LOGIN_PLACEHOLDER#${GITHUB_APP_LOGIN_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-sed -i "s#GITHUB_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-echo "${GH_PRIVATE_KEY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+sed -i "s#GH_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+sed -i "s#GH_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
+
+if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY_BASE64}" == "" ]; then
+  cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
+fi
+if [ "${GH_PRIVATE_KEY_BASE64}" != "" ]; then
+  echo "${GH_PRIVATE_KEY_BASE64}" | base64 -d > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
+  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
+fi
 
 sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
 sed -i "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
@@ -71,6 +73,7 @@ wait_for_pods_ready "argocd" "argocd" 5 10 120
 kubectl apply -f argocd.project.yml
 
 # kustomize is not supported
+echo "Installation argowf"
 mkdir tmp || true
 kubectl apply -k argowf
 curl -sL --output ./tmp/namespace-install.yaml "https://github.com/argoproj/argo-workflows/releases/download/v3.3.8/namespace-install.yaml"
@@ -105,8 +108,9 @@ sleep 30
 
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
-./application/setup.bash
-
+cd collector
+./setup.bash
+cd ..
 sleep 10
 echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &

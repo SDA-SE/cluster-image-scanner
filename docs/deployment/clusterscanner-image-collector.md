@@ -78,12 +78,12 @@ spec:
             image: quay.io/sdase/cluster-image-scanner-imagecollector:2.0
             imagePullPolicy: Always
             env:
-              - name: GITHUB_APP_ID
+              - name: GH_APP_ID
                 valueFrom:
                   configMapKeyRef:
                     name: collector-upload-repository
                     key: collector.upload.github.appid
-              - name: GITHUB_INSTALLATION_ID
+              - name: GH_INSTALLATION_ID
                 valueFrom:
                   configMapKeyRef:
                     name: collector-upload-repository
@@ -135,7 +135,7 @@ patchesJSON6902:
     - op: add
       path: /spec/jobTemplate/spec/template/spec/containers/0/env/0
       value:
-        name: GITHUB_REPOSITORY
+        name: GH_REPOSITORY
         value: "github.com/YOUR-ORG/clusterscanner-image-collector-images-<ENV NAME>.git"
 ```
 ### Sample namespace.yaml

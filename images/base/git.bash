@@ -3,19 +3,20 @@ set -e
 git config --global user.email ""
 git config --global user.name "ClusterImageScanner"
 
-if [ $(echo "${GITHUB_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
-  export GIT_REPOSITORY_PATH=$(echo ${GITHUB_REPOSITORY} | sed 's#.*@##g')
+if [ $(echo "${GH_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
+  export GIT_REPOSITORY_PATH=$(echo ${GH_REPOSITORY} | sed 's#.*@##g')
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
   export GIT_REPOSITORY_PATH="/${GIT_REPOSITORY_PATH}"
-  export GIT_SSH_REPOSITORY_HOST=$(echo ${GITHUB_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
+  export GIT_SSH_REPOSITORY_HOST=$(echo ${GH_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
 fi
 
 createJWT() {
-  if [ "${GITHUB_KEY_FILE_PATH}" == "" ]; then
-    export GITHUB_KEY_FILE_PATH="/etc/github/keyfile"
+  echo "Creating JWT"
+  if [ "${GH_KEY_FILE_PATH}" == "" ]; then
+    export GH_KEY_FILE_PATH="/etc/github/keyfile"
   fi
-  if [ ! -e "${GITHUB_KEY_FILE_PATH}" ] || [ "$(wc -l "${GITHUB_KEY_FILE_PATH}")" == "" ]; then
-    echo "${GITHUB_KEY_FILE_PATH} is empty"
+  if [ ! -e "${GH_KEY_FILE_PATH}" ] || [ "$(wc -l "${GH_KEY_FILE_PATH}")" == "" ]; then
+    echo "${GH_KEY_FILE_PATH} is empty"
     exit 45
   fi
 
@@ -25,7 +26,7 @@ createJWT() {
   payload=$(
     cat <<EOF
 {
-    "iss": ${GITHUB_APP_ID}
+    "iss": ${GH_APP_ID}
 }
 EOF
   )
@@ -42,29 +43,29 @@ EOF
   payload_base64=$(echo -n "${payload}" | jq -c . | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
   header_payload=$(echo -n "${header_base64}.${payload_base64}")
-  signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GITHUB_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+  signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GH_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
   export CLUSTER_SCAN_JWT="${header_payload}.${signature}"
   sleep 1 # time screw
 }
 
 githubAuth() {
-  if [ -z "${GITHUB_APP_ID}" ]; then
-    echo "ERROR: variable GITHUB_APP_ID is empty, exit"
+  if [ -z "${GH_APP_ID}" ]; then
+    echo "ERROR: variable GH_APP_ID is empty, exit"
     exit 1
   fi
-  if [ -z "${GITHUB_INSTALLATION_ID}" ]; then
-    echo "ERROR: variable GITHUB_INSTALLATION_ID is empty, exit"
+  if [ -z "${GH_INSTALLATION_ID}" ]; then
+    echo "ERROR: variable GH_INSTALLATION_ID is empty, exit"
     echo 'try       curl -H "Authorization: Bearer ##INSERT_CLUSTERSCANNER_JWT_HERE##" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app/installations | jq'
     exit 1
   fi
 
   createJWT
 
-  echo "will fetch github_token with GITHUB_INSTALLATION_ID ${GITHUB_INSTALLATION_ID}"
+  echo "will fetch GH_TOKEN with GH_INSTALLATION_ID ${GH_INSTALLATION_ID}"
   # shellcheck disable=SC2155
-  export GITHUB_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" "https://api.github.com/app/installations/${GITHUB_INSTALLATION_ID}/access_tokens" | jq '.token' | tr -d \")
-  if [ "${GITHUB_TOKEN}" == "null" ]; then
-    echo "GITHUB_TOKEN is null"
+  export GH_TOKEN=$(curl -X POST -H "Authorization: Bearer ${CLUSTER_SCAN_JWT}" -H "Accept: application/vnd.github.machine-man-preview+json" "https://api.github.com/app/installations/${GH_INSTALLATION_ID}/access_tokens" | jq '.token' | tr -d \")
+  if [ "${GH_TOKEN}" == "null" ]; then
+    echo "GH_TOKEN is null"
     exit 44
   fi
 }
@@ -112,10 +113,10 @@ gitSshAuth() {
 }
 
 gitAuth() {
-  if [ "${GITHUB_REPOSITORY}" != "SET-ME" ] && [ "${GITHUB_APP_ID}" != "" ] && [ "${GITHUB_INSTALLATION_ID}" != "" ]; then
+  if [ "${GH_REPOSITORY}" != "SET-ME" ] && [ "${GH_APP_ID}" != "" ] && [ "${GH_INSTALLATION_ID}" != "" ]; then
     echo "github detected"
     githubAuth
-    CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@${GITHUB_REPOSITORY}"
+    CLONE_URL="https://x-access-token:${GH_TOKEN}@${GH_REPOSITORY}"
   elif [ "${GIT_SSH_REPOSITORY_HOST}" != "SET-ME" ]; then
     echo "ssh detected"
     gitSshAuth

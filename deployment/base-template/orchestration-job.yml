@@ -110,7 +110,7 @@ spec:
           - name: out
             mountPath: /clusterscanner/out
         env:
-          - name: GITHUB_KEY_FILE_PATH
+          - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
         envFrom:
           - secretRef:
@@ -254,7 +254,6 @@ spec:
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              ls -la /clusterscanner/
               echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
               sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
@@ -377,7 +376,7 @@ spec:
                     #                      fi
                     #                    fi
                     title="${title} in ${image}"
-                    echo "$title in ${image}"
+                    echo "${title} in ${image}"
                     severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
                     description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
                     message="${infoText}; ${description}"
@@ -438,9 +437,9 @@ spec:
             value: "{{ workflow.parameters.scanId }}"
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
-          - name: GITHUB_KEY_FILE_PATH
+          - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
-          - name: GITHUB_REPOSITORY
+          - name: GH_REPOSITORY
             value: "{{ workflow.parameters.allResultsGitTarget }}"
           - name: WORKFLOW_DATE
             value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}"
@@ -454,11 +453,11 @@ spec:
           set -e
           cd $HOME
           
-          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GITHUB_INSTALLATION_ID}" == "" ]; then
-            echo "GIT_SSH_REPOSITORY_HOST or GITHUB_INSTALLATION_ID not configured, skipping"
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GH_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST or GH_INSTALLATION_ID not configured, skipping"
             exit 0
           fi
-          echo "GITHUB_REPOSITORY $GITHUB_REPOSITORY"
+          echo "GH_REPOSITORY $GH_REPOSITORY"
           env
           
           source auth.bash # > /dev/null 2>&1
@@ -468,7 +467,7 @@ spec:
             RESULT_PATH=/clusterscanner/data
           fi
           
-          if [ "${GITHUB_REPOSITORY}" == "" ]; then
+          if [ "${GH_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
             exit 0
           fi
@@ -632,9 +631,9 @@ spec:
         env:
           - name: SCAN_ID
             value: "{{ workflow.parameters.scanId }}"
-          - name: GITHUB_KEY_FILE_PATH
+          - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
-          - name: GITHUB_REPOSITORY
+          - name: GH_REPOSITORY
             value: "{{ workflow.parameters.allResultsGitTarget }}"
           - name: WORKFLOW_DATE
             value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}"
@@ -647,15 +646,15 @@ spec:
         source: |
           set -e
           cd $HOME
-          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GITHUB_INSTALLATION_ID}" == "" ]; then
-            echo "GIT_SSH_REPOSITORY_HOST or GITHUB_INSTALLATION_ID not configured, skipping"
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GH_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST or GH_INSTALLATION_ID not configured, skipping"
             exit 0
           fi
           
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
-          if [ "${GITHUB_REPOSITORY}" == "" ]; then
+          if [ "${GH_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
             exit 0
           fi
