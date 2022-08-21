@@ -13,6 +13,9 @@ export DEFAULT_SCAN_DISTROLESS="true"
 export DEFAULT_SCAN_MALWARE="false"
 export DEFAULT_SCAN_DEPENDENCY_CHECK="true"
 export DEFAULT_SCAN_RUNASROOT="true"
+export DEFAULT_SCAN_BASEIMAGE_LIFETIME="true"
+export DEFAULT_SCAN_DEPENDENCY_TRACK="false"
+export DEFAULT_CONTAINER_TYPE="application"
 export SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime"
 export SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless"
 export SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware"
@@ -22,7 +25,7 @@ export SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot"
 export DEFAULT_TEAM_NAME="test"
 export DEFAULT_SLACK_POSTFIX="-security"
 mkdir /tmp/cluster-scan
-DEFAULT_SCAN_LIFETIME_MAX_DAYS=14
+export DEFAULT_SCAN_LIFETIME_MAX_DAYS=14
 export NAMESPACE_MAPPINGS='{
       "teams": [
         {

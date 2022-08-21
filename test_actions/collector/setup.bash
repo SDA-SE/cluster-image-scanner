@@ -9,7 +9,7 @@ source ../library.bash
 
 sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
 sed -i "s~###VERSION###~${VERSION}~g" job.yml
-sed -i "s~###GIT_TARGET_REPOSITORY###~${GIT_TARGET_REPOSITORY}~g" job.yml
+sed -i "s~###GIT_COLLECTOR_REPOSITORY###~${GIT_COLLECTOR_REPOSITORY}~g" job.yml
 
 kubectl apply -k ./application
 wait_for_pods_ready "test deployment of image" "shire" 1 10 120
