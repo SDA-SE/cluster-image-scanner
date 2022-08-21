@@ -4,6 +4,14 @@ set -e
 
 source ./library.bash
 
+if [ "${SECRETS_PATH}" != "" ]; then
+  source ${SECRETS_PATH}
+elif [ "${DD_TOKEN_SECRET}" == "" ]; then
+  echo "Error, SECRETS_PATH doesn't exists and env variables not set";
+  exit 1;
+fi
+
+
 for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
@@ -13,12 +21,6 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   #read -n 1 -s
 fi
 
-if [ "${SECRETS_PATH}" != "" ]; then
-  source ${SECRETS_PATH}
-elif [ "${DD_TOKEN_SECRET}" == "" ]; then
-  echo "Error, SECRETS_PATH doesn't exists and env variables not set";
-  exit 1;
-fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
 sed -i "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
