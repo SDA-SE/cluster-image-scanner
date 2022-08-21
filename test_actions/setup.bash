@@ -35,7 +35,7 @@ sed -i "s#DD_URL_PLACEHOLDER#${DD_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays
 sed -i "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
 sed -i "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.secret.env
 sed -i "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
-sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
+sed -i "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
 
 echo "test-all=${GIT_TARGET_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
 
