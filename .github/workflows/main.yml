@@ -278,7 +278,7 @@ jobs:
         build_notifier,
         build_syft
       ]
-    if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
+    if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) || (github.event_name == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
