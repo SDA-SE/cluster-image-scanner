@@ -42,8 +42,8 @@ for repofile in /clusterscanner/image-source-list/*; do
   ((i=i+1))
 done
 mkdir -p /clusterscanner/out/merged
-echo "Will delete folders with name description"
-find /clusterscanner/out/ -type d -name "description" -exec rm -rf {} + || true
+echo "Will delete service-description.json"
+find /clusterscanner/out/ -type f -name "service-description.json" -exec rm -rf {} + || true
 echo "Will flatten JSONs"
 jq -s 'flatten  | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
 sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
