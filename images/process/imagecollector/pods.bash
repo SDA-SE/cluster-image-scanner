@@ -295,7 +295,6 @@ getPods() {
           # { "image":"sha256:XXX",
           #   "imageID":"docker-pullable://k8s.gcr.io/ingress-nginx/controller@sha256:YYY" }
           # k8s.gcr.io/ingress-nginx/controller@sha256:XXX is not existing, therefore, we take the imageID
-          echo "${container}" | base64 -d
           echo "${container}" | base64 -d | sed 's#docker-pullable://##g' | sed 's#docker://##g' | jq '. |
             if .image|test("sha256:") then .imageID=.image else . end |
             if .imageID == null then .imageID=.image else . end | {
