@@ -73,10 +73,12 @@ if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
   export PATCH=""
   if [ "${GITHUB_RUN_NUMBER}" != "" ]; then
     export MAJOR=$(echo ${GITHUB_HEAD_REF} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
-    export MINOR=".${GITHUB_RUN_NUMBER}"
+    export MINOR="${GITHUB_RUN_NUMBER}"
   else
     export MINOR=""
   fi
-  export VERSION="${MAJOR}${MINOR}${PATCH}"
+  export VERSION="${MAJOR}.${MINOR}.${PATCH}"
 fi
+VERSION=$(echo ${VERSION} | sed 's#\.$##')
+VERSION=$(echo ${VERSION} | sed 's#\.$##') # to heal two .
 echo "VERSION: ${VERSION}"
