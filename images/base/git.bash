@@ -3,11 +3,11 @@ set -e
 git config --global user.email ""
 git config --global user.name "ClusterImageScanner"
 
-if [ $(echo "${GH_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
-  export GIT_REPOSITORY_PATH=$(echo ${GH_REPOSITORY} | sed 's#.*@##g')
+if [ $(echo "${GIT_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
+  export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY} | sed 's#.*@##g')
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
   export GIT_REPOSITORY_PATH="/${GIT_REPOSITORY_PATH}"
-  export GIT_SSH_REPOSITORY_HOST=$(echo ${GH_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
+  export GIT_SSH_REPOSITORY_HOST=$(echo ${GIT_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
 fi
 
 createJWT() {
@@ -113,10 +113,10 @@ gitSshAuth() {
 }
 
 gitAuth() {
-  if [ "${GH_REPOSITORY}" != "SET-ME" ] && [ "${GH_APP_ID}" != "" ] && [ "${GH_INSTALLATION_ID}" != "" ]; then
+  if [ "${GIT_REPOSITORY}" != "SET-ME" ] && [ "${GH_APP_ID}" != "" ] && [ "${GH_INSTALLATION_ID}" != "" ]; then
     echo "github detected"
     githubAuth
-    CLONE_URL="https://x-access-token:${GH_TOKEN}@${GH_REPOSITORY}"
+    CLONE_URL="https://x-access-token:${GH_TOKEN}@${GIT_REPOSITORY}"
   elif [ "${GIT_SSH_REPOSITORY_HOST}" != "SET-ME" ]; then
     echo "ssh detected"
     gitSshAuth
