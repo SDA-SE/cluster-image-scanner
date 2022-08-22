@@ -23,7 +23,7 @@ spec:
               value: "lord-of-the-rings"
             - name: DEFAULT_SKIP
               value: "true"
-            - name: GH_REPOSITORY
+            - name: GIT_REPOSITORY
               value: "###GIT_COLLECTOR_REPOSITORY###"
             - name: GH_APP_ID
               valueFrom:
