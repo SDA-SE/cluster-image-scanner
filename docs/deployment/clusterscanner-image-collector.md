@@ -135,7 +135,7 @@ patchesJSON6902:
     - op: add
       path: /spec/jobTemplate/spec/template/spec/containers/0/env/0
       value:
-        name: GH_REPOSITORY
+        name: GIT_REPOSITORY
         value: "github.com/YOUR-ORG/clusterscanner-image-collector-images-<ENV NAME>.git"
 ```
 ### Sample namespace.yaml

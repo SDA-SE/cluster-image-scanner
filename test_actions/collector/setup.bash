@@ -31,6 +31,9 @@ fi
 
 
 wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
-
+if [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Completed) -lt 1 ]; then
+  echo "Collector is broken"
+  exit 1
+fi
 
 #kubectl delete namespace shire
