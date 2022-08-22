@@ -79,4 +79,4 @@ if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
   fi
   export VERSION="${MAJOR}${MINOR}${PATCH}"
 fi
-
+echo "VERSION: ${VERSION}"
