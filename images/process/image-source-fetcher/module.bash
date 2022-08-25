@@ -27,6 +27,8 @@ for repofile in /clusterscanner/image-source-list/*; do
     GIT_SSH_REPOSITORY_HOST=$(echo ${repourl} | sed 's#.*@##g' | sed 's#/.*##g')
     gitAuth
     git clone "${repourl}" /tmp/${i}
+    echo "Will delete service-description.json"
+    find /tmp/${i} -type f -name "service-description.json" -exec rm -rf {} + || true
     find /tmp/${i} -name "*.json" -exec mv "{}" /clusterscanner/out/ \;
     rm -Rf /tmp/${i}
   else
@@ -34,6 +36,8 @@ for repofile in /clusterscanner/image-source-list/*; do
     sp_getfile "${repourl}" "${dest}" "application/vnd.github.v3+json" #> /dev/null 2>&1#
     cd /clusterscanner/out/tmp/
     tar xfv "${dest}"
+    echo "Will delete service-description.json"
+    find . -type f -name "service-description.json" -exec rm -rf {} + || true
     find . -name "*.json" -exec mv "{}" /clusterscanner/out/ \;
     cd -
     rm -Rf /clusterscanner/out/tmp/* || true
@@ -42,8 +46,6 @@ for repofile in /clusterscanner/image-source-list/*; do
   ((i=i+1))
 done
 mkdir -p /clusterscanner/out/merged
-echo "Will delete service-description.json"
-find /clusterscanner/out/ -type f -name "service-description.json" -exec rm -rf {} + || true
 echo "Will flatten JSONs"
 jq -s 'flatten  | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
 sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
