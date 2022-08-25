@@ -90,7 +90,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '1'
-            memory: 64Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -137,7 +137,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -186,7 +186,7 @@ spec:
             memory: 368Mi
           requests:
             cpu: '0.2'
-            memory: 128Mi
+            memory: 2568Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
