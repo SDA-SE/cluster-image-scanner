@@ -7,11 +7,7 @@ if [ "${SECRETS_PATH}" != "" ]; then
 fi
 source ../library.bash
 
-if [ "${BRANCH}" == "master" ]; then
-  sed -i "s~###VERSION###~2.0.225~g" application/deployment.yaml
-else
-  sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
-fi
+sed -i "s~###VERSION###~2.0.225~g" application/deployment.yaml # test image has separate build with extra version
 cat application/deployment.yaml
 sed -i "s~###VERSION###~${VERSION}~g" job.yml
 sed -i "s~###GIT_COLLECTOR_REPOSITORY###~${GIT_COLLECTOR_REPOSITORY}~g" job.yml
