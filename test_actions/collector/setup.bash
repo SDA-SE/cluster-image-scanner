@@ -12,6 +12,7 @@ if [ "${BRANCH}" == "master" ]; then
 else
   sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
 fi
+cat application/deployment.yaml
 sed -i "s~###VERSION###~${VERSION}~g" job.yml
 sed -i "s~###GIT_COLLECTOR_REPOSITORY###~${GIT_COLLECTOR_REPOSITORY}~g" job.yml
 
