@@ -31,8 +31,10 @@ fi
 
 
 wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
-kubectl get pods -n cluster-image-scanner-image-collector
+
 if [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Completed) -lt 1 ]; then
+  kubectl get pods -n cluster-image-scanner-image-collector
+   kubectl logs $(kubectl get pods -n cluster-image-scanner-image-collector | grep -v NAME | awk '{print $1}') -n cluster-image-scanner-image-collector
   echo "Collector is broken"
   exit 1
 fi
