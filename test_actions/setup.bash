@@ -153,7 +153,7 @@ done
 argo list workflows -A
 if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
   echo "ERRORs during workflow execution"
-  for pod in $(kubectl get pod -n clusterscanner | grep "Error\|Failed\|InvalidImageName" | awk '{print $1}'); do
+  for pod in $(kubectl get pod -n clusterscanner | grep -v "Completed" | awk '{print $1}'); do
       echo "######################################################################################################## pod logs ${pod}"
       kubectl logs ${pod} -n clusterscanner || true
   done

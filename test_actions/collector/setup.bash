@@ -7,11 +7,8 @@ if [ "${SECRETS_PATH}" != "" ]; then
 fi
 source ../library.bash
 
-if [ "${BRANCH}" == "master" ]; then
-  sed -i "s~###VERSION###~2.0.225~g" application/deployment.yaml
-else
-  sed -i "s~###VERSION###~${VERSION}~g" application/deployment.yaml
-fi
+sed -i "s~###VERSION###~2.0.225~g" application/deployment.yaml # test image has separate build with extra version
+cat application/deployment.yaml
 sed -i "s~###VERSION###~${VERSION}~g" job.yml
 sed -i "s~###GIT_COLLECTOR_REPOSITORY###~${GIT_COLLECTOR_REPOSITORY}~g" job.yml
 
@@ -23,9 +20,10 @@ sed -i "s#GH_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" configmap.yaml
 sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" configmap.yaml
 
 kubectl apply -k .
-if [ -f "${GH_PRIVATE_KEY_PATH}" ]; then
-  kubectl create secret generic github --from-file="keyfile=${GH_PRIVATE_KEY_PATH}" -n cluster-image-scanner-image-collector
+if [ -f "../${GH_PRIVATE_KEY_PATH}" ]; then
+  kubectl create secret generic github --from-file="keyfile=../${GH_PRIVATE_KEY_PATH}" -n cluster-image-scanner-image-collector
 else
+  echo "GH_PRIVATE_KEY_PATH ../${GH_PRIVATE_KEY_PATH} no existing!"
   kubectl create secret generic github --from-literal="keyfile=not-existing" -n cluster-image-scanner-image-collector
 fi
 
