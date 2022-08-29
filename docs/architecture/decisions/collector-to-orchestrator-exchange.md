@@ -8,6 +8,7 @@
 
 Comments:
 - git libraries (like https://github.com/go-git/go-git/tree/master/_examples/clone/auth/basic/access_token) exist for go, but they do not implement the fetching of a github token. This step needs to be done manually.
+
 ## S3
 - Often used technology
 - Might be hard to access the s3 of another cluster for restricted clusters
@@ -30,4 +31,6 @@ Comments:
 - Depending on the customer, it might be ready to be used or needs to be approved
 
 # Decision
-TBD
+SDA SE woud like to use S3. S3 has derivates for different cloud providers.
+S3 could have a UI with minio. Could be used on premises.
+S3 can be easy automated with terraform.
