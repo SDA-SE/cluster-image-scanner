@@ -47,12 +47,12 @@ sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PA
 
 if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY_BASE64}" == "" ]; then
   cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
-  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
+  export GH_PRIVATE_KEY_PATH=$(realpath "${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem")
 fi
 if [ "${GH_PRIVATE_KEY_BASE64}" != "" ]; then
   echo "Found GH_PRIVATE_KEY_BASE64, putting it"
   echo "${GH_PRIVATE_KEY_BASE64}" | base64 -d > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
-  export GH_PRIVATE_KEY_PATH="${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem"
+  export GH_PRIVATE_KEY_PATH="$(realpath ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem")
 fi
 
 sed -i "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
