@@ -37,7 +37,7 @@ debug_pods_in_namespace() {
   for pod in $(kubectl get pods -n ${namespac} | grep -v NAME  | awk '{print $2}'); do
     echo "######################### ${pod}:"
     kubectl get pod -n ${namespac} ${pod} -o yaml
-    kubectl logs-n ${namespac} ${pod}
+    kubectl logs -n ${namespac} ${pod}
     echo "#########################"
   done
 }
