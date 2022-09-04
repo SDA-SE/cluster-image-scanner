@@ -13,7 +13,7 @@ wait_for_pods_ready () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
+      debug_pods_in_namespace "${namespace}"
       exit 1
     fi
     echo "waiting for ${name} to be created"
@@ -24,11 +24,18 @@ wait_for_pods_ready () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
+      debug_pods_in_namespace "${namespace}"
       exit 1
     fi
     echo "waiting for ${name} to be up"
     sleep "${sleep}"
+  done
+}
+debug_pods_in_namespace() {
+  namespace=$1
+  kubectl get pods -A
+  for pod in $(kubectl get pods -n ${namespac} | grep -v NAME  | awk'{print $2}'); do
+    kubectl get pod -n ${namespac} ${pod} -o yaml
   done
 }
 wait_for_pods_completed () {
@@ -44,7 +51,7 @@ wait_for_pods_completed () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
+      debug_pods_in_namespace "${namespace}"
       exit 1
     fi
     echo "waiting for ${name} to be created"
@@ -55,7 +62,7 @@ wait_for_pods_completed () {
     if [[ $(( attempt_num++ )) -ge "${max_attempts}" ]]
     then
       echo "max_attempts ${max_attempts} reached, aborting"
-      kubectl get pods -A
+      debug_pods_in_namespace "${namespace}"
       exit 1
     fi
     echo "waiting for ${name} to be done"
