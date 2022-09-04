@@ -42,7 +42,7 @@ spec:
                   key: collector.namespacemapping
           resources:
             limits:
-              cpu: 200m
+              cpu: 2000m
               memory: 124Mi
       volumes:
         - name: collector-upload-repository
