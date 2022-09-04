@@ -439,7 +439,7 @@ spec:
             value: "{{ workflow.parameters.scanId }}"
           - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
-          - name: GH_REPOSITORY
+          - name: GIT_REPOSITORY
             value: "{{ workflow.parameters.allResultsGitTarget }}"
           - name: WORKFLOW_DATE
             value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}"
@@ -453,12 +453,11 @@ spec:
           set -e
           cd $HOME
           
-          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GH_INSTALLATION_ID}" == "" ]; then
-            echo "GIT_SSH_REPOSITORY_HOST or GH_INSTALLATION_ID not configured, skipping"
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] && [ "${GH_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST and GH_INSTALLATION_ID not configured, skipping"
             exit 0
           fi
-          echo "GH_REPOSITORY $GH_REPOSITORY"
-          env
+          echo "GIT_REPOSITORY $GIT_REPOSITORY"
           
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
@@ -467,7 +466,7 @@ spec:
             RESULT_PATH=/clusterscanner/data
           fi
           
-          if [ "${GH_REPOSITORY}" == "" ]; then
+          if [ "${GIT_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
             exit 0
           fi
@@ -633,7 +632,7 @@ spec:
             value: "{{ workflow.parameters.scanId }}"
           - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
-          - name: GH_REPOSITORY
+          - name: GIT_REPOSITORY
             value: "{{ workflow.parameters.allResultsGitTarget }}"
           - name: WORKFLOW_DATE
             value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}"
@@ -646,15 +645,15 @@ spec:
         source: |
           set -e
           cd $HOME
-          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] || [ "${GH_INSTALLATION_ID}" == "" ]; then
-            echo "GIT_SSH_REPOSITORY_HOST or GH_INSTALLATION_ID not configured, skipping"
+          if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] && [ "${GH_INSTALLATION_ID}" == "" ]; then
+            echo "GIT_SSH_REPOSITORY_HOST and GH_INSTALLATION_ID not configured, skipping"
             exit 0
           fi
           
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
-          if [ "${GH_REPOSITORY}" == "" ]; then
+          if [ "${GIT_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
             exit 0
           fi
