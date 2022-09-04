@@ -34,7 +34,7 @@ wait_for_pods_ready () {
 debug_pods_in_namespace() {
   namespace=$1
   kubectl get pods -A
-  for pod in $(kubectl get pods -n ${namespace} | grep -v NAME  | awk '{print $2}'); do
+  for pod in $(kubectl get pods -n ${namespace} | grep -v NAME  | awk '{print $1}'); do
     echo "######################### ${pod}:"
     kubectl get pod -n ${namespace} ${pod} -o yaml
     kubectl logs -n ${namespace} ${pod}
