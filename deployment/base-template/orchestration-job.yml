@@ -9,8 +9,8 @@ spec:
   workflowSpec:
     #serviceAccountName: clusterscanner
     ttlStrategy:
-      secondsAfterSuccess: 8640
-      secondsAfterFailure: 8640
+      secondsAfterSuccess: 7200 # 2 hours
+      secondsAfterFailure: 86400 # 1 day
     artifactRepositoryRef:
       configMap: artifact-repositories
       key: default-v1
