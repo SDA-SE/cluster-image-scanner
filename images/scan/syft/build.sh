@@ -57,7 +57,7 @@ buildah config \
   --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-scan-dependency-check" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.version=${VERSION}" \
-  --label "${oci_prefix}.title=Clusterscanner Scanner Dependency Check" \
+  --label "${oci_prefix}.title=ClusterImageScanner SBOM Generation" \
   --label "${oci_prefix}.description=${descr}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env "IMAGE_TAR_FOLDER_PATH=/clusterscanner/images" \
