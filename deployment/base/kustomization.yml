@@ -21,7 +21,6 @@ resources:
   - email.yml
   - synchronization.cm.yml
   - dependency-track.cm.yml
-  - dependency-track.secret.yml
 #  - cleanup-scandata.yml
 #  - cleanup-unpacked.yml
 configMapGenerator:

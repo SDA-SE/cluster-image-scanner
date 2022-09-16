@@ -8,6 +8,7 @@ resources:
   - artifacts.yml
   - github.yml
   - registry.yml
+  - dependency-track.secret.yml
 
 commonLabels:
     app.kubernetes.io/name: clusterscanner
