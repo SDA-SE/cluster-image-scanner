@@ -70,7 +70,7 @@ spec:
             template: results-dependency-track-dd-upload
             arguments:
               parameters:
-                - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+                - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
                   value: "{{tasks.dependency-track-notification-thresholds.outputs.result}}"
           - name: scan-distroless
             depends: imagefetcher
@@ -516,6 +516,7 @@ spec:
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION
             value: '[
               {"maven": {"critical": 1, "high": 1, "medium": 100}},
+              {"golang": {"critical": 1, "high": 1, "medium": 100}},
               {"npm": {"critical": 1, "high": 1, "medium": 100}},
               {"deb": {"critical": 2, "high": 10, "medium": 100}},
               {"rpm": {"critical": 2, "high": 10, "medium": 100}},
@@ -523,6 +524,7 @@ spec:
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY
             value: '[
               {"maven": {"critical": 1, "high": 999, "medium": 9999}},
+              {"golang": {"critical": 1, "high": 999, "medium": 9999}},
               {"npm": {"critical": 1, "high": 9999, "medium": 9999}},
               {"deb": {"critical": 10, "high": 100, "medium": 9999}},
               {"rpm": {"critical": 10, "high": 100, "medium": 9999}},
@@ -553,7 +555,7 @@ spec:
           emptyDir: { }
       inputs:
         parameters:
-          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER
+          - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
@@ -616,8 +618,8 @@ spec:
             value: "0" # make the job successful
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
-          - name: UNHANDLED_DEP_TRACK_SEVERITY_FILTER
-            value: "{{input.parameters.UNHANDLED_DEP_TRACK_SEVERITY_FILTER"
+          - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
+            value: "{{input.parameters.DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT"
 
 
     - name: scan-distroless
