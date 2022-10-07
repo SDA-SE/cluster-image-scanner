@@ -520,12 +520,14 @@ spec:
               {"npm": {"critical": 1, "high": 1, "medium": 100}},
               {"deb": {"critical": 2, "high": 10, "medium": 100}},
               {"rpm": {"critical": 2, "high": 10, "medium": 100}},
+              {"pypi": {"critical": 2, "high": 10, "medium": 100}},
               {"alpine": {"critical": 2, "high": 10, "medium": 100}} ]'
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY
             value: '[
-              {"maven": {"critical": 1, "high": 999, "medium": 9999}},
-              {"golang": {"critical": 1, "high": 999, "medium": 9999}},
-              {"npm": {"critical": 1, "high": 9999, "medium": 9999}},
+              {"maven": {"critical": 5, "high": 999, "medium": 9999}},
+              {"golang": {"critical": 5, "high": 999, "medium": 9999}},
+              {"pypi": {"critical": 5, "high": 999, "medium": 9999}},
+              {"npm": {"critical": 5, "high": 9999, "medium": 9999}},
               {"deb": {"critical": 10, "high": 100, "medium": 9999}},
               {"rpm": {"critical": 10, "high": 100, "medium": 9999}},
               {"alpine": {"critical": 10, "high": 100, "medium": 9999}} ]'
