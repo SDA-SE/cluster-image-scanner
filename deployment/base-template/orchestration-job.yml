@@ -228,6 +228,11 @@ spec:
               secretKeyRef:
                 name: "{{ workflow.parameters.emailSecretName }}"
                 key: smtp-auth-user
+          - name: smtpauthpassword # because - are not allowed in bash variable names
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.emailSecretName }}"
+                key: smtp-auth-password
           - name: smtp-auth-password
             valueFrom:
               secretKeyRef:
@@ -299,7 +304,7 @@ spec:
               fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
-              if ! [[ "${smtp-auth-password}" =~ "YOURPASSWORD" ]] && [ "${smtp-auth-password}" != "" ] && [ "${smtp-auth-password}" != "smtp_auth_password_SECRET" ]; then
+              if [ "${smtpauthpassword}" != "YOURPASSWORD" ] && [ "${smtpauthpassword}" != "" ] && [ "${smtpauthpassword}" != "smtp_auth_password_SECRET" ]; then
                 echo "Sending to email ${email}"
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
                 echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
