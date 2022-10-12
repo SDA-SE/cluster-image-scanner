@@ -68,6 +68,10 @@ spec:
           - name: results-dependency-track-dd-upload
             depends: dependency-track-notification-thresholds
             template: results-dependency-track-dd-upload
+            arguments:
+              parameters:
+                - name: dependency-track-notification-thresholds # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+                  value: "{{steps.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-thresholds}}"
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
@@ -503,6 +507,11 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
+        outputs:
+          parameters:
+            - name: dependency-track-notification-thresholds
+              valueFrom:
+                path: /tmp/output.json
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -535,14 +544,17 @@ spec:
             mountPath: /tmp
         source: |
           set -e
+          
+          TARGET=/tmp/output.json
+          
           if [ "${CONTAINER_TYPE}" == "application" ]; then
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}" > ${TARGET}
           elif [ "${CONTAINER_TYPE}" == "third-party" ]; then
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}"
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}" > ${TARGET}
           else
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
+            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}" > ${TARGET}
           fi
-
+          echo ${TARGET}
 
     - name: results-dependency-track-dd-upload
       volumes:
@@ -614,8 +626,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
-            value: "{{tasks.dependency-track-notification-thresholds.outputs.result}}"
-
+            value: "{{inputs.parameters.dependency-track-notification-thresholds}}"
 
     - name: scan-distroless
       volumes:
