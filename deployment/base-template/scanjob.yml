@@ -70,8 +70,8 @@ spec:
             template: results-dependency-track-dd-upload
             arguments:
               parameters:
-                - name: dependency-track-notification-thresholds
-                  value: "{{steps.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-thresholds}}"
+                - name: dependency-track-notification-alerts
+                  value: "{{tasks.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-alerts}}"
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
@@ -491,6 +491,11 @@ spec:
       volumes:
         - name: tmp
           emptyDir: { }
+      outputs:
+        parameters:
+          - name: dependency-track-notification-alerts
+            valueFrom:
+              path: /tmp/output.json
       script:
         resources:
           limits:
@@ -507,11 +512,6 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        outputs:
-          parameters:
-            - name: dependency-track-notification-thresholds
-              valueFrom:
-                path: /tmp/output.json
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -565,7 +565,7 @@ spec:
           emptyDir: { }
       inputs:
         parameters:
-          - name: dependency-track-notification-thresholds
+          - name: dependency-track-notification-alerts
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
@@ -629,7 +629,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
-            value: "{{inputs.parameters.dependency-track-notification-thresholds}}"
+            value: "{{ inputs.parameters.dependency-track-notification-alerts }}"
 
     - name: scan-distroless
       volumes:
