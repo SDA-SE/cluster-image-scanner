@@ -621,7 +621,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
-            value: "{{input.parameters.DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT"
+            value: "{{ input.parameters.DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT }}"
 
 
     - name: scan-distroless
