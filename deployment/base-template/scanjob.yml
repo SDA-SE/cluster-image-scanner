@@ -548,13 +548,14 @@ spec:
           TARGET=/tmp/output.json
           
           if [ "${CONTAINER_TYPE}" == "application" ]; then
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}" > ${TARGET}
+            CONTENT="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
           elif [ "${CONTAINER_TYPE}" == "third-party" ]; then
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}" > ${TARGET}
+            CONTENT="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY}"
           else
-            echo "${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}" > ${TARGET}
+            CONTENT="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
           fi
-          echo ${TARGET}
+          echo "${CONTENT}" > ${TARGET}
+          echo "${CONTENT}"
 
     - name: results-dependency-track-dd-upload
       volumes:
