@@ -70,7 +70,7 @@ spec:
             template: results-dependency-track-dd-upload
             arguments:
               parameters:
-                - name: dependency-track-notification-thresholds # in case a language purl is not defined in the following json, DD_MINIMUM_SEVERITY is used
+                - name: dependency-track-notification-thresholds
                   value: "{{steps.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-thresholds}}"
           - name: scan-distroless
             depends: imagefetcher
@@ -563,6 +563,9 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
+      inputs:
+        parameters:
+          - name: dependency-track-notification-thresholds
       outputs:
         artifacts:
           - name: results-dd-dependency-track-test-link
