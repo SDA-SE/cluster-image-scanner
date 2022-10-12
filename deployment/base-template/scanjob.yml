@@ -519,23 +519,23 @@ spec:
           - name: CONTAINER_TYPE
             value: "{{ workflow.parameters.containerType }}"
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION
-            value: '[
+            value: '{
               {"maven": {"critical": 1, "high": 1, "medium": 100}},
               {"golang": {"critical": 1, "high": 1, "medium": 100}},
               {"npm": {"critical": 1, "high": 1, "medium": 100}},
               {"deb": {"critical": 8, "high": 20, "medium": 100}},
               {"rpm": {"critical": 8, "high": 20, "medium": 100}},
               {"pypi": {"critical": 8, "high": 20, "medium": 100}},
-              {"alpine": {"critical": 8, "high": 20, "medium": 100}} ]'
+              {"alpine": {"critical": 8, "high": 20, "medium": 100}} }'
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY
-            value: '[
+            value: '{
               {"maven": {"critical": 99, "high": 999, "medium": 9999}},
               {"golang": {"critical": 99, "high": 999, "medium": 9999}},
               {"pypi": {"critical": 99, "high": 999, "medium": 9999}},
               {"npm": {"critical": 99, "high": 9999, "medium": 9999}},
               {"deb": {"critical": 30, "high": 100, "medium": 9999}},
               {"rpm": {"critical": 30, "high": 100, "medium": 9999}},
-              {"alpine": {"critical": 30, "high": 100, "medium": 9999}} ]'
+              {"alpine": {"critical": 30, "high": 100, "medium": 9999}} }'
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
