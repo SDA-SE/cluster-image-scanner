@@ -133,7 +133,7 @@ getPods() {
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
           rocketchat=$(echo ${mapping} | jq -rcM '.rocketchat' | sed "s/^null//")
-          containerType=$(echo "${mapping}" | jq -rcM ".container_type" | sed "s/^null//")
+          containerType=$(echo "${mapping}" | jq -rcM ".container_type" | sed "s/^null/${DEFAULT_CONTAINER_TYPE}/")
           skip=$(echo "${mapping}" | jq -rcM ".skip" | sed "s/^null/${DEFAULT_SKIP}/")
           for attributeName in ${configurationsToMap[@]}; do
               setAttributes ${attributeName}
@@ -252,9 +252,11 @@ getPods() {
       if [ "${scanLifetimeMaxDays}" == "" ] || [ "${scanLifetimeMaxDays}" == "null" ]; then
         scanLifetimeMaxDays="${DEFAULT_SCAN_LIFETIME_MAX_DAYS}"
       fi
-      containerType=$(echo "${namespaceAnnotations}" | jq -r ".[\"${CONTAINER_TYPE_ANNOTATION}\"]")
       if [ "${containerType}" == "" ] || [ "${containerType}" == "null" ]; then
-        containerType="${DEFAULT_CONTAINER_TYPE}"
+        containerType=$(echo "${namespaceAnnotations}" | jq -r ".[\"${CONTAINER_TYPE_ANNOTATION}\"]")
+        if [ "${containerType}" == "" ] || [ "${containerType}" == "null" ]; then
+          containerType="${DEFAULT_CONTAINER_TYPE}"
+        fi
       fi
 
       # TODO in the future maybe not only running pods
