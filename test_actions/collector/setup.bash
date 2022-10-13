@@ -21,7 +21,7 @@ sed -i "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" configmap.yaml
 
 kubectl apply -k .
 if [ -f "${GH_PRIVATE_KEY_PATH}" ] && [ "${GH_PRIVATE_KEY_PATH}" != "" ]; then
-  echo "Creating github secret from ${GH_PRIVATE_KEY_PATH}"
+  echo "Creating github secret from GH_PRIVATE_KEY_PATH ${GH_PRIVATE_KEY_PATH}"
   kubectl create secret generic github --from-file="keyfile=${GH_PRIVATE_KEY_PATH}" -n cluster-image-scanner-image-collector
 else
   echo "GH_PRIVATE_KEY_PATH ${GH_PRIVATE_KEY_PATH} not existing!"

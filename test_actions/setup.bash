@@ -151,6 +151,7 @@ do
 #  done
   sleep 60;
 done
+echo "Listing all workflows"
 argo list workflows -A
 if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
   echo "ERRORs during workflow execution"
@@ -162,3 +163,4 @@ if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
 fi
 rm -Rf ./tmp || true
 
+exit 0
