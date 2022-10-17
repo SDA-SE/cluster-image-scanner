@@ -23,7 +23,7 @@ As a result, fellowship-ring-release and fellowship-ring-develop will be scanned
 
 To negate a namespace_filter (because it is not possible in regex), the annotation `clusterscanner.sdase.org/negated_namespace_filter` can be used:
 ```
-clusterscanner.sdase.org/negated_namespace_filter: "\-pr\-"
+clusterscanner.sdase.org/negated_namespace_filter: "\\-pr\\-" # one \ is needed for grep, double escpe for Kubernetes
 ```
 As a result, fellowship-ring-release and fellowship-ring-develop will be scanned, but not other namespaces like fellowship-ring-pr1 or fellowship-ring-pr2 with this annotation.
 
