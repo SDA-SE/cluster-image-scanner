@@ -136,6 +136,7 @@ buildah config \
   --env SCAN_NEW_VERSION_ANNOTATION="clusterscanner.sdase.org/is-scan-new-version" \
   --env DESCRIPTION_ANNOTATION="sdase.org/description" \
   --env NAMESPACE_TO_SCAN_ANNOTATION="clusterscanner.sdase.org/namespace_filter" \
+  --env NAMESPACE_TO_SCAN_NEGATED_ANNOTATION="clusterscanner.sdase.org/negated_namespace_filter" \
   --env CONTAINER_TYPE_ANNOTATION="clusterscanner.sdase.org/container-type" \
   --env IS_FETCH_DESCRIPTION="true" \
   --env NAMESPACE_MAPPINGS="" \

@@ -348,10 +348,18 @@ getPods() {
 
           namespaceToScanRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
           # shellcheck disable=SC2046
-          if [ "${namespaceToScanRegex}" != "" ] && [ "${namespaceToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -v -c "${namespaceToScanRegex}") -eq 1 ]; then
+          if [ "${namespaceToScanRegex}" != "" ] && [ "${namespaceToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -c "${namespaceToScanRegex}") -eq 1 ]; then
             echo "Setting skip to true due to namespaceToScanRegex ${namespaceToScanRegex} from ${NAMESPACE_TO_SCAN_ANNOTATION}"
             skip="true"
           fi
+
+          namespaceToScanNegatedRegex=$(echo "${namespaceAnnotations}" | jq -r ".[\"${NAMESPACE_TO_SCAN_NEGATED_ANNOTATION}\"]")
+          # shellcheck disable=SC2046
+          if [ "${namespaceToScanNegatedRegex}" != "" ] && [ "${namespaceToScanNegatedRegex}" != "null" ] && [ $(echo "${namespace}" | grep -c -v "${namespaceToScanNegatedRegex}") -eq 1 ]; then
+            echo "Setting skip to true due to namespaceToScanNegatedRegex ${namespaceToScanNegatedRegex} from ${NAMESPACE_TO_SCAN_NEGATED_ANNOTATION}"
+            skip="true"
+          fi
+
           podToScanRegex=$(echo "${podDecoded}" | jq -rcM ".metadata.annotations[\"${NAMESPACE_TO_SCAN_ANNOTATION}\"]")
           # shellcheck disable=SC2046
           if [ "${podToScanRegex}" != "" ] && [ "${podToScanRegex}" != "null" ] && [ $(echo "${namespace}" | grep -v -c "${podToScanRegex}") -eq 1 ]; then
