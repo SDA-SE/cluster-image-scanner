@@ -11,70 +11,81 @@ spec:
       configMapKeyRef:
         name: synchronization
         key: workflow
-  arguments:
-    parameters:
-      - name: REGISTRY_SECRET
-        value: "###REGISTRY_SECRET###"
-      - name: DEPENDENCY_SCAN_CM
-        value: "###DEPENDENCY_SCAN_CM###"
-      - name: DEFECTDOJO_CM
-        value: "###DEFECTDOJO_CM###"
-      - name: DEFECTDOJO_SECRETS
-        value: "###DEFECTDOJO_SECRETS###"
-      - name: SCAN_ID
-        value: "###SCAN_ID###"
-      - name: team
-        value: "###team###"
-      - name: appname
-        value: "###appname###"
-      - name: appversion
-        value: "###appversion###"
-      - name: environment
-        value: "###environment###"
-      - name: namespace
-        value: "###namespace###"
-      - name: scm_source_branch
-        value: "###scm_source_branch###"
-      - name: image
-        value: "###image###"
-      - name: image_id
-        value: "###image_id###"
-      - name: slack
-        value: "###slack###"
-      - name: rocketchat
-        value: "###rocketchat###"
-      - name: email
-        value: "###email###"
-      - name: is_scan_baseimage_lifetime
-        value: "###is_scan_baseimage_lifetime###"
-      - name: is_scan_lifetime
-        value: "###is_scan_lifetime###"
-      - name: is_scan_distroless
-        value: "###is_scan_distroless###"
-      - name: is_scan_malware
-        value: "###is_scan_malware###"
-      - name: is_scan_dependency_check
-        value: "###is_scan_dependency_check###"
-      - name: is_scan_runasroot
-        value: "###is_scan_runasroot###"
-      - name: is_scan_new_version
-        value: "###is_scan_new_version###"
-      - name: is_scan_dependency_track
-        value: "###is_scan_dependency_track###"
-      - name: scan_lifetime_max_days
-        value: "###scan_lifetime_max_days###"
-      - name: dependencyCheckSuppressionsConfigMapName
-        value: "###dependencyCheckSuppressionsConfigMapName###"
-      - name: new_version_image_filter
-        value: "###new_version_image_filter###"
-      - name: imageRegistryBase
-        value: "###imageRegistryBase###"
-      - name: scanjobEnvParameter
-        value: "scanjob-env-parameter"
-      - name: "containerType"
-        value: "###containerType###"
-      - name: "clusterImageScannerImageTag"
-        value: "###clusterImageScannerImageTag###"
-
-  workflowTemplateRef:
-    name: scan-image-job
+  entrypoint: whalesay
+  onExit: exit-handler
+  templates:
+    - name: whalesay
+      steps:
+        - - name: call-whalesay-template
+            templateRef:
+              name: call-scan-image-job
+              template: scan-image-job
+            arguments:
+              parameters:
+                - name: REGISTRY_SECRET
+                  value: "###REGISTRY_SECRET###"
+                - name: DEPENDENCY_SCAN_CM
+                  value: "###DEPENDENCY_SCAN_CM###"
+                - name: DEFECTDOJO_CM
+                  value: "###DEFECTDOJO_CM###"
+                - name: DEFECTDOJO_SECRETS
+                  value: "###DEFECTDOJO_SECRETS###"
+                - name: SCAN_ID
+                  value: "###SCAN_ID###"
+                - name: team
+                  value: "###team###"
+                - name: appname
+                  value: "###appname###"
+                - name: appversion
+                  value: "###appversion###"
+                - name: environment
+                  value: "###environment###"
+                - name: namespace
+                  value: "###namespace###"
+                - name: scm_source_branch
+                  value: "###scm_source_branch###"
+                - name: image
+                  value: "###image###"
+                - name: image_id
+                  value: "###image_id###"
+                - name: slack
+                  value: "###slack###"
+                - name: rocketchat
+                  value: "###rocketchat###"
+                - name: email
+                  value: "###email###"
+                - name: is_scan_baseimage_lifetime
+                  value: "###is_scan_baseimage_lifetime###"
+                - name: is_scan_lifetime
+                  value: "###is_scan_lifetime###"
+                - name: is_scan_distroless
+                  value: "###is_scan_distroless###"
+                - name: is_scan_malware
+                  value: "###is_scan_malware###"
+                - name: is_scan_dependency_check
+                  value: "###is_scan_dependency_check###"
+                - name: is_scan_runasroot
+                  value: "###is_scan_runasroot###"
+                - name: is_scan_new_version
+                  value: "###is_scan_new_version###"
+                - name: is_scan_dependency_track
+                  value: "###is_scan_dependency_track###"
+                - name: scan_lifetime_max_days
+                  value: "###scan_lifetime_max_days###"
+                - name: dependencyCheckSuppressionsConfigMapName
+                  value: "###dependencyCheckSuppressionsConfigMapName###"
+                - name: new_version_image_filter
+                  value: "###new_version_image_filter###"
+                - name: imageRegistryBase
+                  value: "###imageRegistryBase###"
+                - name: scanjobEnvParameter
+                  value: "scanjob-env-parameter"
+                - name: "containerType"
+                  value: "###containerType###"
+                - name: "clusterImageScannerImageTag"
+                  value: "###clusterImageScannerImageTag###"
+    - name: exit-handler
+      container:
+        image: docker/whalesay:latest
+        command: [cowsay]
+        args: ["hello world"]
