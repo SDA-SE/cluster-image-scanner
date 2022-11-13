@@ -14,12 +14,12 @@ spec:
   entrypoint: whalesay
   onExit: exit-handler
   templates:
-    - name: whalesay
+    - name: run-subflow
       steps:
-        - - name: call-whalesay-template
+        - - name: call-scan-image-job-template
             templateRef:
-              name: call-scan-image-job
-              template: scan-image-job
+              name: scan-image-job-template
+              template: main
             arguments:
               parameters:
                 - name: REGISTRY_SECRET
