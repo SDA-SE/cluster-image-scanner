@@ -11,7 +11,7 @@ spec:
       configMapKeyRef:
         name: synchronization
         key: workflow
-  entrypoint: whalesay
+  entrypoint: run-subflow
   onExit: exit-handler
   templates:
     - name: run-subflow
