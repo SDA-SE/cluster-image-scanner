@@ -60,6 +60,9 @@ while read -r line; do
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
   sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /tmp/template.yml
   sed -i "s~###clusterImageScannerImageTag###~${clusterImageScannerImageTag}~" /tmp/template.yml
+  sed -i "s~###slackTokenSecretName###~${slackTokenSecretName}~" /tmp/template.yml
+  sed -i "s~###errorTargets###~${errorTargets}~" /tmp/template.yml
+
 
   echo "Setting workflow name"
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
