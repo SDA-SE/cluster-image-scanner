@@ -12,7 +12,7 @@ spec:
         name: synchronization
         key: workflow
   entrypoint: run-subflow
-  onExit: exit-handler
+  #onExit: exit-handler
   templates:
     - name: run-subflow
       steps:

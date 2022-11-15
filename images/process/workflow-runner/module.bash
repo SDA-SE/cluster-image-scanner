@@ -66,7 +66,9 @@ while read -r line; do
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
-  #cat /tmp/template.yml
+  if [ "${IS_PRINT_TEMPLATE}" == "true" ]; then
+    cat /tmp/template.yml
+  fi
   kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /tmp/template.yml
 
   for outdatedJob in $(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" --prefix "${scanjobPrefix}" | grep "Running *1h" | awk '{print $1}'); do
