@@ -44,6 +44,8 @@ spec:
         value: "quay.io/sdase"
       - name: clusterImageScannerImageTag
         value: "###clusterImageScannerImageTag###"
+      - name: errorTargets
+        value: '[{ "channel":"#security-notifications-test", "type": "slack"} ]'
   templates:
     - name: main
       steps:
