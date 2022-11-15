@@ -77,8 +77,8 @@ spec:
         value: "###clusterImageScannerImageTag###"
       - name: "slackTokenSecretName"#
         value: "###slackTokenSecretName###"
-      - name: "errorTargets"#
-        value: "###errorTargets###"
+      - name: "errorTargets"
+        value: '###errorTargets###'
 
 
   workflowTemplateRef:
