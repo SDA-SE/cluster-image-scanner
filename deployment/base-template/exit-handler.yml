@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: exit-handler
+  namespace: clusterscanner
+spec:
+  activeDeadlineSeconds: 3600
+  entrypoint: main # Entry point for job execution
+  workflowSpec:
+    #serviceAccountName: clusterscanner
+    ttlStrategy:
+      secondsAfterSuccess: 3600
+      secondsAfterFailure: 7200
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+  inputs:
+    parameters:
+      - workflow.parameters.defectDojoConfigMapName
+      - workflow.parameters.scanjobEnvParameter
+
+  templates:
+    - name: main
+      steps:
+        - - name: exit-handler
+            template: exit-handler
+
+    - name: exit-handler
+      container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '0.2'
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        imagePullPolicy: Always # TODO IfNotPresent
+        source: |
+          

@@ -60,13 +60,18 @@ while read -r line; do
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
   sed -i "s~###imageRegistryBase###~${imageRegistryBase}~" /tmp/template.yml
   sed -i "s~###clusterImageScannerImageTag###~${clusterImageScannerImageTag}~" /tmp/template.yml
+  sed -i "s~###slackTokenSecretName###~${slackTokenSecretName}~" /tmp/template.yml
+  sed -i "s~###errorTargets###~${errorTargets}~" /tmp/template.yml
+
 
   echo "Setting workflow name"
   workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
   workflowGeneratedName="${workflowGeneratedName:0:62}"
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
-  #cat /tmp/template.yml
+  if [ "${IS_PRINT_TEMPLATE}" == "true" ]; then
+    cat /tmp/template.yml
+  fi
   kubectl create -n "${JOB_EXECUTION_NAMESPACE}" -f /tmp/template.yml
 
   for outdatedJob in $(argo list --running -n "${JOB_EXECUTION_NAMESPACE}" --prefix "${scanjobPrefix}" | grep "Running *1h" | awk '{print $1}'); do

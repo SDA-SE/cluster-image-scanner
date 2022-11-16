@@ -4,6 +4,7 @@ metadata:
   name: orchestration-job-template
   namespace: clusterscanner
 spec:
+  onExit: exit-handler
   activeDeadlineSeconds: 21600 # 6h
   entrypoint: main # Entry point for job execution
   workflowSpec:
@@ -30,6 +31,7 @@ spec:
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
       - workflow.parameters.clusterImageScannerImageTag
+      - workflow.parameters.errorTargets
 
   templates:
     - name: main
@@ -171,6 +173,12 @@ spec:
             value: "{{ workflow.parameters.imageRegistryBase }}"
           - name: clusterImageScannerImageTag
             value: "{{ workflow.parameters.clusterImageScannerImageTag }}"
+          - name: "slackTokenSecretName"
+            value: "{{ workflow.parameters.slackTokenSecretName }}"
+          - name: errorTargets
+            value: "{{ workflow.parameters.errorTargets }}"
+          - name: IS_PRINT_TEMPLATE
+            value: "true" # TODO false
 
     - name: notify-teams
       volumes:
@@ -752,4 +760,103 @@ spec:
             #  --silent \
             #  --show-error \
             #  "${DEPENDENCY_TRACK_URL}/api/v1/project"
+          done
+
+    - name: exit-handler
+      script:
+        command: [/bin/bash]
+        resources:
+          limits:
+            cpu: '1'
+            memory: 128Mi
+          requests:
+            cpu: '0.2'
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        imagePullPolicy: Always # TODO IfNotPresent
+        env:
+          - name: MESSAGE_TARGETS
+            value: "{{ workflow.parameters.errorTargets }}"
+          - name: SLACK_CLI_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: "{{ workflow.parameters.slackTokenSecretName }}"
+                key: SLACK_CLI_TOKEN
+
+        envFrom:
+          - configMapRef:
+              name: "scanjob-env-parameter"
+        source: |
+          if [ "${MESSAGE_TARGETS}" == "" ]; then
+            echo "MESSAGE_TARGETS set, exiting"
+            exit 1
+          fi
+          
+          failures='{{workflow.failures}}'
+          failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
+          sendMessageViarocketchat() {
+            channel="${1}"
+            message="${2}"
+          
+            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
+            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
+          
+            if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
+              echo "No ROCKET_CHAT_USER_ID set"
+              exit 3
+            fi
+            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+              echo "No SLACK_CLI_TOKEN set"
+              exit 2
+            fi
+          
+            echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${channel}"
+            curl -H "Content-type: application/json" \
+              -d @/tmp/slack-template.json \
+              -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
+              -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
+              -X POST \
+              "${SLACK_MESSAGE_ENDPOINT}"
+          }
+          sendMessageViaslack() {
+            channel="${1}"
+          
+            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
+            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
+            cat /tmp/slack-template.json
+          
+            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+              echo "No SLACK_CLI_TOKEN set"
+              exit 2
+            fi
+          
+            curl \
+              -H "Content-type:application/json" \
+              -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
+              -X POST \
+              -d @/tmp/slack-template.json \
+              "${SLACK_MESSAGE_ENDPOINT}"
+          }
+          
+          fn_exists() { declare -F "$1" > /dev/null; }
+          
+          echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
+            channel=$(echo "${i}" | jq -r '.channel')
+            type=$(echo "${i}" | jq -r '.type')
+            echo "Sending via ${type} to channel ${channel}"
+            toCall="sendMessageVia$type"
+            if ! fn_exists ${toCall} ; then
+              echo "Message type '${type}' doesn't exit"
+              exit 1
+            fi
+
+            ${toCall} "${channel}"
           done
