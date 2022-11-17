@@ -1524,6 +1524,10 @@ spec:
           
           fn_exists() { declare -F "$1" > /dev/null; }
           
+          if [[ "${message}" == "" ]] || [[ "${message}" == "[]" ]]; then
+            echo "No message, exit 0" 
+            exit 0
+          fi
           echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
             channel=$(echo "${i}" | jq -r '.channel')
             type=$(echo "${i}" | jq -r '.type')
@@ -1533,6 +1537,6 @@ spec:
               echo "Message type '${type}' doesn't exit"
               exit 1
             fi
-
+            
             ${toCall} "${channel}"
           done
