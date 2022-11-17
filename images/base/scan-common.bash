@@ -48,15 +48,15 @@ function parse_and_set_image_variables() {
     if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
       field=2
     fi
-    export IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
+    export IMAGE_NAME=$(echo "IMAGE" | cut -d: -f${field})
     export IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
     if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
       field=2
     else
       field=3
     fi
-    export IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
-    export IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | sed -e "s#/#__#g" | cut -d: -f${field})
+    export IMAGE_TAG=$(echo "IMAGE" | cut -d: -f${field})
+    export IMAGE_HASH=$(echo "IMAGE_ID" | sed -e "s#/#__#g" | cut -d: -f${field})
 }
 
 
