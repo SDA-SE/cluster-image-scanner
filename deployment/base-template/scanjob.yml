@@ -352,6 +352,10 @@ spec:
             value: "{{ workflow.parameters.appname }}"
           - name: APP_VERSION
             value: "{{ workflow.parameters.appversion }}" # TODO Usage of image version
+          - name: IMAGE
+            value: "{{ workflow.parameters.image }}"
+          - name: IMAGE_ID
+            value: "{{ workflow.parameters.image }}"
           - name: DD_BRANCH_NAME
             value: "{{ workflow.parameters.image }}"
           - name: NAMESPACE
