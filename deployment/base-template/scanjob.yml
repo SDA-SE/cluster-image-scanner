@@ -279,10 +279,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 1024Mi
+            memory: 512Mi
           requests:
             cpu: '0.2'
-            memory: 256Mi
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -330,7 +330,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 128Mi
@@ -507,7 +507,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 128Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -583,10 +583,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -656,7 +656,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 128Mi
@@ -709,10 +709,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -764,10 +764,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -823,7 +823,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 64Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -876,10 +876,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 64Mi
           requests:
             cpu: '0.2'
-            memory: 128Mi
+            memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -940,7 +940,7 @@ spec:
             memory: 1792Mi
           requests:
             cpu: '0.2'
-            memory: 1500Mi
+            memory: 1792Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1002,7 +1002,7 @@ spec:
             memory: 368Mi
           requests:
             cpu: '0.2'
-            memory: 256Mi
+            memory: 368Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1054,7 +1054,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 64Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -1119,10 +1119,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1193,10 +1193,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1286,7 +1286,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
