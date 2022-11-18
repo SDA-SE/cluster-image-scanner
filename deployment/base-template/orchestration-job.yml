@@ -283,7 +283,7 @@ spec:
                   echo "SLACK_CLI_TOKEN not set, exit"
                   exit 1
                 fi
-                echo "Sending to slack ${slack}"
+                echo "Sending to slack ${slack} with messageendpoint ${SLACK_MESSAGE_ENDPOINT}"
                 curl \
                   -H "Content-type:application/json" \
                   -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
