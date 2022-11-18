@@ -10,6 +10,7 @@ totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
 echo "Found ${totalCount} entries in /clusterscanner/imageList.json"
 while read -r line; do
+  echo "Will read line"
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
   if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
     echo "Skipping Image due to skip=true: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
