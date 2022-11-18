@@ -780,7 +780,7 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always # TODO IfNotPresent
         env: # TODO check for email creds
           - name: MESSAGE_TARGETS
