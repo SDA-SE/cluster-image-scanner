@@ -1475,7 +1475,7 @@ spec:
             echo "MESSAGE_TARGETS set, exiting"
             exit 1
           fi
-          if [ "${JOB_EXECUTION_NAMESPACE} == "" ]; then # comming from scanjob-parameter
+          if [ "${JOB_EXECUTION_NAMESPACE}" == "" ]; then # comming from scanjob-parameter
             JOB_EXECUTION_NAMESPACE=clusterscanner
           fi
           failures='{{workflow.failures}}'
