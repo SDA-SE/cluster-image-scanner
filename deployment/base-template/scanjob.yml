@@ -1526,7 +1526,7 @@ spec:
           
           fn_exists() { declare -F "$1" > /dev/null; }
           
-          if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]]; then
+          if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]] || [[ "${failures}" == "null" ]]; then
             echo "No message, exit 0" 
             exit 0
           fi
