@@ -1466,7 +1466,6 @@ spec:
               secretKeyRef:
                 name: "{{ workflow.parameters.slackTokenSecretName }}"
                 key: SLACK_CLI_TOKEN
-
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
@@ -1480,7 +1479,8 @@ spec:
           fi
           failures='{{workflow.failures}}'
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
-          
+          echo "failures"
+          echo "${failures}"
           sendMessageViarocketchat() {
             channel="${1}"
           
