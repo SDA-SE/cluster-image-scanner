@@ -780,9 +780,9 @@ spec:
           readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:{{ workflow.parameters.clusterImageScannerImageTag }}"
         imagePullPolicy: Always # TODO IfNotPresent
-        env:
+        env: # TODO check for email creds
           - name: MESSAGE_TARGETS
             value: "{{ workflow.parameters.errorTargets }}"
           - name: SLACK_CLI_TOKEN
@@ -790,7 +790,6 @@ spec:
               secretKeyRef:
                 name: "{{ workflow.parameters.slackTokenSecretName }}"
                 key: SLACK_CLI_TOKEN
-
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
@@ -799,9 +798,16 @@ spec:
             echo "MESSAGE_TARGETS set, exiting"
             exit 1
           fi
-          
+          if [ "${JOB_EXECUTION_NAMESPACE} == "" ]; then # comming from scanjob-parameter
+            JOB_EXECUTION_NAMESPACE=clusterscanner
+          fi
           failures='{{workflow.failures}}'
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
+          
+          pod=$(echo "${failures}" | jq -r '.[] | .podName)
+          #echo "Pod: ${pod}"
+          #export logs=$(kubectl get logs "${pod}" -n "${JOB_EXECUTION_NAMESPACE}")
+          
           sendMessageViarocketchat() {
             channel="${1}"
             message="${2}"
@@ -848,6 +854,10 @@ spec:
           
           fn_exists() { declare -F "$1" > /dev/null; }
           
+          if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]]; then
+            echo "No message, exit 0" 
+            exit 0
+          fi
           echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
             channel=$(echo "${i}" | jq -r '.channel')
             type=$(echo "${i}" | jq -r '.type')
@@ -857,6 +867,6 @@ spec:
               echo "Message type '${type}' doesn't exit"
               exit 1
             fi
-
+          
             ${toCall} "${channel}"
           done
