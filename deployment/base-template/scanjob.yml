@@ -93,10 +93,6 @@ spec:
             #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
             depends: scan-dependency-check
             template: results-dependency-check-dd-upload
-            arguments:
-              artifacts:
-                - name: results-dependency-check-report
-                  from: "{{ tasks.scan-dependency-check.outputs.artifacts.results-dependency-check-report }}"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
@@ -647,11 +643,6 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-distroless
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -700,11 +691,6 @@ spec:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: tmp
           emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-lifetime
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -755,11 +741,6 @@ spec:
         - name: registry-creds
           secret:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
-      outputs:
-        artifacts:
-          - name: results-baseimage-lifetime
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -814,11 +795,6 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-runasroot
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -867,11 +843,6 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-runasroot
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -928,11 +899,6 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-runasroot
-            path: /clusterscanner/data
-            archiveLogs: true
       container:
         resources:
           limits:
@@ -993,8 +959,6 @@ spec:
           - name: results-dependency-check
             path: /clusterscanner/data/module_scan-dependency-check.json
             archiveLogs: true
-          - name: results-dependency-check-report
-            path: /clusterscanner/data
       container:
         resources:
           limits:
