@@ -165,8 +165,6 @@ spec:
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
           - name: DEFECTDOJO_SECRETS
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
-          - name: MAX_RUNNING_JOBS_IN_QUEUE
-            value: "4" # too many jobs create disk pressure
           - name: dependencyCheckSuppressionsConfigMapName
             value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: imageRegistryBase
