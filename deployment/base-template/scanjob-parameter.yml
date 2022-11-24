@@ -11,6 +11,7 @@ data:
   SKOPEO_INSPECT_PARAMETER: "" # e.g. "tls-verify=false "
   DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD: "0" # 0 disables cleanup
   DD_PRODUCT_NAME_TEMPLATE: "###ENVIRONMENT### | ###NAMESPACE### | ###APP_NAME###"
+  MAX_RUNNING_JOBS_IN_QUEUE: "4" # for subflows, too many jobs create disk pressure
   SLACK_MESSAGE_ENDPOINT: "https://slack.com/api/chat.postMessage"
   SLACK_TEMPLATE: |-
     {
