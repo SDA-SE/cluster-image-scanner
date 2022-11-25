@@ -41,6 +41,8 @@ clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
 clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean
 clusterscanner.sdase.org/is-scan-malware: "true"
 
+clusterscanner.sdase.org/container-type: "application" # one of application, third-party. third-party results in no notifications from scan like dependency track.
+
 clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the lifetime scan
 ```
 Filters like `skip_regex` and `namespace_filter` are implemented with [grep](https://www.gnu.org/software/grep/manual/grep.html).
