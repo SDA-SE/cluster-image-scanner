@@ -658,13 +658,14 @@ spec:
         source: |
           set -e
           cd $HOME
+          
+          source auth.bash # > /dev/null 2>&1
+          source git.bash # > /dev/null 2>&1
+
           if [ "${GIT_SSH_REPOSITORY_HOST}" == "SET-ME" ] && [ "${GH_INSTALLATION_ID}" == "" ]; then
             echo "GIT_SSH_REPOSITORY_HOST and GH_INSTALLATION_ID not configured, skipping"
             exit 0
           fi
-          
-          source auth.bash # > /dev/null 2>&1
-          source git.bash # > /dev/null 2>&1
 
           if [ "${GIT_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
