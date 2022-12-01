@@ -599,7 +599,7 @@ spec:
             mountPath: /tmp/dependency-track-results
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
             readOnly: true
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1038,7 +1038,7 @@ spec:
             mountPath: /tmp/dependency-check-results
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
             readOnly: true
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1170,7 +1170,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
