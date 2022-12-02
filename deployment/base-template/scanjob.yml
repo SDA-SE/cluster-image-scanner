@@ -241,7 +241,7 @@ spec:
           fi
           for l in $(jq -r "$extractionCommand" "${image_copy_dir}/manifest.json" | sed -e "s/^sha256://g"); do
               echo "Extracting blob ${l}"
-              tar --exclude "/dev/" --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
+              tar --exclude "/dev/" --mode='a+rw' --no-acls --no-selinux --no-xattrs --no-overwrite-dir --owner=clusterscanner --group=clusterscanner -mxzf "${image_copy_dir}/${l}" -C "${unpack_dir}" || true # TODO scan somehow dev
           done
           echo "Changing directory permissions"
           find "${unpack_dir}" -type d -exec chmod 755 {} +
