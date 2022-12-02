@@ -165,7 +165,7 @@ spec:
             memory: 256Mi
           requests:
             cpu: '0.2'
-            memory: 64Mi
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -251,7 +251,8 @@ spec:
 
           echo "Packing image to ${IMAGE_TAR_FOLDER_PATH}"
           tar -cf "${IMAGE_TAR_PATH}" ./* || exit 1
-
+          echo "Size of ${IMAGE_TAR_PATH}"
+          ls -lah ${IMAGE_TAR_PATH}
           echo "Copying manifest and config file"
           cp "${image_copy_dir}/manifest.json" "${IMAGE_TAR_FOLDER_PATH}/manifest.json"
           rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
