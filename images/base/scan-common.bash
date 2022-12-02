@@ -43,7 +43,7 @@ function scan_result_pre {
   mkdir -p "${ARTIFACTS_PATH}" || true
 }
 
-function parse_and_set_image_variables() {
+function parse_and_set_image_variables {
     field=1
     if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
       field=2
