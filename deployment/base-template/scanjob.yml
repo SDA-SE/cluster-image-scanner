@@ -12,6 +12,9 @@ spec:
   ttlStrategy:
     secondsAfterSuccess: 900 # 15 min
     secondsAfterFailure: 7200
+  retryStrategy:
+    limit: 2
+    retryPolicy: "Always"
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
