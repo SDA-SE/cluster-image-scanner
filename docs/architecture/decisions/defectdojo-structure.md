@@ -12,7 +12,7 @@ Two strcutures are evaluated:
     * Test,  <date> | <imageTag> | (<ScanType>),   	2022-12-04 21:21:49 | 2cbc6c9.47 (Dependency Track Import)
 
 ### Pro
-* Statistics for products are easier to understand for humans because they are visible in an aggregated form.
+* DefectDojo statistics for products are easier to understand for humans because they are visible in an aggregated form.
 * Very flexible for teams
 
 ### Con
@@ -25,7 +25,7 @@ Two strcutures are evaluated:
         * Test,  <date> | <imageTag> | (<ScanType>),   	2022-12-04 21:21:49 | 2cbc6c9.47 (Dependency Track Import)
 
 ### Pro
-* Statistics for products are easier to understand for humans because they are visible in an aggregated form.
+* DefectDojo statistics for products are easier to understand for humans because they are visible in an aggregated form.
 * No effort to implement it for teams
 
 ### Con
