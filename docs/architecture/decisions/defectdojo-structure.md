@@ -12,11 +12,11 @@ Two strcutures are evaluated:
     * Test,  <date> | <imageTag> | (<ScanType>),   	2022-12-04 21:21:49 | 2cbc6c9.47 (Dependency Track Import)
 
 ### Pro
-* Statistics for products are easier to understand for humans because they are visible in an aggregated form.  
+* Statistics for products are easier to understand for humans because they are visible in an aggregated form.
+* Very flexible for teams
 
 ### Con
-* Extra work to integrate
-
+* Effort to implement it for teams
 
 ## Grouped by namespace:
 ### Structure
@@ -26,9 +26,10 @@ Two strcutures are evaluated:
 
 ### Pro
 * Statistics for products are easier to understand for humans because they are visible in an aggregated form.
+* No effort to implement it for teams
 
 ### Con
-* Extra work to integrate
+* Effort to integrate for the security scanner operators
 
 
 ##  image/service:
@@ -39,6 +40,7 @@ Two strcutures are evaluated:
 
 ### Pro
 * Current default status (no extra work)
+* Might be easier to understand
 ### Con
 
 ## Conclusion
