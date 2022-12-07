@@ -37,7 +37,7 @@ skopeo_image="registry.access.redhat.com/ubi8/go-toolset:latest"
 ctr_skopeo="$( buildah from --pull --quiet "${skopeo_image}")"
 mnt_skopeo="$( buildah mount "${ctr_skopeo}")"
 
-base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
+base_image="registry.access.redhat.com/ubi8-init" # minimal doesn't have useradd
 ctr_tools="$( buildah from --pull --quiet "${base_image}")"
 mnt_tools="$( buildah mount "${ctr_tools}")"
 

@@ -45,12 +45,12 @@ function scan_result_pre {
 
 function parse_and_set_image_variables {
     field=1
-    if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+    if [ $(echo "${IMAGE}" | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
       field=2
     fi
     export IMAGE_NAME=$(echo "${IMAGE}" | cut -d: -f${field})
     export IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
-    if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+    if [ $(echo "${IMAGE}" | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
       field=2
     else
       field=3
