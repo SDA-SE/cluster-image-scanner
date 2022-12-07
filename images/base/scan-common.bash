@@ -45,7 +45,7 @@ function scan_result_pre {
 
 function parse_and_set_image_variables {
     field=1
-    if [ $(echo "${IMAGE}" | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+    if [ $(echo "${IMAGE}" | sed 's#/.*##' | tr ':' '\n' | wc -l) -ne 1 ]; then # no port
       field=2
     fi
     export IMAGE_NAME=$(echo "${IMAGE}" | cut -d: -f${field})
