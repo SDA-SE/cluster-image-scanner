@@ -14,7 +14,6 @@ spec:
     secondsAfterFailure: 7200
   retryStrategy:
     limit: 1
-    retryPolicy: "Always"
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
@@ -49,6 +48,7 @@ spec:
       - name: containerType
       - name: slackTokenSecretName
       - name: errorTargets
+  #      - name: engagementTags
   templates:
     - name: main
       dag:
