@@ -45,6 +45,7 @@ target_image="scratch"
 ctr="$( buildah from --pull --quiet "${target_image}")"
 mnt="$( buildah mount "${ctr}")"
 
+
 # Options that are used with every `dnf` command
 dnf_opts=(
   #"--disableplugin=*"
@@ -56,6 +57,12 @@ dnf_opts=(
   "--quiet"
 
 )
+
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install libsemanage1
+# User management
+touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
+"${mnt_tools}/usr/sbin/useradd" --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
+
 
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash tar jq grep diffutils findutils coreutils-single util-linux curl openssl bc
 
@@ -74,10 +81,6 @@ mkdir -p "${mnt}/etc" "${mnt}/bin" "${mnt}/etc/containers" || true
 echo "copying to skopeo"
 cp "${mnt_skopeo}/opt/app-root/src/$folder/default-policy.json" "${mnt}/etc/containers/policy.json"
 cp "${mnt_skopeo}/opt/app-root/src/$folder/bin/skopeo" "${mnt}/bin/"
-
-# User management
-touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
-"${mnt_tools}/usr/sbin/useradd" --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
 
 # component
 mkdir -p "${mnt}/clusterscanner" || true
