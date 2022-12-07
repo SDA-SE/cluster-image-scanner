@@ -58,15 +58,16 @@ dnf_opts=(
 
 )
 
-# User management
-touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
-useradd --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
-
-
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash tar jq grep diffutils findutils coreutils-single util-linux curl openssl bc
 
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_opts[@]}" all
 rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
+
+
+# User management
+touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
+useradd --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
+
 
 latest_skopeo_tarball=$(curl --silent https://api.github.com/repos/containers/skopeo/releases/latest | jq '.tarball_url' | sed 's/"//g')
 buildah run "${ctr_skopeo}" -- curl -s -L "${latest_skopeo_tarball}" -o skopeo.tar
