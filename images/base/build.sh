@@ -58,7 +58,6 @@ dnf_opts=(
 
 )
 
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install libsemanage1
 # User management
 touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
 useradd --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
