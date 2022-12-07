@@ -61,7 +61,7 @@ dnf_opts=(
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install libsemanage1
 # User management
 touch "${mnt}/etc/passwd" "${mnt}/etc/shadow" "${mnt}/etc/group"
-"${mnt_tools}/usr/sbin/useradd" --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
+useradd --root "${mnt}" --uid 1001 --home-dir /clusterscanner --create-home clusterscanner
 
 
 buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" bash tar jq grep diffutils findutils coreutils-single util-linux curl openssl bc
