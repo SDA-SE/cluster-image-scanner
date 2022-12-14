@@ -279,7 +279,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 512Mi # due to inspecting the tar
+            memory: 1024Mi # due to inspecting the tar
           requests:
             cpu: '0.2'
             memory: 512Mi
@@ -386,7 +386,7 @@ spec:
           
           source ./scan-common.bash        
           parse_and_set_image_variables
-          
+          echo "ImageName ${IMAGE_NAME}"
           PROJECT_NAME=$(echo "${DD_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
           echo "PROJECT_NAME: ${PROJECT_NAME}"
           bomPath="/clusterscanner/data/bom.json"
