@@ -27,6 +27,7 @@ sed -i "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment
+git checkout ${DEPLOYMENT_PATH}/overlays/
 sed -i "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 sed -i "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.env
 

@@ -58,12 +58,15 @@ spec:
           - name: sbom-generation
             depends: imagefetcher
             template: sbom-generation
+            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
           - name: scan-dependency-track
             depends: sbom-generation
             template: scan-dependency-track
+            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
           - name: dependency-track-notification-thresholds
             depends: scan-dependency-track
             template: dependency-track-notification-thresholds
+            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
           - name: results-dependency-track-dd-upload
             depends: dependency-track-notification-thresholds
             template: results-dependency-track-dd-upload
@@ -71,31 +74,39 @@ spec:
               parameters:
                 - name: dependency-track-notification-alerts
                   value: "{{tasks.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-alerts}}"
+            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
+            when: "{{ workflow.parameters.is_scan_distroless }} == true"
           - name: scan-lifetime
             depends: imagefetcher
             template: scan-lifetime
+            when: "{{ workflow.parameters.is_scan_lifetime }} == true"
           - name: scan-baseimage-lifetime
             depends: imagefetcher
             template: scan-baseimage-lifetime
+            when: "{{ workflow.parameters.is_scan_baseimage_lifetime }} == true"
           - name: scan-dependency-check
             depends: imagefetcher
             template: scan-dependency-check
+            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
           - name: scan-runasroot
             depends: imagefetcher
             template: scan-runasroot
+            when: "{{ workflow.parameters.is_scan_runasroot }} == true"
           - name: scan-malware
             depends: imagefetcher
             template: scan-malware
+            when: "{{ workflow.parameters.is_scan_malware }} == true"
           - name: scan-new-version
             depends: imagefetcher
             template: scan-new-version
+            when: "{{ workflow.parameters.is_scan_new_version }} == true"
           - name: results-dependency-check-dd-upload
-            #when: "{{ workflow.parameters.is_scan_dependency_check }} == true" # v3 allows conditional artifacts, that might be a way
             depends: scan-dependency-check
             template: results-dependency-check-dd-upload
+            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
@@ -106,6 +117,7 @@ spec:
               artifacts:
                 - name: results-generic-findings
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
+            when: "{{ scan-distroless.Succeeded }} == true || {{ scan-lifetime.Succeeded }} == true || {{ scan-baseimage-lifetime.Succeeded }} == true || {{ scan-runasroot.Succeeded }} == true || scan-malware.Succeeded || {{ scan-new-version.Succeeded}} == true"
           - name: results-aggregate
             depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
@@ -113,43 +125,34 @@ spec:
               artifacts:
                 - name: results-dd-generic-test-link
                   from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link }}"
+                  optional: true
                 - name: results-dd-generic-is-finding-file
                   from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file }}"
+                  optional: true
                 - name: results-dd-generic-findings-file
                   from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file }}"
+                  optional: true
                 - name: results-generic
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
+                  optional: true
                 - name: results-dd-dependency-check-test-link
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
+                  optional: true
                 - name: results-dd-dependency-check-is-finding-file
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
+                  optional: true
                 - name: results-dd-dependency-check-findings-file
                   from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
+                  optional: true
                 - name: results-dd-dependency-track-test-link
                   from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link }}"
+                  optional: true
                 - name: results-dd-dependency-track-is-finding-file
                   from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.is-finding-file }}"
+                  optional: true
                 - name: results-dd-dependency-track-findings-file
                   from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.findings-file }}"
-              parameters:
-                - name: "dd-generic-exitcode"
-                  value: "{{ tasks.results-generic-dd-upload.exitCode }}"
-                - name: "dd-generic-startedat"
-                  value: "{{ tasks.results-generic-dd-upload.startedAt }}"
-                - name: "dd-generic-finishedat"
-                  value: "{{ tasks.results-generic-dd-upload.finishedAt }}"
-                - name: "dd-dependency-check-exitcode"
-                  value: "{{ tasks.results-dependency-check-dd-upload.exitCode }}"
-                - name: "dd-dependency-check-startedat"
-                  value: "{{ tasks.results-dependency-check-dd-upload.startedAt }}"
-                - name: "dd-dependency-check-finishedat"
-                  value: "{{ tasks.results-dependency-check-dd-upload.finishedAt }}"
-                - name: "dd-dependency-track-exitcode"
-                  value: "{{ tasks.results-dependency-track-dd-upload.exitCode }}"
-                - name: "dd-dependency-track-startedat"
-                  value: "{{ tasks.results-dependency-track-dd-upload.startedAt }}"
-                - name: "dd-dependency-track-finishedat"
-                  value: "{{ tasks.results-dependency-track-dd-upload.finishedAt }}"
+                  optional: true
 
     - name: imagefetcher
       volumes:
@@ -575,10 +578,13 @@ spec:
         artifacts:
           - name: results-dd-dependency-track-test-link
             path: /tmp/defectDojoTestLink.txt
+            optional: true
           - name: is-finding-file
             path: /tmp/isFinding
+            optional: true
           - name: findings-file
             path: /tmp/findings.json
+            optional: true
       container:
         resources:
           limits:
@@ -1014,10 +1020,13 @@ spec:
         artifacts:
           - name: results-dd-dependency-check-test-link
             path: /tmp/defectDojoTestLink.txt
+            optional: true
           - name: is-finding-file
             path: /tmp/isFinding
+            optional: true
           - name: findings-file
             path: /tmp/findings.json
+            optional: true
       container:
         resources:
           limits:
@@ -1150,10 +1159,13 @@ spec:
         artifacts:
           - name: results-dd-generic-test-link
             path: /tmp/defectDojoTestLink.txt
+            optional: true
           - name: is-finding-file
             path: /tmp/isFinding
+            optional: true
           - name: findings-file
             path: /tmp/findings.json
+            optional: true
       volumes:
         - name: tmp
           emptyDir: { }
@@ -1213,34 +1225,34 @@ spec:
         artifacts:
           - name: results-dd-generic-test-link
             path: /tmp/dd-generic-test-link.txt
+            optional: true
           - name: results-dd-generic-is-finding-file
             path: /tmp/isFinding-generic
+            optional: true
           - name: results-dd-generic-findings-file
             path: /tmp/findings-generic.json
+            optional: true
           - name: results-generic
             path: /tmp/result.json
+            optional: true
           - name: results-dd-dependency-check-test-link
             path: /tmp/dd-dependency-check-test-link.txt
+            optional: true
           - name: results-dd-dependency-check-is-finding-file
             path: /tmp/isFinding-dependency-check
+            optional: true
           - name: results-dd-dependency-check-findings-file
             path: /tmp/findings-dependency-check.json
+            optional: true
           - name: results-dd-dependency-track-test-link
             path: /tmp/dd-dependency-track-test-link.txt
+            optional: true
           - name: results-dd-dependency-track-is-finding-file
             path: /tmp/isFinding-dependency-track
+            optional: true
           - name: results-dd-dependency-track-findings-file
             path: /tmp/findings-dependency-track.json
-        parameters:
-          - name: dd-generic-exitcode
-          - name: dd-generic-startedat
-          - name: dd-generic-finishedat
-          - name: dd-dependency-check-exitcode
-          - name: dd-dependency-check-startedat
-          - name: dd-dependency-check-finishedat
-          - name: dd-dependency-track-exitcode
-          - name: dd-dependency-track-startedat
-          - name: dd-dependency-track-finishedat
+            optional: true
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -1290,7 +1302,9 @@ spec:
           fi
           IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
           IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | sed -e "s#/#__#g" | cut -d: -f${field})
-
+          if ! [ -e /tmp/result.json ]; then
+            echo "{}" > /tmp/result.json
+          fi
           JSON_RESULT=$(cat /tmp/result.json)
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageHash = \"${IMAGE_HASH}\"")
@@ -1304,7 +1318,7 @@ spec:
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
 
-          JSON_DD_DEPENDENCY_TRACK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-track-startedat }}\"}")
+          JSON_DD_DEPENDENCY_TRACK=$(echo "{\"errors\":[]}")
           isFinding=$(cat /tmp/isFinding-dependency-track) || isFinding="false"
           if [ "$isFinding" == "true" ]; then
             DD_LINK=$(cat /tmp/dd-dependency-track-test-link.txt)
@@ -1326,18 +1340,12 @@ spec:
               JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"findings\": []}")
               echo "Warning: /tmp/findings-dependency-track.json is empty"
             fi
-          elif [ "xX{{ inputs.parameters.dd-dependency-track-exitcode }}" != "xX0" ]; then
-            echo "Exit code != 0"
-            JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
           else
             JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
-          JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-track-finishedat }}\"}")
           JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"scanType\": \"Dependency Track\"}")
 
-
-
-          JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-dependency-check-startedat }}\"}")
+          JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" )
           isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
           if [ "$isFinding" == "true" ]; then
             DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
@@ -1359,18 +1367,13 @@ spec:
               JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
               echo "Warning: /tmp/findings-dependency-check.json is empty"
             fi
-          elif [ "xX{{ inputs.parameters.dd-dependency-check-exitcode }}" != "xX0" ]; then
-            echo "Exit code != 0"
-            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\", \"findings\": []}")
           else
             JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-dependency-check-finishedat }}\"}")
           JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
 
           echo "Starting Generic"
-          JSON_DD_GENERIC=$(echo "{\"errors\":[]}" | jq -Sc ".+= {\"startedAt\": \"{{ inputs.parameters.dd-generic-startedat }}\"}")
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"finishedAt\": \"{{ inputs.parameters.dd-generic-finishedat }}\"}") || true
+          JSON_DD_GENERIC=$(echo "{\"errors\":[]}" )
           JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")          
           isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
           if [ "${isFinding}" == "true" ]; then
@@ -1383,8 +1386,6 @@ spec:
               JSON_DD_GENERIC=$(echo ${JSON_DD_DEPENDENCY_GENERIC} | jq -Sc ". += {\"findings\": []}")
               echo "Warning: /tmp/finding-generic  is empty"
             fi
-          elif [ "xX{{ inputs.parameters.dd-generic-exitcode }}" != "xX0" ]; then
-            JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"failed\", \"finding\": false, \"infoText\": \"Uploading report to DefectDojo failed.\"}")
           else
             JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
