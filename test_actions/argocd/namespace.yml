@@ -2,3 +2,12 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: argocd
+  annotations:
+    team: "operations"
+    slack: "#security-notifications-test"
+    clusterscanner.sdase.org/skip: "false"
+    clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
+    clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
+    clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
+    clusterscanner.sdase.org/is-scan-dependency-check: "false" # Boolean
+    clusterscanner.sdase.org/is-scan-dependency-track: "true" # Boolean
