@@ -3,7 +3,7 @@
 WORKFLOW_FILE=/tmp/image-workflow.yml
 cp ../images/process/workflow-runner/workflow.template.yml ${WORKFLOW_FILE}
 
-IMAGE="quay.io/sdase/terminal-backend-public:1.34.2"
+IMAGE="quay.io/sdase/cluster-image-scanner-test-image:2"
 IMAGE_ID="${IMAGE}"
 
 sed -i 's|###workflow_name###|test-scan|g' ${WORKFLOW_FILE}
@@ -28,10 +28,10 @@ sed -i 's|###is_scan_baseimage_lifetime###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_lifetime###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_distroless###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_malware###|true|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_dependency_check###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_runasroot###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_new_version###|true|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_dependency_track###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_dependency_track###|false|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_dependency_check###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###scan_lifetime_max_days###|14|g' ${WORKFLOW_FILE}
 sed -i 's|###dependencyCheckSuppressionsConfigMapName###|suppressions-sda|g' ${WORKFLOW_FILE}
 sed -i 's|###new_version_image_filter###|.*|g' ${WORKFLOW_FILE}
