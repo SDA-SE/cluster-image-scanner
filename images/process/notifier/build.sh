@@ -18,7 +18,7 @@ MAJOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 1p)
 MINOR=$(echo "${VERSION}" | tr '.' "\n" | sed -n 2p)
 
 oci_prefix="org.opencontainers.image"
-descr="Clusterscan Notifier"
+descr="ClusterImageScanner Notifier"
 
 trap cleanup INT EXIT
 cleanup() {
