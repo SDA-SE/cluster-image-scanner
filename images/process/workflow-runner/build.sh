@@ -39,7 +39,8 @@ touch "${mnt}/clusterscanner/template.yml"
 chmod 777 "${mnt}/clusterscanner/template.yml"
 
 # set argo version
-export ARGO_VERSION=$(curl --silent https://api.github.com/repos/argoproj/argo-workflows/releases/latest | jq '.tag_name' | sed 's/"//g')
+export ARGO_VERSION=$(curl --silent https://api.github.com/repos/argoproj/argo-workflows/releases/latest | jq -r '.tag_name' | sed 's/"//g')
+curl --silent https://api.github.com/repos/argoproj/argo-workflows/releases/latest # debug
 # Download archive
 echo "Will download from https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
 curl -sLO "https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-amd64.gz"
