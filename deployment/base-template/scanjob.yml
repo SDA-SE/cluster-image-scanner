@@ -117,7 +117,7 @@ spec:
               artifacts:
                 - name: results-generic-findings
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
-            when: "{{ scan-distroless.Succeeded }} == true || {{ scan-lifetime.Succeeded }} == true || {{ scan-baseimage-lifetime.Succeeded }} == true || {{ scan-runasroot.Succeeded }} == true || scan-malware.Succeeded || {{ scan-new-version.Succeeded}} == true"
+            #when: "{{ scan-distroless.Succeeded }} == true || {{ scan-lifetime.Succeeded }} == true || {{ scan-baseimage-lifetime.Succeeded }} == true || {{ scan-runasroot.Succeeded }} == true || scan-malware.Succeeded || {{ scan-new-version.Succeeded}} == true"
           - name: results-aggregate
             depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
