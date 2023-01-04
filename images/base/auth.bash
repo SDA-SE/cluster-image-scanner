@@ -25,7 +25,7 @@ EOF
     payload_base64=$(echo -n "${payload}" | jq -c . | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
     header_payload=$(echo -n "${header_base64}.${payload_base64}")
-    echo "Creating Signature with header_payload ${header_payload} AND GH_KEY_FILE_PATH: $GH_KEY_FILE_PATH"
+    echo "Creating Signature with header_payload ${header_payload} (this is not a secret) AND GH_KEY_FILE_PATH: $GH_KEY_FILE_PATH"
     signature=$(echo -n "${header_payload}" | openssl dgst -binary -sha256 -sign "${GH_KEY_FILE_PATH}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
     export CLUSTER_SCAN_JWT="${header_payload}.${signature}"
