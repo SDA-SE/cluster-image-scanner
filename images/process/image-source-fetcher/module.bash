@@ -28,6 +28,7 @@ for repofile in /clusterscanner/image-source-list/*; do
     gitAuth
     git clone "${repourl}" /tmp/${i}
     echo "Will delete service-description.json"
+    find /tmp/${i} -type f -name ".*service-description.json" -exec rm -rf {} + || true
     find /tmp/${i} -type f -name "service-description.json" -exec rm -rf {} + || true
     find /tmp/${i} -name "*.json" -exec mv "{}" /clusterscanner/out/ \;
     rm -Rf /tmp/${i}
