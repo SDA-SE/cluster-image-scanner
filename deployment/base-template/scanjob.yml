@@ -1439,6 +1439,7 @@ spec:
           - configMapRef:
               name: "scanjob-env-parameter"
         source: |         
+          set -e
           if [ "${MESSAGE_TARGETS}" == "" ]; then
             echo "MESSAGE_TARGETS set, exiting"
             exit 1
@@ -1448,6 +1449,12 @@ spec:
           fi
           failures='{{workflow.failures}}'
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
+          echo "ERROR_NOTIFICATION_IGNORE: ${ERROR_NOTIFICATION_IGNORE}"
+          if [ $(echo "${failures}" | grep -c "${ERROR_NOTIFICATION_IGNORE}") -ne 0 ]; then
+            echo "Skipping notifiction because it is in ERROR_NOTIFICATION_IGNORE: \"${ERROR_NOTIFICATION_IGNORE}\"" 
+            exit 0
+          fi
+          
           echo "failures"
           echo "${failures}"
           sendMessageViarocketchat() {
@@ -1493,7 +1500,7 @@ spec:
               "${SLACK_MESSAGE_ENDPOINT}"
           }
           
-          fn_exists() { declare -F "$1" > /dev/null; }
+          functionExists() { declare -F "$1" > /dev/null; }
           
           if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]] || [[ "${failures}" == "null" ]]; then
             echo "No message, exit 0" 
@@ -1504,7 +1511,7 @@ spec:
             type=$(echo "${i}" | jq -r '.type')
             echo "Sending via ${type} to channel ${channel}"
             toCall="sendMessageVia$type"
-            if ! fn_exists ${toCall} ; then
+            if ! functionExists ${toCall} ; then
               echo "Message type '${type}' doesn't exit"
               exit 1
             fi
