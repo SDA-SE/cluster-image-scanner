@@ -265,7 +265,7 @@ spec:
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
+              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s/###ROCKETCHAT_CHANNEL###/${rocketchat}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
               sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
               sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
