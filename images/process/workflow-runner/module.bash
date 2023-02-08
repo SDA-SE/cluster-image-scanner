@@ -27,6 +27,18 @@ while read -r line; do
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
+  IMAGE_NAME=$(echo "${DATA_JSON}" | jq -r .image)
+  IMAGE_ID=$(echo "${DATA_JSON}" | jq -r .image_id)
+  parse_and_set_image_variables
+  appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_name)
+  if [ "${appname}" == "" ]; then
+    appname="${IMAGE_NAME}"
+  fi
+  appversion=$(echo "${DATA_JSON}" | jq -r .app_version)
+  if [ "${appversion}" == "" ]; then
+    appversion="${IMAGE_TAG}"
+  fi
+
   cp /clusterscanner/workflow.template.yml /tmp/template.yml
   scanjobPrefix="sj-"
   echo "Replacing placeholders in template, clusterImageScannerImageTag ${clusterImageScannerImageTag}, containerType: ${containerType}"
@@ -38,8 +50,8 @@ while read -r line; do
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
   sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
   sed -i "s~###team###~${team}~" /tmp/template.yml
-  sed -i "s~###appname###~$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)~" /tmp/template.yml
-  sed -i "s~###appversion###~$(echo "${DATA_JSON}" | jq -r .app_version)~" /tmp/template.yml
+  sed -i "s~###appname###~${appname}~" /tmp/template.yml
+  sed -i "s~###appversion###~${appversion}~" /tmp/template.yml
   sed -i "s~###environment###~${environment}~" /tmp/template.yml
   sed -i "s~###namespace###~${namespace}~" /tmp/template.yml
   sed -i "s~###containerType###~${containerType}~" /tmp/template.yml
