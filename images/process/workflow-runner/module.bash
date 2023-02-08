@@ -2,6 +2,8 @@
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
 set -e
 
+source ./scan-common.bash
+
 if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
   SERVICE_ACCOUNT_NAME="clusterscanner"
 fi
