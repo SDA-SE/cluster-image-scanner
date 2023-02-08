@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 # checks if an image appears to be distroless
 # by looking for a shell
 #
