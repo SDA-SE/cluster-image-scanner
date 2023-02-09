@@ -177,7 +177,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -216,7 +216,9 @@ spec:
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           unpack_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           config_dir=$(mktemp -d --tmpdir="${tmp_dir}")
-          mkdir -p "${image_copy_dir}" "${config_dir}" "${unpack_dir}"
+          skopeo_tmp_dir=$(mktemp -d --tmpdir="${tmp_dir}")
+          SKOPEO_COPY_PARAMETER="--tmpdir ${skopeo_tmp_dir} ${SKOPEO_COPY_PARAMETER}"
+          mkdir -p "${image_copy_dir}" "${config_dir}" "${unpack_dir}" "${skopeo_tmp_dir}"
           echo "Directory /run/containers"
           ls -lah /run/containers
 
@@ -598,7 +600,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
@@ -714,7 +716,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -764,7 +766,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -1040,7 +1042,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
@@ -1182,7 +1184,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
@@ -1408,6 +1410,9 @@ spec:
           
 
     - name: exit-handler
+      volumes:
+        - name: tmp
+          emptyDir: { }
       script:
         command: [/bin/bash]
         resources:
@@ -1422,7 +1427,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -1438,6 +1443,9 @@ spec:
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
         source: |         
           set -e
           if [ "${MESSAGE_TARGETS}" == "" ]; then

@@ -37,7 +37,6 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
     dt1=$(echo ${imageHistory} | jq -r '.[0] | if has("created") then .created else if has("Created") then .Created else "NODATE" end end')
   fi
-  sed -i 's#Image#BaseImage#g' /clusterscanner/lifetime.csv
   IMAGE_TYPE="BaseImage"
 else
   dt1=$(skopeo inspect ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" | jq -r 'if has("created") then .created else if has("Created") then .Created else "NODATE" end end' | sed 's/"//g')
@@ -81,6 +80,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/lifetime.csv "${ARTIFACTS_PATH}/lifetime.csv"
+    sed -i "s#Image#${IMAGE_TYPE}#g" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###INFOTEXT###/${infoText}/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###SEVERITY###/Medium/" "${ARTIFACTS_PATH}/lifetime.csv"
     sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"
