@@ -98,7 +98,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true # .gitignore needs to be locked
+          readOnlyRootFilesystem: false # .gitignore needs to be locked
           runAsNonRoot: true
           runAsUser: 1001
         volumeMounts:
