@@ -1411,6 +1411,9 @@ spec:
           
 
     - name: exit-handler
+      volumes:
+        - name: tmp
+          emptyDir: { }
       script:
         command: [/bin/bash]
         resources:
@@ -1441,6 +1444,9 @@ spec:
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
         source: |         
           set -e
           if [ "${MESSAGE_TARGETS}" == "" ]; then
