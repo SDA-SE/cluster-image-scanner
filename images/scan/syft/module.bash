@@ -5,7 +5,7 @@ source /clusterscanner/scan-common.bash
 scan_result_pre
 
 echo "Starting Syft with parameter '$@'"
-/syft "$@" -v
+/syft "$@" -vv
 
 if [ -f /clusterscanner/data/bom.json ]; then
   echo  "/clusterscanner/data/bom.json doesn't exists"
