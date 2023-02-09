@@ -431,7 +431,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false # .gitignore needs to be locked
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
