@@ -4,7 +4,7 @@ set -e
 source /clusterscanner/scan-common.bash
 scan_result_pre
 
-echo "Starting Syft with parameter '$@ > /clusterscanner/data/bom.json'"
+echo "Starting Syft with parameter '$@'"
 /syft "$@"
 ls -la /clusterscanner/data
 if ! [ -f /clusterscanner/data/bom.json ]; then

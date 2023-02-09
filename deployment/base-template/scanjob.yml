@@ -312,7 +312,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -356,7 +356,7 @@ spec:
           - name: APP_NAME
             value: "{{ workflow.parameters.appname }}"
           - name: APP_VERSION
-            value: "{{ workflow.parameters.appversion }}" # TODO Usage of image version
+            value: "{{ workflow.parameters.appversion }}"
           - name: IMAGE
             value: "{{ workflow.parameters.image }}"
           - name: IMAGE_ID
@@ -389,7 +389,7 @@ spec:
             exit 0
           fi
           
-          source ./scan-common.bash        
+          source ./scan-common.bash
           parse_and_set_image_variables
           echo "ImageName ${IMAGE_NAME}"
           PROJECT_NAME=$(echo "${DD_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
@@ -400,6 +400,11 @@ spec:
            echo "Error: DEPENDENCY_TRACK_KEY not set"
            exit 4
           fi
+          ls -la "${bomPath}"
+          if ! [ -f "${bomPath}" ]; then
+            echo "Could not find bom file in ${bomPath}"
+            exit 5
+          fi          
           bomBase64=$(cat "${bomPath}" | base64 -w 0)
           echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${IMAGE_TAG}'", "autoCreate": true, "bom": "'${bomBase64}'" }' > /tmp/tmpfile
           curl -X "PUT" \
