@@ -29,8 +29,9 @@ while read -r line; do
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
-  export IMAGE_NAME=$(echo "${DATA_JSON}" | jq -r .image)
-  export IMAGE_ID=$(echo "${DATA_JSON}" | jq -r .image_id)
+  IMAGE_NAME=$(echo "${DATA_JSON}" | jq -r .image)
+  IMAGE_ID=$(echo "${DATA_JSON}" | jq -r .image_id)
+  export IMAGE_ID #used in parse_and_set_image_variables
   parse_and_set_image_variables
   appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_name)
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
