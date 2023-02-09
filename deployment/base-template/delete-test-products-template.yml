@@ -42,7 +42,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3"

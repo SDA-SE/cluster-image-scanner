@@ -204,7 +204,7 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
-          set -e
+          set -xe
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
@@ -1134,6 +1134,7 @@ spec:
             if [ "${isFinding}" == "true" ]; then
               echo "Checking for csv:"
               ls -la $(dirname "${j}")/*.csv
+              cat $(dirname "${j}")/*.csv 
               cat $(dirname "${j}")/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given for ${j}"
             fi
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")

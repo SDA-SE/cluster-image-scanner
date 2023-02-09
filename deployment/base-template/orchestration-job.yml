@@ -98,7 +98,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false # .gitignore needs to be locked
+          readOnlyRootFilesystem: true # .gitignore needs to be locked
           runAsNonRoot: true
           runAsUser: 1001
         volumeMounts:
@@ -431,7 +431,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -591,7 +591,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
@@ -629,7 +629,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
@@ -776,7 +776,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
