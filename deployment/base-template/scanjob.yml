@@ -1134,7 +1134,6 @@ spec:
             if [ "${isFinding}" == "true" ]; then
               echo "Checking for csv:"
               ls -la $(dirname "${j}")/*.csv
-              cat $(dirname "${j}")/*.csv 
               cat $(dirname "${j}")/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given for ${j}"
             fi
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
