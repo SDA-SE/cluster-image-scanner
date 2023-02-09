@@ -284,10 +284,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 1024Mi # due to inspecting the tar
+            memory: 2024Mi # due to inspecting the tar
           requests:
             cpu: '0.2'
-            memory: 768Mi
+            memory: 2024Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
