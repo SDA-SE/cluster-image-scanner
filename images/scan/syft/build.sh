@@ -29,7 +29,7 @@ cleanup() {
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
-base_image="anchore/syft:v0.60.2"
+base_image="anchore/syft:v0.70.0"
 #base_image="quay.io/sdase/cluster-image-scanner-scan-syft:cataloger"
 
 ctr="$( buildah from --pull --quiet "${base_image}")"
