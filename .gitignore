@@ -3,3 +3,4 @@
 /.idea
 /deployment/overlays/test-local/config-source/
 .idea
+test/
