@@ -629,7 +629,7 @@ spec:
           capabilities:
             drop:
               - ALL
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-imagecollector:{{ workflow.parameters.clusterImageScannerImageTag }}"
