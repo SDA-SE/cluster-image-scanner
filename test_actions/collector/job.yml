@@ -16,7 +16,7 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             runAsUser: 1001
-          image: "quay.io/sdase/sdase-version-collector:1.1.104-106-g761eff7"
+          image: "quay.io/sdase/cluster-image-scanner-imagecollector:###VERSION###"
           imagePullPolicy: Always
           env:
             - name: CLUSTER_NAME
@@ -24,7 +24,7 @@ spec:
             - name: DEFAULT_SKIP
               value: "true"
             - name: GIT_REPOSITORY
-              value: "github.com/pagel-pro/cluster-image-scanner-test-targets.git"
+              value: "###GIT_COLLECTOR_REPOSITORY###"
             - name: GH_APP_ID
               valueFrom:
                 configMapKeyRef:
