@@ -34,9 +34,14 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ../ddTemplate.csv "${mnt}/clusterscanner/lifetime.csv"
+#cp ../ddTemplate.csv "${mnt}/clusterscanner/lifetime.csv"
+cp ../ddTemplate.json "${mnt}/clusterscanner/lifetime.json"
 
-sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/lifetime.csv"
+#sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/lifetime.csv"
+cat <<< $(jq \
+  --arg title "Image Age > ###MAXLIFETIME### Days" \
+ '.findings[].title = $title' \
+ "${mnt}/clusterscanner/distroless.csv") > "${mnt}/clusterscanner/distroless.csv"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance ${mnt}/clusterscanner/lifetime.csv
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Response ${mnt}/clusterscanner/lifetime.csv
 
