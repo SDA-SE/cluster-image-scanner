@@ -33,9 +33,10 @@ while read -r line; do
   IMAGE_ID=$(echo "${DATA_JSON}" | jq -r .image_id)
   export IMAGE_ID #used in parse_and_set_image_variables
   parse_and_set_image_variables
-  appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_name)
+  appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
     appname="${IMAGE_NAME}"
+    echo "app_kubernetes_io_name is empty, setting to: ${IMAGE_NAME}"
   fi
   appversion=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_version)
   if [ "${appversion}" == "" ] || [ "${appversion}" == "null" ]; then
