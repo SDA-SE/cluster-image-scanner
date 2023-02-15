@@ -41,7 +41,7 @@ cp ../ddTemplate.json "${mnt}/clusterscanner/distroless.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.csv
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response ${mnt}/clusterscanner/distroless.csv
 
-cat <<< $(jq \
+echo $(jq \
   --arg infoText "${infoText}" \
   --arg title "No distroless used" \
   --arg severity "Medium" \
