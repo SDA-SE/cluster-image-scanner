@@ -4,9 +4,16 @@
             "date": "",
             "title": "",
             "severity": "",
+            "description": {
+                "infoText": "",
+                "image": "",
+                "cluster": "",
+                "namespace": ""
+            },
+            "mitigation": "",
+            "impact": "",
             "references": "",
-            "relevance": "",
-            "response": ""
+            "relevance": ""
         }
     ]
 }

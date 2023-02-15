@@ -21,4 +21,4 @@ sed -i.bak "s/# //g" ${TEMP_FILE}
 sed -i.bak "s/#/\n/g" ${TEMP_FILE}
 
 extract=$(jq -R -s -c '.' ${TEMP_FILE})
-jq --arg extract "${extract}" '.findings[].relevance = ($extract | fromjson)' "${TARGET_FILE}" > "${TARGET_FILE}"
+$(jq --arg extract "${extract}" '.findings[].relevance = ($extract | fromjson)' < "${TARGET_FILE}") > "${TARGET_FILE}"
