@@ -1,4 +1,4 @@
-# Known Vulnerabilities via OWASP Dependency Check
+# Known Vulnerabilities via OWASP Dependency Track
 
 ## Relevance
 Services and artifacts often rely on external dependencies for all sorts of reasons. These dependencies may have known vulnerabilities.
