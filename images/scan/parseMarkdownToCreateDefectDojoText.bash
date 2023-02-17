@@ -23,5 +23,5 @@ sed -i.bak "s/#/\n/g" ${TEMP_FILE}
 extract=$(jq -R -s -c '.' ${TEMP_FILE})
 echo $(jq --arg extract "${extract}" '.findings[].relevance = ($extract | fromjson)' < "${TARGET_FILE}") > "${TARGET_FILE}"
 
-desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' distroless.json)
-echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < distroless.json) > distroless.json
+desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' "${TARGET_FILE}")
+echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < "${TARGET_FILE}") > "${TARGET_FILE}"
