@@ -1131,7 +1131,7 @@ spec:
           JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           find /tmp/results
           #echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
-          echo '{ "findings": [] }' > findings.json
+          echo '{ "findings": [] }' > /tmp/findings.json
           for j in /tmp/results/**/*.json; do
             echo "Collecting ${j}"
             JSON_RESULT=$(cat "${j}" | jq -ScM .)
@@ -1140,7 +1140,7 @@ spec:
             if [ "${isFinding}" == "true" ]; then
               echo "Checking for json:"
               ls -la $(dirname "${j}")/*.json
-              echo $(jq --argfile f1 findings.json --argfile f2 "${j}" '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > findings.json
+              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "${j}" '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
             fi
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
