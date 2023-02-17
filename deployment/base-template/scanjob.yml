@@ -1230,7 +1230,7 @@ spec:
           - name: DD_REPORT_TYPE
             value: "Generic Findings Import"
           - name: DD_REPORT_PATH
-            value: /tmp/generic-results.csv
+            value: /tmp/generic-results.json
           - name: EXIT_CODE_ON_FINDING
             value: "0"
           - name: NAMESPACE
