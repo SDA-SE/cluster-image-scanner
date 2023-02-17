@@ -273,7 +273,7 @@ getPods() {
           "scm_release": .metadata.annotations["'${SCM_RELEASE_ANNOTATION}'"],
           "skip": .metadata.annotations["'${SKIP_ANNOTATION}'"],
           "app_kubernetes_io_name": .metadata.labels["'${APP_NAME_LABEL}'"],
-          "app_version": .metadata.labels["'${APP_VERSION_LABEL}'"],
+          "app_kubernetes_io_version": .metadata.labels["'${APP_VERSION_LABEL}'"],
           "team": "'${team}'",
           "namespace": "'${namespace}'",
           "container_running_as": "TODO",
@@ -403,9 +403,9 @@ getPods() {
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |
           if .scan_lifetime_max_days == null then .scan_lifetime_max_days="'${scanLifetimeMaxDays}'" else . end |
           if .app_kubernetes_io_name == null then .app_kubernetes_io_name="'${imageBase}'" else . end |
-          if .app_version == null then .app_version="'${imageTag}'" else . end |
+          if .app_kubernetes_io_version == null then .app_kubernetes_io_version="'${imageTag}'" else . end |
           if .container_type == null then .container_type="'${containerType}'" else . end |
-          if .scm_release == null then .scm_release=.app_version else . end
+          if .scm_release == null then .scm_release=.app_kubernetes_io_version else . end
           ' /tmp/container.json /tmp/meta.json >> "${IMAGE_JSON_FILE}"
         done
       done

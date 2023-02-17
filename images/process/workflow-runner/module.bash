@@ -38,7 +38,7 @@ while read -r line; do
     appname="${IMAGE_NAME}"
     echo "app_kubernetes_io_name is empty, setting to: ${IMAGE_NAME}"
   fi
-  appversion=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_version)
+  appversion=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_version)
   if [ "${appversion}" == "" ] || [ "${appversion}" == "null" ]; then
     appversion="${IMAGE_TAG}"
   fi
