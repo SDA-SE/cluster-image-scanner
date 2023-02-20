@@ -45,7 +45,7 @@ echo $(jq \
   --arg infoText "${infoText}" \
   --arg title "No distroless used" \
   --arg severity "Medium" \
- '.findings[].severity = $severity | .findings[].title = $title | .findings[].description.infotext = $infoText' \
+ '.findings[].severity = $severity | .findings[].title = $title | .findings[].description.infoText = $infoText' \
  "${mnt}/clusterscanner/distroless.json") > "${mnt}/clusterscanner/distroless.json"
 
 # sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/distroless.csv"
