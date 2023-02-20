@@ -43,8 +43,8 @@ cp ../ddTemplate.json "${mnt}/clusterscanner/runAsRoot.json"
 #sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/runAsRoot.csv"
 #sed -i "s/###TITLE###/Image Potentially Running as Root/" "${mnt}/clusterscanner/runAsRoot.csv"
 echo $(jq \
-  --arg severity = "Medium" \
-  --arg title = "Image Potentially Running as Root" \
+  --arg severity "Medium" \
+  --arg title "Image Potentially Running as Root" \
   '.findings[].severity = $severity | .findings[].title = $title' \
   "${mnt}/clusterscanner/runAsRoot.json") > "${mnt}/clusterscanner/runAsRoot.json"
 
