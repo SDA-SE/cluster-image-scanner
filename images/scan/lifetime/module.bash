@@ -80,6 +80,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/lifetime.json "${ARTIFACTS_PATH}/lifetime.json"
+    sed -i "/###MAXLIFETIME###/${dDiff}/" "${ARTIFACTS_PATH}/lifetime.json"
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi
