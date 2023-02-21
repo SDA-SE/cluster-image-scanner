@@ -81,6 +81,12 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
     cp /clusterscanner/lifetime.json "${ARTIFACTS_PATH}/lifetime.json"
     sed -i "/###MAXLIFETIME###/${dDiff}/" "${ARTIFACTS_PATH}/lifetime.json"
+    originalReferenceText=$(jq '.findings[].references')
+    referencesText="${IMAGE_TYPE} is ${dDiff} days old.\nBuilddate: ${dt1}"
+    echo $(jq \
+      --arg references "${referencesText}\n${originalReferenceText}" \
+      '.findings[].references  = $referencesText' \
+      "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi
