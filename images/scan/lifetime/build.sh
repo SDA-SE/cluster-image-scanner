@@ -40,6 +40,7 @@ cp ../ddTemplate.json "${mnt}/clusterscanner/lifetime.json"
 #sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/lifetime.csv"
 echo $(jq \
   --arg title "Image Age > ###MAXLIFETIME### Days" \
+  --arg severity "Medium" \
  '.findings[].title = $title' \
  "${mnt}/clusterscanner/lifetime.json") > "${mnt}/clusterscanner/lifetime.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance ${mnt}/clusterscanner/lifetime.json
