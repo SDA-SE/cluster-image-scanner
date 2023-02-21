@@ -17,9 +17,7 @@ fi
 _imageUser=$(skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} docker://"${IMAGE_BY_HASH}" | jq '.config.User // "ROOT"' | tr -d \")
 
 if [[ "xX${_imageUser,,}" =~ ^xX(root|0) ]]; then
-    #cp /clusterscanner/runAsRoot.csv "${ARTIFACTS_PATH}/runAsRoot.csv"
     cp /clusterscanner/runAsRoot.json "${ARTIFACTS_PATH}/runAsRoot.json"
-    #sed -i "s~###References###~~" "${ARTIFACTS_PATH}/runAsRoot.csv"
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc  ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Image is potentially running as root\"}")
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc  ". += {\"status\": \"completed\", \"finding\": false}")
