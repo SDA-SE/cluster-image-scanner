@@ -312,7 +312,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -349,7 +349,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_dependency_track }}"
@@ -616,7 +616,7 @@ spec:
             mountPath: /tmp/dependency-track-results
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
             readOnly: true
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -678,7 +678,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -829,7 +829,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: Always # TODO
+        imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -1058,7 +1058,7 @@ spec:
             mountPath: /tmp/dependency-check-results
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
             readOnly: true
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1233,7 +1233,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
