@@ -678,7 +678,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -829,7 +829,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # TODO
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -1128,54 +1128,78 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
+          
           JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           find /tmp/results
           #echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
           echo '{ "findings": [] }' > /tmp/findings.json
-          for j in /tmp/results/**/*.json; do
+          cat /tmp/findings.json
+          ls -la /tmp/results/**/*.json
+          # merge results
+          for j in $(ls /tmp/results/**/module_*.json ); do
             echo "Collecting ${j}"
             JSON_RESULT=$(cat "${j}" | jq -ScM .)
             echo "${JSON_RESULT}"
-            isFinding=$(echo "${JSON_RESULT}" | jq -ScM ".[].finding") || isFinding="false"
-            if [ "${isFinding}" == "true" ]; then
-              echo "Checking for json:"
-              ls -la $(dirname "${j}")/*.json
-              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "${j}" '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
-            fi
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
-          echo "${JSON_RESULTS}" > /tmp/result.json
+          # merge findings
           DATE=$(date +%m/%d/%Y)
-          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.json and /tmp/result.json"
-          #sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
-          echo $(jq \
-            --arg image {{ workflow.parameters.image }} \
-            '.findings[].image = $image ' \
-            /tmp/findings.json) > /tmp/findings.json
-          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
+          for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
+            echo "Collecting ${j}"
+            if [ -s "${j}" ]; then
+              echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.json and /tmp/result.json"
+              #sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
+              echo $(jq \
+                --arg image {{ workflow.parameters.image }} \
+                '.findings[].description.image = $image ' \
+                /tmp/findings.json) > /tmp/findings.json
+              sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
+              echo "cat /tmp/findings.json2"
+              cat /tmp/findings.json
+              echo "Will replace placeholder CLUSTER in /tmp/findings.json and /tmp/result.json"
+              #sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
+              echo $(jq \
+                --arg cluster {{ workflow.parameters.environment }} \
+                '.findings[].description.cluster = $cluster ' \
+                /tmp/findings.json) > /tmp/findings.json
+              sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
+    
+              echo "Will replace placeholder NAMESPACE in /tmp/findings.json and /tmp/result.json"
+              #sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+              echo $(jq \
+                --arg namespace {{ workflow.parameters.namespace }} \
+                '.findings[].description.namespace = $namespace ' \
+                /tmp/findings.json) > /tmp/findings.json
+              sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
+    
+              #sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
+              echo "cat /tmp/findings.json1"
+              cat /tmp/findings.json 
+              echo $(jq \
+                --arg date "{$DATE}" \
+                '.findings[].date = $date' \
+                /tmp/findings.json) > /tmp/findings.json
+              sed -i "s-###DATE###-$DATE-g" /tmp/result.json
+                      
+              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' "${j}")
+              echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < "${j}") > "${j}"
+              cat "${j}"
+              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "${j}" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
+            else
+              echo "Error: ${j} is empty"
+            fi  
 
-          echo "Will replace placeholder CLUSTER in /tmp/findings.json and /tmp/result.json"
-          #sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
-          echo $(jq \
-            --arg cluster {{ workflow.parameters.environment }} \
-            '.findings[].cluster = $cluster ' \
-            /tmp/findings.json) > /tmp/findings.json
-          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
+            if ! [ -s /tmp/findings.json ]; then
+              echo "Error: /tmp/findings.json is empty"
+            fi
+            echo "################################ /tmp/findings.json"
+            cat /tmp/findings.json
+          done
+          echo "${JSON_RESULTS}" > /tmp/result.json
 
-          echo "Will replace placeholder NAMESPACE in /tmp/findings.json and /tmp/result.json"
-          #sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
-          echo $(jq \
-            --arg namespace {{ workflow.parameters.namespace }} \
-            '.findings[].namespace = $namespace ' \
-            /tmp/findings.json) > /tmp/findings.json
-          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
-
-          #sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
-          echo $(jq \
-            --arg date "{$DATE}" \
-            '.findings[].date = $date' \
-            /tmp/findings.json) > /tmp/findings.json
-          sed -i "s-###DATE###-$DATE-g" /tmp/result.json
+          echo "cat /tmp/findings.json"
+          cat /tmp/findings.json
+          
 
     - name: results-generic-dd-upload
       inputs:
