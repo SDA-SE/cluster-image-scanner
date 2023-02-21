@@ -1142,7 +1142,7 @@ spec:
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
           # merge findings
-          DATE=$(date +%m/%d/%Y)
+          DATE=$(date +%Y-%m-%d)
           for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
             echo "Collecting ${j}"
             if [ -s "${j}" ]; then
@@ -1165,7 +1165,7 @@ spec:
                 /tmp/finding.tmp) > /tmp/finding.tmp
 
               echo $(jq \
-                --arg date "{$DATE}" \
+                --arg date "${DATE}" \
                 '.findings[].date = $date' \
                 /tmp/finding.tmp) > /tmp/finding.tmp
               echo "/tmp/finding.tmp before desc"
@@ -1182,10 +1182,10 @@ spec:
               echo "Error: ${j} is empty"
             fi
           done
-          
+
           echo "Writing JSON_RESULTS to /tmp/result.json"
           echo "${JSON_RESULTS}" > /tmp/result.json
-          sed -i "s-###DATE###-$DATE-g" /tmp/result.json
+          sed -i "s~###DATE###~${DATE}~g" /tmp/result.json
           echo "Will replace placeholder CLUSTER in /tmp/result.json"
           sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
           echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/result.json"
