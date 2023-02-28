@@ -20,6 +20,15 @@ sed -i.bak "s/##/#/g" ${TEMP_FILE}
 sed -i.bak "s/# //g" ${TEMP_FILE}
 sed -i.bak "s/#/\n/g" ${TEMP_FILE}
 
-extract=$(jq -R -s -c '.' ${TEMP_FILE})
+extract=$(jq -R -r -s -c '.' ${TEMP_FILE})
+echo "extract: $extract"
 references=$(jq -r '.findings[].references' "${TARGET_FILE}")
-echo $(jq --arg extract "${extract}\n${references}" '.findings[].references = ($extract | fromjson)' < "${TARGET_FILE}") > "${TARGET_FILE}"
+#references="\n${references}"
+echo "$TARGET_FILE"
+cat $TARGET_FILE
+echo "references: ${references}"
+
+extract="${extract}
+${references}"
+
+echo $(jq --arg extract "${extract}" '.findings[].references = ($extract)' < "${TARGET_FILE}") > "${TARGET_FILE}"
