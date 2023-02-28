@@ -25,7 +25,10 @@ references=$(jq -r '.findings[].references' "${TARGET_FILE}")
 echo "references: ${references}"
 
 # The newline is intended; \n will be double encoded
-extract="${extract}
-${references}"
+extract=$(cat <<EOF
+${extract}
+${references}
+EOF
+)
 
 echo $(jq --arg extract "${extract}" '.findings[].references = ($extract)' < "${TARGET_FILE}") > "${TARGET_FILE}"
