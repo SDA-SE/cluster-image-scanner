@@ -21,13 +21,10 @@ sed -i.bak "s/# //g" ${TEMP_FILE}
 sed -i.bak "s/#/\n/g" ${TEMP_FILE}
 
 extract=$(jq -R -r -s -c '.' ${TEMP_FILE})
-echo "extract: $extract"
 references=$(jq -r '.findings[].references' "${TARGET_FILE}")
-#references="\n${references}"
-echo "$TARGET_FILE"
-cat $TARGET_FILE
 echo "references: ${references}"
 
+# The newline is intended; \n will be double encoded
 extract="${extract}
 ${references}"
 
