@@ -82,8 +82,14 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     cp /clusterscanner/lifetime.json "${ARTIFACTS_PATH}/lifetime.json"
     originalReferenceText=$(jq '.findings[].references')
     referencesText="${IMAGE_TYPE} is ${dDiff} days old.\nBuilddate: ${dt1}"
+    references=$(cat <<EOF
+${referencesText}
+${originalReferenceText}
+EOF
+    )
+
     echo $(jq \
-      --arg references "${referencesText}\n${originalReferenceText}" \
+      --arg references "${references}" \
       --arg title "${IMAGE_TYPE} Age > ${dDiff} Days" \
       '.findings[].references  = $references | .findings[].title  = $title' \
       "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
