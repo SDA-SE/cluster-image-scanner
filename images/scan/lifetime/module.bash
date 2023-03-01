@@ -85,7 +85,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     echo $(jq \
       --arg references "${referencesText}\n${originalReferenceText}" \
       --arg title "${IMAGE_TYPE} Age > ${dDiff} Days"
-      '.findings[].references  = $references' \
+      '.findings[].references  = $references | .findings[].title  = $title' \
       "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
