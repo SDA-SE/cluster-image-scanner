@@ -34,10 +34,8 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-#cp ../ddTemplate.csv "${mnt}/clusterscanner/lifetime.csv"
 cp ../ddTemplate.json "${mnt}/clusterscanner/lifetime.json"
 
-#sed -i "s|###TITLE###|Image Age > ###MAXLIFETIME### Days|" "${mnt}/clusterscanner/lifetime.csv"
 echo $(jq \
   --arg title "Image Age > ###MAXLIFETIME### Days" \
   --arg severity "Medium" \
@@ -45,6 +43,9 @@ echo $(jq \
  "${mnt}/clusterscanner/lifetime.json") > "${mnt}/clusterscanner/lifetime.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance ${mnt}/clusterscanner/lifetime.json
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Response ${mnt}/clusterscanner/lifetime.json
+
+echo "Is severity set?"
+cat ${mnt}/clusterscanner/lifetime.json
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
