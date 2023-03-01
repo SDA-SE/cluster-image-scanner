@@ -84,7 +84,7 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
     referencesText="${IMAGE_TYPE} is ${dDiff} days old.\nBuilddate: ${dt1}"
     echo $(jq \
       --arg references "${referencesText}\n${originalReferenceText}" \
-      --arg title "${IMAGE_TYPE} Age > ${dDiff} Days"
+      --arg title "${IMAGE_TYPE} Age > ${dDiff} Days" \
       '.findings[].references  = $references | .findings[].title  = $title' \
       "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
 else
