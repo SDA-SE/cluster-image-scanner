@@ -39,8 +39,7 @@ cp ../ddTemplate.json "${mnt}/clusterscanner/lifetime.json"
 echo $(jq \
   --arg title "Image Age > ###MAXLIFETIME### Days" \
   --arg severity "Medium" \
- '.findings[].title = $title' \
- '.findings[].severity = $severity' \
+ '.findings[].title = $title | .findings[].severity = $severity' \
  "${mnt}/clusterscanner/lifetime.json") > "${mnt}/clusterscanner/lifetime.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance ${mnt}/clusterscanner/lifetime.json
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Response ${mnt}/clusterscanner/lifetime.json
