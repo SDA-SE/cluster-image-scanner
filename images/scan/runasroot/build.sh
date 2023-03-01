@@ -35,15 +35,11 @@ mnt="$( buildah mount "${ctr}" )"
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 
-#cp ../ddTemplate.csv "${mnt}/clusterscanner/runAsRoot.csv"
 cp ../ddTemplate.json "${mnt}/clusterscanner/runAsRoot.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance "${mnt}/clusterscanner/runAsRoot.json"
 ../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response "${mnt}/clusterscanner/runAsRoot.json"
 echo "${mnt}/clusterscanner/runAsRoot.json"
 cat "${mnt}/clusterscanner/runAsRoot.json"
-#sed -i "s/###INFOTEXT###//" "${mnt}/clusterscanner/runAsRoot.csv"
-#sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/runAsRoot.csv"
-#sed -i "s/###TITLE###/Image Potentially Running as Root/" "${mnt}/clusterscanner/runAsRoot.csv"
 echo $(jq \
   --arg severity "Medium" \
   --arg title "Image Potentially Running as Root" \

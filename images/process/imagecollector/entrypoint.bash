@@ -37,7 +37,6 @@ TZ="Europe/Berlin" date > lastScan
 git add lastScan || true
 
 echo "Old json is not to be used anymore" # TODO: Remove
-#git rm imagesAndCluster.csv || true
 git rm imagesAndCluster.json || true
 
 git commit -m "update lastscan" lastScan  || true

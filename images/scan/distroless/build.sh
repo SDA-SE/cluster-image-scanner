@@ -37,8 +37,8 @@ mnt="$( buildah mount "${ctr}" )"
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.json "${mnt}/clusterscanner/distroless.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.json
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response ${mnt}/clusterscanner/distroless.json
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "${mnt}/clusterscanner/distroless.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "${mnt}/clusterscanner/distroless.json"
 
 echo $(jq \
   --arg infoText "${infoText}" \

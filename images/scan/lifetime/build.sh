@@ -40,11 +40,8 @@ echo $(jq \
   --arg severity "Medium" \
  '.findings[].severity = $severity' \
  "${mnt}/clusterscanner/lifetime.json") > "${mnt}/clusterscanner/lifetime.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance ${mnt}/clusterscanner/lifetime.json
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Response ${mnt}/clusterscanner/lifetime.json
-
-echo "Is severity set?"
-cat ${mnt}/clusterscanner/lifetime.json
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Relevance "${mnt}/clusterscanner/lifetime.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/image-lifetime.md Response "${mnt}/clusterscanner/lifetime.json"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

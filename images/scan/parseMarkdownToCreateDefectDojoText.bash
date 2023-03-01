@@ -2,7 +2,7 @@
 
 SOURCE_FILE=$1 # md from doc
 TARGET=$2 # What to extract Response or Relevance
-TARGET_FILE=$3 # Target CSV
+TARGET_FILE=$3 # Target JSON file
 TEMP_FILE="/tmp/tmp-file-to-create-markdown"
 heading="##"
 
@@ -24,7 +24,7 @@ extract=$(jq -R -r -s -c '.' ${TEMP_FILE})
 references=$(jq -r '.findings[].references' "${TARGET_FILE}")
 echo "references: ${references}"
 
-# The newline is intended; \n will be double encoded
+# heredoc for correctly-parsed newlines
 extract=$(cat <<EOF
 ${extract}
 ${references}
