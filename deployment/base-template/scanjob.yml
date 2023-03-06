@@ -1132,8 +1132,7 @@ spec:
           JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           find /tmp/results
           echo '{ "findings": [] }' > /tmp/findings.json
-          cat /tmp/findings.json
-          ls -la /tmp/results/**/*.json
+
           # merge results
           for j in $(ls /tmp/results/**/module_*.json ); do
             echo "Collecting ${j}"
