@@ -1176,10 +1176,12 @@ spec:
               echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "/tmp/finding.tmp" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
             else
               echo "Error: ${j} is empty"
+              exit 2
             fi  
 
             if ! [ -s ${j} ]; then
               echo "Error: ${j} is empty"
+              exit 3
             fi
           done
 
