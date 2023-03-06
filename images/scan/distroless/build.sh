@@ -36,13 +36,16 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ../ddTemplate.csv "${mnt}/clusterscanner/distroless.csv"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance ${mnt}/clusterscanner/distroless.csv
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response ${mnt}/clusterscanner/distroless.csv
+cp ../ddTemplate.json "${mnt}/clusterscanner/distroless.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "${mnt}/clusterscanner/distroless.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "${mnt}/clusterscanner/distroless.json"
 
-sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/distroless.csv"
-sed -i "s|###TITLE###|No distroless used|" "${mnt}/clusterscanner/distroless.csv"
-sed -i "s|###INFOTEXT###|${infoText}|" "${mnt}/clusterscanner/distroless.csv"
+echo $(jq \
+  --arg infoText "${infoText}" \
+  --arg title "No distroless used" \
+  --arg severity "Medium" \
+ '.findings[].severity = $severity | .findings[].title = $title | .findings[].description.infoText = $infoText' \
+ "${mnt}/clusterscanner/distroless.json") > "${mnt}/clusterscanner/distroless.json"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

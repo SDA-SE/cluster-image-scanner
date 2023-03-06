@@ -79,14 +79,20 @@ if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
       infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
     fi
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
-    cp /clusterscanner/lifetime.csv "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s#Image#${IMAGE_TYPE}#g" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s/###INFOTEXT###/${infoText}/" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s/###SEVERITY###/Medium/" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s/###MAXLIFETIME###/${MAX_IMAGE_LIFETIME_IN_DAYS}/" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s/###BUILDDATE###/${dt1}/" "${ARTIFACTS_PATH}/lifetime.csv"
-    sed -i "s~###References###~${IMAGE_TYPE} is ${dDiff} days old~" "${ARTIFACTS_PATH}/lifetime.csv"
+    cp /clusterscanner/lifetime.json "${ARTIFACTS_PATH}/lifetime.json"
+    originalReferenceText=$(jq '.findings[].references')
+    references=$(cat <<EOF
+${IMAGE_TYPE} is ${dDiff} days old.
+Builddate: ${dt1}
+${originalReferenceText}
+EOF
+    )
 
+    echo $(jq \
+      --arg references "${references}" \
+      --arg title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" \
+      '.findings[].references  = $references | .findings[].title  = $title' \
+      "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi

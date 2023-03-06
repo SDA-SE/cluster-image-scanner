@@ -34,11 +34,13 @@ mnt="$( buildah mount "${ctr}" )"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ../ddTemplate.csv "${mnt}/clusterscanner/new-version.csv"
-sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/new-version.csv" # TODO For test mode low, later critical
+cp ../ddTemplate.json "${mnt}/clusterscanner/new-version.json"
+jq --arg severity "Medium" \
+  '.findings[].severity = $severity' \
+  "${mnt}/clusterscanner/new-version.json" > "${mnt}/clusterscanner/new-version.json"
 
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Relevance ${mnt}/clusterscanner/new-version.csv
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Response ${mnt}/clusterscanner/new-version.csv
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Relevance ${mnt}/clusterscanner/new-version.json
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Response ${mnt}/clusterscanner/new-version.json
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

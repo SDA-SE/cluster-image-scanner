@@ -25,8 +25,7 @@ for sh in "bin/sh$" "bin/bash$" "bin/dash$" "bin/zsh$" "bin/ash$"; do
 done
 
 if [[ ${_shell_found} -eq 1 ]]; then
-    cp /clusterscanner/distroless.csv "${ARTIFACTS_PATH}/distroless.csv"
-    sed -i "s~###References###~~" "${ARTIFACTS_PATH}/distroless.csv"
+    cp /clusterscanner/distroless.json "${ARTIFACTS_PATH}/distroless.json"
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")

@@ -312,7 +312,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -349,7 +349,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: IS_SCAN
             value: "{{ workflow.parameters.is_scan_dependency_track }}"
@@ -616,7 +616,7 @@ spec:
             mountPath: /tmp/dependency-track-results
             subPath: "results/{{ workflow.parameters.image_id }}/sbom"
             readOnly: true
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1058,7 +1058,7 @@ spec:
             mountPath: /tmp/dependency-check-results
             subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
             readOnly: true
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1098,7 +1098,7 @@ spec:
           - name: results-generic
             path: /tmp/result.json
           - name: results-generic-findings
-            path: /tmp/findings.csv
+            path: /tmp/findings.json
       script:
         resources:
           limits:
@@ -1128,40 +1128,81 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
+          
           JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
           find /tmp/results
-          echo 'Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified' > /tmp/findings.csv
-          for j in /tmp/results/**/*.json; do
+          echo '{ "findings": [] }' > /tmp/findings.json
+
+          # merge results
+          for j in $(ls /tmp/results/**/module_*.json ); do
             echo "Collecting ${j}"
             JSON_RESULT=$(cat "${j}" | jq -ScM .)
             echo "${JSON_RESULT}"
-            isFinding=$(echo "${JSON_RESULT}" | jq -ScM ".[].finding") || isFinding="false"
-            if [ "${isFinding}" == "true" ]; then
-              echo "Checking for csv:"
-              ls -la $(dirname "${j}")/*.csv
-              cat $(dirname "${j}")/*.csv >> /tmp/findings.csv || echo "No generic findinigs via csv given for ${j}"
-            fi
             JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
           done
+          # merge findings
+          DATE=$(date +%Y-%m-%d)
+          for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
+            echo "Collecting ${j}"
+            if [ -s "${j}" ]; then
+              echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in ${j}"
+              echo $(jq \
+                --arg image {{ workflow.parameters.image }} \
+                '.findings[].description.image = $image ' \
+                ${j}) > /tmp/finding.tmp
+
+              echo "Will replace placeholder environment in /tmp/finding.tmp"
+              echo $(jq \
+                --arg cluster {{ workflow.parameters.environment }} \
+                '.findings[].description.cluster = $cluster ' \
+                /tmp/finding.tmp) > /tmp/finding.tmp
+    
+              echo "Will replace placeholder NAMESPACE in /tmp/finding.tmp"
+              echo $(jq \
+                --arg namespace {{ workflow.parameters.namespace }} \
+                '.findings[].description.namespace = $namespace ' \
+                /tmp/finding.tmp) > /tmp/finding.tmp
+
+              echo $(jq \
+                --arg date "${DATE}" \
+                '.findings[].date = $date' \
+                /tmp/finding.tmp) > /tmp/finding.tmp
+              echo "/tmp/finding.tmp before desc"
+              cat /tmp/finding.tmp
+              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' "/tmp/finding.tmp")
+              echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < "/tmp/finding.tmp") > "/tmp/finding.tmp"
+              cat "${j}"
+              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "/tmp/finding.tmp" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
+            else
+              echo "Error: ${j} is empty"
+              exit 2
+            fi  
+
+            if ! [ -s ${j} ]; then
+              echo "Error: ${j} is empty"
+              exit 3
+            fi
+          done
+
+          echo "Writing JSON_RESULTS to /tmp/result.json"
           echo "${JSON_RESULTS}" > /tmp/result.json
-          DATE=$(date +%m/%d/%Y)
-          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/findings.csv and /tmp/result.json"
-          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/findings.csv
-          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
-          echo "Will replace placeholder CLUSTER in /tmp/findings.csv and /tmp/result.json"
-          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/findings.csv
+          sed -i "s~###DATE###~${DATE}~g" /tmp/result.json
+          echo "Will replace placeholder CLUSTER in /tmp/result.json"
           sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
-          echo "Will replace placeholder NAMESPACE in /tmp/findings.csv and /tmp/result.json"
-          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/findings.csv
+          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/result.json"
+          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
+          echo "Will replace placeholder NAMESPACE in/tmp/result.json"
           sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
-          sed -i "s-###DATE###-$DATE-g" /tmp/findings.csv
-          sed -i "s-###DATE###-$DATE-g" /tmp/result.json
+
+          echo "cat /tmp/findings.json"
+          cat /tmp/findings.json
+          
 
     - name: results-generic-dd-upload
       inputs:
         artifacts:
           - name: results-generic-findings
-            path: /tmp/generic-results.csv
+            path: /tmp/generic-findings.json
       outputs:
         artifacts:
           - name: results-dd-generic-test-link
@@ -1193,7 +1234,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1"
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -1210,7 +1251,7 @@ spec:
           - name: DD_REPORT_TYPE
             value: "Generic Findings Import"
           - name: DD_REPORT_PATH
-            value: /tmp/generic-results.csv
+            value: /tmp/generic-findings.json
           - name: EXIT_CODE_ON_FINDING
             value: "0"
           - name: NAMESPACE

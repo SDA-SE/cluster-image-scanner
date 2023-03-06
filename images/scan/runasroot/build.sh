@@ -35,13 +35,16 @@ mnt="$( buildah mount "${ctr}" )"
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 
-cp ../ddTemplate.csv "${mnt}/clusterscanner/runAsRoot.csv"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance ${mnt}/clusterscanner/runAsRoot.csv
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response ${mnt}/clusterscanner/runAsRoot.csv
-sed -i "s/###INFOTEXT###//" "${mnt}/clusterscanner/runAsRoot.csv"
-sed -i "s/###SEVERITY###/Medium/" "${mnt}/clusterscanner/runAsRoot.csv"
-sed -i "s/###TITLE###/Image Potentially Running as Root/" "${mnt}/clusterscanner/runAsRoot.csv"
-
+cp ../ddTemplate.json "${mnt}/clusterscanner/runAsRoot.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance "${mnt}/clusterscanner/runAsRoot.json"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response "${mnt}/clusterscanner/runAsRoot.json"
+echo "${mnt}/clusterscanner/runAsRoot.json"
+cat "${mnt}/clusterscanner/runAsRoot.json"
+echo $(jq \
+  --arg severity "Medium" \
+  --arg title "Image Potentially Running as Root" \
+  '.findings[].severity = $severity | .findings[].title = $title' \
+  "${mnt}/clusterscanner/runAsRoot.json") > "${mnt}/clusterscanner/runAsRoot.json"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

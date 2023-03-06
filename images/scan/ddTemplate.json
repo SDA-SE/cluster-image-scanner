@@ -1,0 +1,18 @@
+{
+    "findings": [
+        {
+            "date": "",
+            "title": "",
+            "severity": "",
+            "description": {
+                "infoText": "",
+                "image": "",
+                "cluster": "",
+                "namespace": ""
+            },
+            "mitigation": "",
+            "impact": "",
+            "references": ""
+        }
+    ]
+}

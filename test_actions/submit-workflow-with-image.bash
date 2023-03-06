@@ -6,6 +6,12 @@ cp ../images/process/workflow-runner/workflow.template.yml ${WORKFLOW_FILE}
 IMAGE="quay.io/sdase/cluster-image-scanner-test-image:2"
 IMAGE_ID="${IMAGE}"
 
+currentBranch=$(git branch --show-current)
+echo "currentBranch ${currentBranch}"
+if [ "${currentBranch}" == "master" ];then
+    currentBranch="2"
+fi
+
 sed -i 's|###workflow_name###|test-scan|g' ${WORKFLOW_FILE}
 
 sed -i 's|###REGISTRY_SECRET###|registry-default|g' ${WORKFLOW_FILE}
@@ -24,20 +30,20 @@ sed -i "s|###image_id###|${IMAGE_ID}|g" ${WORKFLOW_FILE}
 sed -i 's|###slack###|#security-notifications-test|g' ${WORKFLOW_FILE}
 sed -i 's|###rocketchat###||g' ${WORKFLOW_FILE}
 sed -i 's|###email###||g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_baseimage_lifetime###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_lifetime###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_distroless###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_malware###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_runasroot###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_new_version###|false|g' ${WORKFLOW_FILE}
-sed -i 's|###is_scan_dependency_track###|false|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_baseimage_lifetime###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_lifetime###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_distroless###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_malware###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_runasroot###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_new_version###|true|g' ${WORKFLOW_FILE}
+sed -i 's|###is_scan_dependency_track###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###is_scan_dependency_check###|true|g' ${WORKFLOW_FILE}
 sed -i 's|###scan_lifetime_max_days###|14|g' ${WORKFLOW_FILE}
 sed -i 's|###dependencyCheckSuppressionsConfigMapName###|suppressions-sda|g' ${WORKFLOW_FILE}
 sed -i 's|###new_version_image_filter###|.*|g' ${WORKFLOW_FILE}
 sed -i 's|###imageRegistryBase###|quay.io/sdase|g' ${WORKFLOW_FILE}
 sed -i 's|###containerType###|application|g' ${WORKFLOW_FILE}
-sed -i 's|###clusterImageScannerImageTag###|2|g' ${WORKFLOW_FILE}
+sed -i "s|###clusterImageScannerImageTag###|${currentBranch}|g" ${WORKFLOW_FILE}
 sed -i 's|###slackTokenSecretName###|slacktoken|g' ${WORKFLOW_FILE}
 sed -i 's|###errorTargets###|[{ "channel":"#security-notifications-test", "type": "slack"} ]|g' ${WORKFLOW_FILE}
 
