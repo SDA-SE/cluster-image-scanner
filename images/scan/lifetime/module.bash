@@ -90,7 +90,7 @@ EOF
 
     echo $(jq \
       --arg references "${references}" \
-      --arg title "${IMAGE_TYPE} Age > ${dDiff} Days" \
+      --arg title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" \
       '.findings[].references  = $references | .findings[].title  = $title' \
       "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
 else
