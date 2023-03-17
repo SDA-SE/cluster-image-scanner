@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 git config --global user.email ""
 git config --global user.name "ClusterImageScanner"
 
