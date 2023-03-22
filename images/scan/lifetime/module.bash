@@ -26,7 +26,7 @@ fi
 dt1=""
 if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   # apt.* includes apt-get, apt.*upgrade includes dist-upgrade
-  distroPackageUpdateCommands=("apt.*upgrade" "yum.*update" "apk.*upgrade" "zypper.*update")
+  distroPackageUpdateCommands=("apt.*upgrade" "yum.*update" "apk.*upgrade" "zypper.*update" "yum.*update")
   imageHistory=$(skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" | jq -r '.history')
   for updateCommand in ${distroPackageUpdateCommands[@]}; do
     if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
