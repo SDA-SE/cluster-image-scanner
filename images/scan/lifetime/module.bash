@@ -31,7 +31,9 @@ if [ "${IS_BASE_IMAGE_LIFETIME_SCAN}" == "true" ]; then
   for updateCommand in ${distroPackageUpdateCommands[@]}; do
     if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
       dt1=$(echo ${imageHistory} | jq -r '.[] | select(.created_by != null) | select(.created_by | match("'${updateCommand}'")) | .created' | tail -n 1)
-      break
+      if [ "${dt1}" != "" ]; then
+              break
+      fi
     fi
   done
   if [ "${dt1}" == "" ] || [ "${dt1}" == "null" ]; then
