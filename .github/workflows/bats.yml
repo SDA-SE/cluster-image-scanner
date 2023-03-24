@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Bats
-        run: sudo apt-get install -y bats
+        run: sudo apt-get install -y npm && sudo npm install -g bats
 
       - name: Run Bats test
         run: bats tests
