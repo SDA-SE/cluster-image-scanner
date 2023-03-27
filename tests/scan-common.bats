@@ -2,7 +2,7 @@
 
 bats_require_minimum_version 1.5.0
 
-source "${BATS_TEST_DIRNAME}/../images/base/scan-common.bash"
+load "${BATS_TEST_DIRNAME}/../images/base/scan-common.bash"
 
 setup () {
 clean_simple_json=$(cat <<"EOF"
