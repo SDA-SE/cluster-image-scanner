@@ -140,3 +140,7 @@ empty_template=$(get_template)
 @test "b2kb() should return 5 for 4097" {
     [ $(b2kb 4097) -eq 5 ]
 }
+
+@test "test chaining of b2kb() and size2bytes()" {
+    [ $(b2kb $(size2bytes 40M)) -eq 40960 ]
+}
