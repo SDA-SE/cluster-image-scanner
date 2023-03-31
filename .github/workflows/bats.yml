@@ -14,8 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Bats
-        run: sudo apt-get install -y npm && sudo npm install -g bats
+      - name: Install Bats and ClamAV
+        run: sudo apt-get install -y clamav npm && sudo npm install -g bats
 
       - name: Run Bats test
         run: bats tests
