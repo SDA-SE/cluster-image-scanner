@@ -163,3 +163,37 @@ function safe_write_to_file {
   rm "$tmpfile"
   return 0
 }
+
+
+##
+#  Will convert a size unit that can be passed to clamscan to its value in bytes
+#  valid units can be K, and M for kilobytes and megabytes, respectively.
+# 
+#  returns a byte value for input like 40M or 400K, or the input unchanged if 
+#  the unit is not M or K. 
+##
+function size2bytes {
+  local size="$1"
+  local unit="${size: -1}"
+  local num="${size%?}"
+  
+  case "$unit" in
+    M)
+      echo "$((num * 1024 * 1024))"
+      ;;
+    K)
+      echo "$((num * 1024))"
+      ;;
+    *)
+      echo "$1"
+      ;;
+  esac
+}
+
+##
+#  Will return a size in kilobytes for any input in bytes.
+#  Kilobyte sizes are ceil'd to resemble block size on a disk 
+##
+function b2kb {
+  echo $((($1+1024-1)/1024))
+}

@@ -109,3 +109,34 @@ empty_template=$(get_template)
 @test "get_template() should return valid json" {
     jq <<<$(get_template)
 }
+
+
+@test "size2bytes() should return 4194304000 for 4000M" {
+    [ $(size2bytes 4000M) -eq 4194304000 ]
+    [ $(size2bytes 4000M) -lt 4194304001 ]
+    [ $(size2bytes 4000M) -gt 4194303999 ]
+}
+
+@test "size2bytes() should return 4096000 for 4000K" {
+    [ $(size2bytes 4000K) -eq 4096000 ]
+    [ $(size2bytes 4000K) -lt 4096001 ]
+    [ $(size2bytes 4000K) -gt 4095999 ]
+}
+
+@test "size2bytes() should return 4000 for 4000" {
+    [ $(size2bytes 4000) -eq 4000 ]
+    [ $(size2bytes 4000) -lt 4001 ]
+    [ $(size2bytes 4000) -gt 3999 ]
+}
+
+@test "b2kb() should return 4 for 4000" {
+    [ $(b2kb 4000) -eq 4 ]
+}
+
+@test "b2kb() should return 4 for 4096" {
+    [ $(b2kb 4096) -eq 4 ]
+}
+
+@test "b2kb() should return 5 for 4097" {
+    [ $(b2kb 4097) -eq 5 ]
+}
