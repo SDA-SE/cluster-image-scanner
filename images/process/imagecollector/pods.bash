@@ -3,7 +3,7 @@
 
 # TODO This script needs to be refactored one day, in a way that only jsons are used (and no other env variables)
 
-set -e
+set -ex
 echo "Workdir:"
 ls -la
 echo "Workdir/config"

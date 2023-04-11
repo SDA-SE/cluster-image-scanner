@@ -6,7 +6,7 @@ metadata:
   namespace: clusterscanner
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1000Gi
@@ -18,7 +18,7 @@ metadata:
   namespace: clusterscanner
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 50Gi
