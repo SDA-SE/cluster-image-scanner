@@ -39,8 +39,9 @@ while read -r line; do
   appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)
   
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
-    appname="${IMAGE}"
-    echo "app_kubernetes_io_name is empty, setting to: ${IMAGE}"
+    #IMAGE_NAME is exportet from parse_and_set_image_variables()
+    appname="${IMAGE_NAME}"
+    echo "app_kubernetes_io_name is empty, setting to: ${IMAGE_NAME}"
   fi
   appversion=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_version)
   if [ "${appversion}" == "" ] || [ "${appversion}" == "null" ]; then
