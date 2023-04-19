@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
-set -ex
+set -e
 
 source ./scan-common.bash
 
