@@ -29,17 +29,18 @@ while read -r line; do
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
-  IMAGE_NAME=$(echo "${DATA_JSON}" | jq -r .image)
+  IMAGE=$(echo "${DATA_JSON}" | jq -r .image)
   IMAGE_ID=$(echo "${DATA_JSON}" | jq -r .image_id)
   export IMAGE_ID #used in parse_and_set_image_variables
+  export IMAGE #used in parse_and_set_image_variables
   parse_and_set_image_variables
   
   
   appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)
   
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
-    appname="${IMAGE_NAME}"
-    echo "app_kubernetes_io_name is empty, setting to: ${IMAGE_NAME}"
+    appname="${IMAGE}"
+    echo "app_kubernetes_io_name is empty, setting to: ${IMAGE}"
   fi
   appversion=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_version)
   if [ "${appversion}" == "" ] || [ "${appversion}" == "null" ]; then
