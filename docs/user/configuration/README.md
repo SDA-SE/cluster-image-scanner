@@ -28,7 +28,7 @@ clusterscanner.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" 
 clusterscanner.sdase.org/negated_namespace_filter: "\\-pr\\-" # one \ is needed for grep, double escpe for Kubernetes
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
-scm.sdase.org/source_url="https://github.com/cluster-image-scanner" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
+scm.sdase.org/source_url="https://github.com/ring-calling-service" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
 scm.sdase.org/release="1.0.0" # String, see also labels, defaults to the image tag
   
 # Adjust scans on object or namespace
@@ -63,7 +63,7 @@ This is a recommended configuration including ISO 27001 asset catalog compliance
 contact.sdase.org/team: "the-fellowship-of-the-ring"
 contact.sdase.org/slack: "#fellowship-security" 
 sdase.org/description: "My service description"
-scm.sdase.org/source_url="https://github.com/cluster-image-scanner"
+scm.sdase.org/source_url="https://github.com/ring-calling-service"
 ```
 ### Labels
 ```
