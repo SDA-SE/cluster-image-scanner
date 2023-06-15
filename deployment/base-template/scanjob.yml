@@ -407,7 +407,9 @@ spec:
           fi          
           bomBase64=$(cat "${bomPath}" | base64 -w 0)
           echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${IMAGE_TAG}'", "autoCreate": true, "bom": "'${bomBase64}'" }' > /tmp/tmpfile
-          curl -X "PUT" \
+          echo "bom file:"
+          cat /tmp/tmpfile
+          curl -iX "PUT" \
             "${DEPENDENCY_TRACK_URL}/api/v1/bom" \
             -H 'Content-Type: application/json' \
             -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
@@ -415,7 +417,18 @@ spec:
             --silent \
             --show-error \
             --output /tmp/token.json
-          token=$(cat /tmp/token.json | jq -r '.token')
+
+          RESPONSE=$(head -n1 /tmp/token.json | awk '{print $2}')
+          BODY=$(tail -n1 /tmp/token.json)
+
+          if [ "${RESPONSE}" -le 200 ]; then
+            token=$(jq -r '.token' <<< "${BODY}")
+            echo "token: ${TOKEN}"
+          else 
+            echo "Received HTTP code ${RESPONSE} back form DependencyTrack"
+            echo "Response body: ${BODY}"
+            exit 1
+          fi
 
           counter=0
           processingPerformed="false"
