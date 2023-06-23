@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 # checks if an image a new images exists
 
 source ./scan-common.bash
@@ -17,12 +17,18 @@ function testNewImageAndReport {
   infoText="Image has a new tag, at least ${imageToTest}"
   JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\", \"newVersion\": \"${imageToTest}\"}")
   cp /clusterscanner/new-version.json "${ARTIFACTS_PATH}/new-version.json"
-  echo $(jq \
+  JSON=$(jq \
     --arg infoText "${infoText}" \
     --arg title "Image Has a New Version" \
     --arg severity "low" \
   '.findings[].description.infoText = $infoText | .findings[].title = $title | .findings[].severity = $severity' \
-  "${ARTIFACTS_PATH}/new-version.json") > "${ARTIFACTS_PATH}/new-version.json"
+  "${ARTIFACTS_PATH}/new-version.json")
+  if [ -z "$JSON" ]; then
+    echo "JSON generation with base data failed"
+    exit 1
+  else 
+    cat "$JSON" > "${ARTIFACTS_PATH}/new-version.json"
+  fi
 
   scan_result_post
   exit 0
@@ -54,9 +60,10 @@ PATCH=$(echo "${imageTag}" | tr  '.' "\n" | sed -n 3p)
 IMAGE_WITHOUT_TAG=$(echo "${IMAGE}" | sed 's#:.*##')
 echo "IMAGE_WITHOUT_TAG: ${IMAGE_WITHOUT_TAG}"
 
-let patchPlusOne=${PATCH}+1
+(( patchPlusOne = PATCH + 1 ))
 testNewImageAndReport "${IMAGE_WITHOUT_TAG}:${MAJOR}.${MINOR}.${patchPlusOne}"
-let minorPlusOne=${MINOR}+1
+
+(( minorPlusOne = MINOR + 1 ))
 testNewImageAndReport "${IMAGE_WITHOUT_TAG}:${MAJOR}.${minorPlusOne}.0"
 if [[ "${MAJOR}" =~ ^v ]]; then
   let majorPlusOne=$(echo ${MAJOR} | sed 's#v##g')+1
@@ -71,6 +78,9 @@ echo "No new version available"
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 
 scan_result_post
+
+echo "result file:"
+cat "${ARTIFACTS_PATH}/new-version.json"
 
 exit  0
 
