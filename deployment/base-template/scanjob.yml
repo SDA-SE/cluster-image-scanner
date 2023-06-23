@@ -890,7 +890,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: always 
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -1157,7 +1157,10 @@ spec:
           DATE=$(date +%Y-%m-%d)
           for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
             echo "Collecting ${j}"
-            if [ -s "${j}" ]; then
+            echo "checking ${j} for valid JSON:"
+            jq '.' "${j}" &> /dev/null
+            if [ $? -eq 0 ]; then
+              echo "${j} is valid JSON"
               echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in ${j}"
               echo $(jq \
                 --arg image {{ workflow.parameters.image }} \
@@ -1187,7 +1190,7 @@ spec:
               cat "${j}"
               echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "/tmp/finding.tmp" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
             else
-              echo "Error: ${j} is empty"
+              echo "Error: ${j} does not contain valid JSON"
               exit 2
             fi  
 
