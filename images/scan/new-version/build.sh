@@ -6,8 +6,6 @@ if [ $# -ne 7 ]; then
   exit 1
 fi
 
-source "${mnt}/clusterscanner/scan-common.bash"
-
 REGISTRY=$1
 ORGANIZATION=$2
 IMAGE_NAME=$3
@@ -33,6 +31,8 @@ build_dir="${dir}/build"
 base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
+
+source "${mnt}/clusterscanner/scan-common.bash"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
