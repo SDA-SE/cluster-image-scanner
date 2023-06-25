@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 if [ $# -ne 7 ]; then
   echo "Parameters are not set correctly"
