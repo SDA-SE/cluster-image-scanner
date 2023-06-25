@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "IMAGE: ${IMAGE}, IMAGE_ID: ${IMAGE_ID}"
+#echo "IMAGE: ${IMAGE}, IMAGE_ID: ${IMAGE_ID}"
 
 function scan_result_post {
   if ${IS_USE_CACHE} ; then
@@ -63,11 +63,137 @@ function parse_and_set_image_variables {
 }
 
 
+function get_template {
+cat <<"EOF"
+{
+    "findings": [
+        {
+            "date": "",
+            "title": "",
+            "severity": "",
+            "description": {
+                "infoText": "",
+                "image": "",
+                "cluster": "",
+                "namespace": ""
+            },
+            "mitigation": "",
+            "impact": "",
+            "references": ""
+        }
+    ]
+}
+EOF
+}
 
 
+function add_json_field {
+
+  if [ $# -lt 3 ] || [ $# -gt 4 ]; then
+    >&2 echo "${0}(): ERROR: called with invalid number of parameters"
+    return 1
+  fi
+
+  local -r field=${1:?"${0}(): ERROR: Missing field name"}
+  local -r value=${2:?"${0}(): ERROR: Missing value"}
+  local -r json=${3:?"${0}(): ERROR: Missing input"}
+  local    parent="${4:-nil}"
+
+  if [ -z "${json}" ]; then 
+    >&2 echo "${0}(): ERROR: missing input JSON"
+    return 1
+  fi
+  
+  if ! jq <<< "$json" &>/dev/null; then
+    >&2 echo "${0}(): ERROR: input is not valid JSON"
+    return 1
+  fi
+
+  if [ "${parent}" != "nil" ]; then
+    parent=".${parent}"
+  else 
+    parent=''
+  fi
+  
+  selector=".findings[]${parent}.${field}"
+
+  if ! jq -e "$selector" <<< "$json"; then
+    >&2 echo "${0}(): ERROR: invalid selector: ${selector}"
+    return 1
+  fi
+
+  result=$(jq --arg "${field}" "${value}" \
+    "${selector} = \$${field}" \
+    <<< "$json")
+  jq_res=$?
+
+  if [ $jq_res -eq 0 ]; then
+    echo "$result"
+  elif [ $jq_res -eq 4 ]; then
+    # return clean template with error code 4
+    get_template
+  else
+    echo "$json"
+  fi
+
+  return $jq_res
+}
 
 
+function safe_write_to_file {
+  local -r json=${1:?"${0}(): ERROR: Missing content"}
+  local -r file=${2:?"${0}(): ERROR: Missing file"}
+
+  if [ -z "${json}" ]; then
+    >&2 echo "${0}(): ERROR: missing content"
+    return 1
+  fi
+
+  if ! [ -f "${file}" ]; then
+    >&2 echo "${0}(): ERROR: ${file} does not exist"
+    return 1
+  fi
+
+  tmpfile=$(mktemp)
+
+  if ! echo "$json" > "$tmpfile"; then
+    >&2 echo "${0}(): ERROR: cannot write to $tmpfile" 
+  fi
+  mv "$tmpfile" "$file"
+  rm "$tmpfile"
+  return 0
+}
 
 
+##
+#  Will convert a size unit that can be passed to clamscan to its value in bytes
+#  valid units can be K, and M for kilobytes and megabytes, respectively.
+# 
+#  returns a byte value for input like 40M or 400K, or the input unchanged if 
+#  the unit is not M or K. 
+##
+function size2bytes {
+  local size="$1"
+  local unit="${size: -1}"
+  local num="${size%?}"
+  
+  case "$unit" in
+    M)
+      echo "$((num * 1024 * 1024))"
+      ;;
+    K)
+      echo "$((num * 1024))"
+      ;;
+    *)
+      echo "$1"
+      ;;
+  esac
+}
 
-
+##
+#  Will return a size in kilobytes for any input in bytes.
+#  Kilobyte sizes are ceil'd to resemble block size on a disk 
+##
+function b2kb {
+  echo $((($1+1024-1)/1024))
+}

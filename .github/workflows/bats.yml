@@ -1,0 +1,21 @@
+name: Run BATS tests
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Bats and ClamAV
+        run: sudo apt-get install -y clamav npm && sudo npm install -g bats
+
+      - name: Run Bats test
+        run: bats tests
