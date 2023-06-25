@@ -6,7 +6,7 @@ if [ $# -ne 7 ]; then
   exit 1
 fi
 
-source /clusterscanner/scan-common.bash
+source "${mnt}/clusterscanner/scan-common.bash"
 
 REGISTRY=$1
 ORGANIZATION=$2
