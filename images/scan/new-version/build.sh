@@ -35,13 +35,13 @@ mnt="$( buildah mount "${ctr}" )"
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.json "${mnt}/clusterscanner/new-version.json"
-JSON=$(</mnt/clusterscanner/new-version.json)
+JSON=$(<"/${mnt}/clusterscanner/new-version.json")
 JSON=$(add_json_field severity "Medium" "$JSON")
 #jq --arg severity "Medium" \
 #  '.findings[].severity = $severity' \
 #  "${mnt}/clusterscanner/new-version.json" > "${mnt}/clusterscanner/new-version.json"
 if [ -n "$JSON" ]; then
-  echo "JSON" > /mnt/clusterscanner/new-version.json
+  echo "JSON" > "/${mnt}/clusterscanner/new-version.json"
 else 
   echo "error generating JSON file"
   exit 1
