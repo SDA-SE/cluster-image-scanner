@@ -21,7 +21,7 @@ function testNewImageAndReport {
   JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\", \"newVersion\": \"${imageToTest}\"}")
 
   #cp /clusterscanner/new-version.json "${ARTIFACTS_PATH}/new-version.json"
-  JSON=$(<"/${ARTIFACTS_PATH}/new-version.json")
+  JSON=$(<"/${JSONFILE}")
   JSON=$(add_json_field infoText "$infoText" "$JSON" description)
   JSON=$(add_json_field title "Image Has a New Version" "$JSON")
   JSON=$(add_json_field severity "low" "$JSON")

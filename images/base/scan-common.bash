@@ -117,7 +117,7 @@ function add_json_field {
   
   selector=".findings[]${parent}.${field}"
 
-  if ! jq -e "$selector" <<< "$json"; then
+  if ! jq -e "$selector" <<< "$json" >> /dev/null; then
     >&2 echo "${0}(): ERROR: invalid selector: ${selector}"
     return 1
   fi
