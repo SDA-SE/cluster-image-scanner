@@ -5,10 +5,13 @@ set -ex
 
 source ./scan-common.bash
 
+JSONFILE="${ARTIFACTS_PATH}/new-version.json"
+
 scan_result_pre
 
 function testNewImageAndReport {
   imageToTest=$1
+
 
   imageExists=true
   skopeo inspect "docker://${imageToTest}" > /dev/null || imageExists=false
@@ -16,18 +19,23 @@ function testNewImageAndReport {
 
   infoText="Image has a new tag, at least ${imageToTest}"
   JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\", \"newVersion\": \"${imageToTest}\"}")
-  cp /clusterscanner/new-version.json "${ARTIFACTS_PATH}/new-version.json"
-  JSON=$(jq \
-    --arg infoText "${infoText}" \
-    --arg title "Image Has a New Version" \
-    --arg severity "low" \
-  '.findings[].description.infoText = $infoText | .findings[].title = $title | .findings[].severity = $severity' \
-  "${ARTIFACTS_PATH}/new-version.json")
+
+  #cp /clusterscanner/new-version.json "${ARTIFACTS_PATH}/new-version.json"
+  JSON=$(</clusterscanner/new-version.json)
+  JSON=$(add_json_field infoText "$infoText" "$JSON" description)
+  JSON=$(add_json_field title "Image Has a New Version" "$JSON")
+  JSON=$(add_json_field severity "low" "$JSON")
+  #JSON=$(jq \
+  #  --arg infoText "${infoText}" \
+  #  --arg title "Image Has a New Version" \
+  #  --arg severity "low" \
+  #'.findings[].description.infoText = $infoText | .findings[].title = $title | .findings[].severity = $severity' \
+  #"${ARTIFACTS_PATH}/new-version.json")
   if [ -z "$JSON" ]; then
     echo "JSON generation with base data failed"
     exit 1
   else 
-    cat "$JSON" > "${ARTIFACTS_PATH}/new-version.json"
+    cat "$JSON" > "$JSONFILE"
   fi
 
   scan_result_post
@@ -80,7 +88,7 @@ JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \
 scan_result_post
 
 echo "result file:"
-cat "${ARTIFACTS_PATH}/new-version.json"
+cat "$JSONFILE"
 
 exit  0
 
