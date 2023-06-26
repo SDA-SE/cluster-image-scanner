@@ -35,7 +35,7 @@ function testNewImageAndReport {
     echo "JSON generation with base data failed"
     exit 1
   else 
-    cat "$JSON" > "$JSONFILE"
+    echo "$JSON" > "$JSONFILE"
   fi
 
   scan_result_post
