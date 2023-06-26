@@ -24,11 +24,11 @@ function testNewImageAndReport {
   JSON=$(<"${JSONFILE}")
   JSON=$(add_json_field infoText "$infoText" "$JSON" description)
   JSON=$(add_json_field title "Image Has a New Version" "$JSON")
-  JSON=$(add_json_field severity "low" "$JSON")
+  JSON=$(add_json_field severity "Low" "$JSON")
   #JSON=$(jq \
   #  --arg infoText "${infoText}" \
   #  --arg title "Image Has a New Version" \
-  #  --arg severity "low" \
+  #  --arg severity "Low" \
   #'.findings[].description.infoText = $infoText | .findings[].title = $title | .findings[].severity = $severity' \
   #"${ARTIFACTS_PATH}/new-version.json")
   if [ -z "$JSON" ]; then
