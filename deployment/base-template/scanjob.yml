@@ -829,7 +829,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -877,7 +877,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -1141,77 +1141,108 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
-          
-          JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
-          find /tmp/results
-          echo '{ "findings": [] }' > /tmp/findings.json
 
-          # merge results
-          for j in $(ls /tmp/results/**/module_*.json ); do
-            echo "Collecting ${j}"
-            JSON_RESULT=$(cat "${j}" | jq -ScM .)
-            echo "${JSON_RESULT}"
-            JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
-          done
-          # merge findings
+          if [ -f /clusterscanner/scan-common.bash ]; then
+              source /clusterscanner/scan-common.bash
+              IMAGE="{{ workflow.parameters.image }}"
+              NAMESPACE="{{ workflow.parameters.namespace }}"
+              CLUSTER="{{ workflow.parameters.environment }}"
+              RESULTS_PATH="/tmp/results"
+              FINDINGS="/tmp/findings.json"
+              TMP_FINDINGS="/tmp/findings.tmp.json"
+              RESULTS_FILE="/tmp/result.json"
+          else 
+              source scan-common.bash
+              IMAGE="grafana@sha256:e5a9655dabef50b04847ee75da8bb9cf46f16480117b7a1d955d5648c1d6e5ba"
+              NAMESPACE="TEST"
+              CLUSTER="TEST-CLUSTER"
+              RESULTS_PATH="test-results/${IMAGE}"
+              FINDINGS="findings.json"
+              TMP_FINDINGS="findings.tmp.json"
+              RESULTS_FILE="result.json"
+          fi
+
           DATE=$(date +%Y-%m-%d)
-          for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
+
+          JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+          find ${RESULTS_PATH}
+          echo '{ "findings": [] }' > "${FINDINGS}"
+
+          export JSON_RESULTS
+
+          merge_result() {
+            echo "Collecting $1"
+            JSON_RESULT=$(jq -ScM '.' "$1" )
+            echo "${JSON_RESULT}"
+            JSON_RESULTS=$(jq -ScM ".scanResults += [${JSON_RESULT}]" <<< "${JSON_RESULTS}")
+          }
+
+          echo "merging results..."
+          while read -r f; do merge_result "$f"; done < <(find "${RESULTS_PATH}" -iname "module_*.json")
+          printf "\n\n"
+
+          echo "Results:"
+          echo "$JSON_RESULTS"
+
+          printf "%s\n\n" "------------------------"
+
+          echo "merging findings"
+          while read -r j; do
             echo "Collecting ${j}"
             echo "checking ${j} for valid JSON:"
             jq '.' "${j}" &> /dev/null
             if [ $? -eq 0 ]; then
               echo "${j} is valid JSON"
-              echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in ${j}"
-              echo $(jq \
-                --arg image {{ workflow.parameters.image }} \
-                '.findings[].description.image = $image ' \
-                ${j}) > /tmp/finding.tmp
+              json=$(jq -cM '.' "$j")
+
+              echo "Will replace placeholder IMAGE ${IMAGE} in ${j}"
+              json=$(add_json_field image "$IMAGE" "$json" description)
 
               echo "Will replace placeholder environment in /tmp/finding.tmp"
-              echo $(jq \
-                --arg cluster {{ workflow.parameters.environment }} \
-                '.findings[].description.cluster = $cluster ' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
-    
-              echo "Will replace placeholder NAMESPACE in /tmp/finding.tmp"
-              echo $(jq \
-                --arg namespace {{ workflow.parameters.namespace }} \
-                '.findings[].description.namespace = $namespace ' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
+              json=$(add_json_field cluster "$CLUSTER" "$json" description)
 
-              echo $(jq \
-                --arg date "${DATE}" \
-                '.findings[].date = $date' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
-              echo "/tmp/finding.tmp before desc"
-              cat /tmp/finding.tmp
-              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' "/tmp/finding.tmp")
-              echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < "/tmp/finding.tmp") > "/tmp/finding.tmp"
-              cat "${j}"
-              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "/tmp/finding.tmp" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
+
+              echo "Will replace placeholder NAMESPACE in /tmp/finding.tmp"
+              json=$(add_json_field namespace "$NAMESPACE" "$json" description)
+
+
+              json=$(add_json_field date "$DATE" "$json")
+
+              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' <<<"$json")
+              jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' <<<"$json" > "$TMP_FINDINGS"
+              TMP=$(jq --argfile f1 "${FINDINGS}" --argfile f2 "${TMP_FINDINGS}" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings')
+
+              if  ! jq '.' <<<"$TMP" &>/dev/null ; then 
+                echo "Error: cannot merge findings files into one"
+                exit 2
+              fi
+              echo "final JSON:"
+              jq '.' <<<"$TMP"
+              echo "writing final JSON to ${FINDINGS}"
+              echo "$TMP" > "$FINDINGS"
             else
               echo "Error: ${j} does not contain valid JSON"
               exit 2
             fi  
 
-            if ! [ -s ${j} ]; then
+            if ! [ -s "${j}" ]; then
               echo "Error: ${j} is empty"
               exit 3
             fi
-          done
+          done < <(find ${RESULTS_PATH} -iname "*.json" ! -iname "module_*")
 
-          echo "Writing JSON_RESULTS to /tmp/result.json"
-          echo "${JSON_RESULTS}" > /tmp/result.json
-          sed -i "s~###DATE###~${DATE}~g" /tmp/result.json
-          echo "Will replace placeholder CLUSTER in /tmp/result.json"
-          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
-          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/result.json"
-          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
-          echo "Will replace placeholder NAMESPACE in/tmp/result.json"
-          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
+          echo "Writing JSON_RESULTS to ${RESULTS_FILE}"
+          echo "${JSON_RESULTS}" > ${RESULTS_FILE}
+          sed -i.bak "s~###DATE###~${DATE}~g" ${RESULTS_FILE}
+          echo "Will replace placeholder CLUSTER in ${RESULTS_FILE}"
+          sed -i.bak "s/###CLUSTER###/$CLUSTER/g" ${RESULTS_FILE}
+          echo "Will replace placeholder IMAGE ${IMAGE} in ${RESULTS_FILE}"
+          sed -i.bak "s~###IMAGE###~$IMAGE~g" ${RESULTS_FILE}
+          echo "Will replace placeholder NAMESPACE in${RESULTS_FILE}"
+          sed -i.bak "s/###NAMESPACE###/$NAMESPACE/g" ${RESULTS_FILE}
 
-          echo "cat /tmp/findings.json"
-          cat /tmp/findings.json
+          echo "cat ${FINDINGS}"
+          cat ${FINDINGS}
           
 
     - name: results-generic-dd-upload
@@ -1237,10 +1268,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 512Mi
           requests:
             cpu: '0.2'
-            memory: 256Mi
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
