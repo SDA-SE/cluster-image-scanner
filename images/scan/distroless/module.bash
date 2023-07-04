@@ -9,6 +9,7 @@ set -e
 # export ARTIFACTS_PATH=/path/to/output/dir"
 # ./module.bash
 
+# shellcheck source=../../base/scan-common.bash
 source /clusterscanner/scan-common.bash
 
 scan_result_pre

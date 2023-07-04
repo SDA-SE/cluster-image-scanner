@@ -20,6 +20,7 @@ MINOR=$(echo "${VERSION}" | tr  '.' "\n" | sed -n 2p)
 oci_prefix="org.opencontainers.image"
 descr="Clusterscan Scanner Distroless"
 
+# shellcheck source=env.bash
 source env.bash
 
 trap cleanup INT EXIT
@@ -34,18 +35,28 @@ base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
+# shellcheck source=../../base/scan-common.bash
+source "${mnt}/clusterscanner/scan-common.bash"
+
+JSONFILE="${mnt}/clusterscanner/distroless.json"
+
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ../ddTemplate.json "${mnt}/clusterscanner/distroless.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "${mnt}/clusterscanner/distroless.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "${mnt}/clusterscanner/distroless.json"
+cp ../ddTemplate.json "$JSONFILE"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "$JSONFILE"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "$JSONFILE"
 
-echo $(jq \
-  --arg infoText "${infoText}" \
-  --arg title "No distroless used" \
-  --arg severity "Medium" \
- '.findings[].severity = $severity | .findings[].title = $title | .findings[].description.infoText = $infoText' \
- "${mnt}/clusterscanner/distroless.json") > "${mnt}/clusterscanner/distroless.json"
+JSON=$(<"$JSONFILE")
+JSON=$(add_json_field infoText "$infoText" description) #infoText comes from env.bash
+JSON=$(add_json_field title "No distroless used")
+JSON=$(add_json_field severity "Medium")
+
+if [ -z "$JSON" ]; then
+  echo "failed to prepare JSON template"
+  exit 1
+else 
+  echo "$JSON" > "$JSONFILE"
+fi
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
