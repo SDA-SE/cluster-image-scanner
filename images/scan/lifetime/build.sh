@@ -42,7 +42,7 @@ cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.json "$JSONFILE"
 
 JSON=$(<"$JSONFILE")
-JSON=$(add_json_field severity "Medium")
+JSON=$(add_json_field severity "Medium" "$JSON")
 
 if [ -z "$JSON" ]; then
   echo "failed to prepare JSON template"
