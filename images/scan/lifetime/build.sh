@@ -40,10 +40,6 @@ cp ../ddTemplate.json "$JSONFILE"
 
 JSON=$(<"$JSONFILE")
 JSON=$(add_json_field severity "Medium")
-# echo $(jq \
-#   --arg severity "Medium" \
-#  '.findings[].severity = $severity' \
-#  "${mnt}/clusterscanner/lifetime.json") > "${mnt}/clusterscanner/lifetime.json"
 
 if [ -z "$JSON" ]; then
   echo "failed to prepare JSON template"

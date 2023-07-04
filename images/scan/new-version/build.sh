@@ -32,25 +32,26 @@ base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
+# shellcheck source=../../base/scan-common.bash
 source "${mnt}/clusterscanner/scan-common.bash"
+
+JSONFILE="${mnt}/clusterscanner/new-version.json"
 
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
-cp ../ddTemplate.json "${mnt}/clusterscanner/new-version.json"
-JSON=$(<"/${mnt}/clusterscanner/new-version.json")
+cp ../ddTemplate.json "$JSONFILE"
+
+JSON=$(<"$JSONFILE")
 JSON=$(add_json_field severity "Medium" "$JSON")
-#jq --arg severity "Medium" \
-#  '.findings[].severity = $severity' \
-#  "${mnt}/clusterscanner/new-version.json" > "${mnt}/clusterscanner/new-version.json"
-if [ -n "$JSON" ]; then
-  echo "$JSON" > "/${mnt}/clusterscanner/new-version.json"
-else 
+if [ -z "$JSON" ]; then
   echo "error generating JSON file"
   exit 1
+else 
+  echo "$JSON" > "$JSONFILE"
 fi
 
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Relevance ${mnt}/clusterscanner/new-version.json
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Response ${mnt}/clusterscanner/new-version.json
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Relevance "$JSONFILE"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/new-version.md Response "$JSONFILE"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

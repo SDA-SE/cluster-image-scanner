@@ -3,6 +3,7 @@
 set -ex
 # checks if an image a new images exists
 
+# shellcheck source=../../base/scan-common.bash
 source ./scan-common.bash
 
 JSONFILE="${ARTIFACTS_PATH}/new-version.json"
@@ -25,12 +26,6 @@ function testNewImageAndReport {
   JSON=$(add_json_field infoText "$infoText" "$JSON" description)
   JSON=$(add_json_field title "Image Has a New Version" "$JSON")
   JSON=$(add_json_field severity "Low" "$JSON")
-  #JSON=$(jq \
-  #  --arg infoText "${infoText}" \
-  #  --arg title "Image Has a New Version" \
-  #  --arg severity "Low" \
-  #'.findings[].description.infoText = $infoText | .findings[].title = $title | .findings[].severity = $severity' \
-  #"${ARTIFACTS_PATH}/new-version.json")
   if [ -z "$JSON" ]; then
     echo "JSON generation with base data failed"
     exit 1

@@ -99,6 +99,7 @@ EOF
 
   if [ -z "$JSON" ]; then
     echo "failed to create JSON results"
+    exit 1
   else
     echo "$JSON" > "$JSONFILE"
   fi
