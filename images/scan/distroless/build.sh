@@ -43,8 +43,6 @@ JSONFILE="${mnt}/clusterscanner/distroless.json"
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
 cp ../ddTemplate.json "$JSONFILE"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "$JSONFILE"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "$JSONFILE"
 
 JSON=$(<"$JSONFILE")
 JSON=$(add_json_field infoText "$infoText" description) #infoText comes from env.bash
@@ -57,6 +55,9 @@ if [ -z "$JSON" ]; then
 else 
   echo "$JSON" > "$JSONFILE"
 fi
+
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Relevance "$JSONFILE"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/distroless.md Response "$JSONFILE"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
