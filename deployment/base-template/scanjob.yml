@@ -1561,7 +1561,7 @@ spec:
           sendMessageViarocketchat() {
             channel="${1}"
           
-            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
+            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
             echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner workflow job execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
           
             if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
@@ -1584,7 +1584,7 @@ spec:
           sendMessageViaslack() {
             channel="${1}"
           
-            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
+            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
             echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
             cat /tmp/slack-template.json
           
@@ -1607,6 +1607,7 @@ spec:
             echo "No message, exit 0" 
             exit 0
           fi
+
           echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
             channel=$(echo "${i}" | jq -r '.channel')
             type=$(echo "${i}" | jq -r '.type')
