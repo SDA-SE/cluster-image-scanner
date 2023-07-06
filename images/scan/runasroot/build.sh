@@ -32,19 +32,28 @@ base_image="quay.io/sdase/cluster-image-scanner-base:2"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
+# shellcheck source=../../base/scan-common.bash
+source "${mnt}/clusterscanner/scan-common.bash"
+
+JSONFILE="${mnt}/clusterscanner/runAsRoot.json"
+
 cp module.bash "${mnt}/clusterscanner/"
 cp env.bash "${mnt}/clusterscanner/"
+cp ../ddTemplate.json "$JSONFILE"
 
-cp ../ddTemplate.json "${mnt}/clusterscanner/runAsRoot.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance "${mnt}/clusterscanner/runAsRoot.json"
-../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response "${mnt}/clusterscanner/runAsRoot.json"
-echo "${mnt}/clusterscanner/runAsRoot.json"
-cat "${mnt}/clusterscanner/runAsRoot.json"
-echo $(jq \
-  --arg severity "Medium" \
-  --arg title "Image Potentially Running as Root" \
-  '.findings[].severity = $severity | .findings[].title = $title' \
-  "${mnt}/clusterscanner/runAsRoot.json") > "${mnt}/clusterscanner/runAsRoot.json"
+JSON=$(<"$JSONFILE")
+JSON=$(add_json_field severity "Medium" "$JSON")
+JSON=$(add_json_field title "Image Potentially Running as Root" "$JSON")
+
+if [ -z "$JSON" ]; then
+  echo "error creating JSON template"
+  exit 1
+else
+  echo "$JSON" > "$JSONFILE"
+fi
+
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Relevance "$JSONFILE"
+../parseMarkdownToCreateDefectDojoText.bash ../../../docs/user/scans/run-as-root.md Response "$JSONFILE"
 
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')

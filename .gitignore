@@ -5,3 +5,4 @@
 .idea
 test/
 secrets
+.DS_Store

@@ -9,7 +9,10 @@ set -e
 # export ARTIFACTS_PATH=/path/to/output/dir"
 # ./module.bash
 
+# shellcheck source=../../base/scan-common.bash
 source /clusterscanner/scan-common.bash
+
+JSONFILE="${ARTIFACTS_PATH}/lifetime.json"
 
 scan_result_pre
 
@@ -76,27 +79,32 @@ fi
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"reproducibleBuild\": ${reproducibleBuild}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
 if [ "${dDiff}" -gt "${MAX_IMAGE_LIFETIME_IN_DAYS}" ]; then
-    infoText="Image is too old"
-    if [ "${reproducibleBuild}"  == "true" ]; then
-      infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
-    fi
-    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
-    cp /clusterscanner/lifetime.json "${ARTIFACTS_PATH}/lifetime.json"
-    originalReferenceText=$(jq '.findings[].references')
-    references=$(cat <<EOF
+  infoText="Image is too old"
+  if [ "${reproducibleBuild}"  == "true" ]; then
+    infoText="Could not determine ${IMAGE_TYPE} age due to ${IMAGE_TYPE} creation date of 1970 (happens for reproducible builds)"
+  fi
+  JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
+  cp /clusterscanner/lifetime.json "$JSONFILE"
+  originalReferenceText=$(jq '.findings[].references')
+  references=$(cat <<EOF
 ${IMAGE_TYPE} is ${dDiff} days old.
 Builddate: ${dt1}
 ${originalReferenceText}
 EOF
     )
 
-    echo $(jq \
-      --arg references "${references}" \
-      --arg title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" \
-      '.findings[].references  = $references | .findings[].title  = $title' \
-      "${ARTIFACTS_PATH}/lifetime.json") > "${ARTIFACTS_PATH}/lifetime.json"
+  JSON=$(<"$JSONFILE")
+  JSON=$(add_json_field references "$references" "$JSON")
+  JSON=$(add_json_field title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" "$JSON")
+
+  if [ -z "$JSON" ]; then
+    echo "failed to create JSON results"
+    exit 1
+  else
+    echo "$JSON" > "$JSONFILE"
+  fi
 else
-    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
+  JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi
 
 scan_result_post
