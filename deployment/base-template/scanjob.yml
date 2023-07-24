@@ -890,7 +890,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: Always 
+        imagePullPolicy: IfNotPresent 
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
