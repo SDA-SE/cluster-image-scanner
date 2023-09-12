@@ -183,7 +183,7 @@ spec:
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
-        volumeMounts:
+          volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: images
@@ -193,6 +193,10 @@ spec:
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
+            defaultMode: 0444
+          - name: additionalCAs
+            mountPath: /etc/ssl/certs/additionalCAs.pem
+            subPath: ADDITIONAL_CAS
             defaultMode: 0444
         env:
           - name: IMAGE
