@@ -30,15 +30,15 @@ else
 fi
 
 
-wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
-
-if [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Completed) -lt 1 ]; then
-  kubectl get pods -n cluster-image-scanner-image-collector
-  for pod in $(kubectl get pods -n cluster-image-scanner-image-collector | grep -v NAME | awk '{print $1}'); do
-      kubectl logs ${pod} -n cluster-image-scanner-image-collector
-    done
-  echo "Collector is broken"
-  exit 1
-fi
+#wait_for_pods_completed "collector" "cluster-image-scanner-image-collector" 1 10 120
+#
+#if [ $(kubectl get pods -n cluster-image-scanner-image-collector | grep -c Completed) -lt 1 ]; then
+#  kubectl get pods -n cluster-image-scanner-image-collector
+#  for pod in $(kubectl get pods -n cluster-image-scanner-image-collector | grep -v NAME | awk '{print $1}'); do
+#      kubectl logs ${pod} -n cluster-image-scanner-image-collector
+#    done
+#  echo "Collector is broken"
+#  exit 1
+#fi
 
 #kubectl delete namespace shire

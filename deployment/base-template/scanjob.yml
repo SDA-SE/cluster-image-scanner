@@ -194,6 +194,10 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
+          - name: additionalCAs
+            mountPath: /etc/ssl/certs/additionalCAs.pem
+            subPath: ADDITIONAL_CAS
+            defaultMode: 0444
         env:
           - name: IMAGE
             value: "{{ workflow.parameters.image }}"
