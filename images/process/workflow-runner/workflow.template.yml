@@ -6,11 +6,6 @@ metadata:
     clusterscanner.sda.org/scan-id: "###SCAN_ID###"
 spec:
   serviceAccountName: ###SERVICE_ACCOUNT_NAME###
-  synchronization:
-    semaphore:
-      configMapKeyRef:
-        name: synchronization
-        key: workflow
   arguments:
     parameters:
       - name: REGISTRY_SECRET
