@@ -164,10 +164,9 @@ spec:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: tmp
           emptyDir: { }
-        - name: "additionalCAs"
+        - name: "additional-cas"
           configMap:
             name: "scanjob-env-parameter"
-            key: "ADDITIONAL_CAS"
       script:
         resources:
           limits:
@@ -198,9 +197,9 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
-          - name: additionalCAs
+          - name: additional-cas
             mountPath: /etc/ssl/certs/additionalCAs.pem
-            subPath: additionalCAs.pem
+            subPath: ADDITIONAL_CAS
             defaultMode: 0444
         env:
           - name: IMAGE
