@@ -167,7 +167,6 @@ spec:
         - name: "additionalCAs"
           configMap:
             name: "scanjob-env-parameter"
-            key: "ADDITIONAL_CAS"
       script:
         resources:
           limits:
@@ -200,7 +199,7 @@ spec:
             defaultMode: 0444
           - name: additionalCAs
             mountPath: /etc/ssl/certs/additionalCAs.pem
-            subPath: additionalCAs.pem
+            subPath: ADDITIONAL_CAS
             defaultMode: 0444
         env:
           - name: IMAGE
