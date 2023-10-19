@@ -953,7 +953,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # to have up to date signatures
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
