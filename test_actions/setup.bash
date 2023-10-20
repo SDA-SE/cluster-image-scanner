@@ -20,12 +20,12 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   #read -n 1 -s
   kubectl config use-context minikube
-  if [ $(kubectl config current-context) != "minkube" ]; then
+  if [ $(kubectl config current-context) != "minikube" ]; then
     echo "Error, I am not in kubectx minikube"
     exit 1
   fi
 fi
-
+exit 1
 
 echo "clusterImageScannerImageTag: ${VERSION}"
 sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
