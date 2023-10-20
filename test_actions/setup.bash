@@ -19,6 +19,11 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   minikube start --memory=4384 --cpus=8 --vm-driver kvm2 --disk-size 25GB
   #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   #read -n 1 -s
+  kubectl config use-context minikube
+  if [ $(kubectl config current-context) != "minkube" ]; then
+    echo "Error, I am not in kubectx minikube"
+    exit 1
+  fi
 fi
 
 
