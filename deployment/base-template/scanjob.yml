@@ -399,7 +399,7 @@ spec:
           source ./scan-common.bash
           parse_and_set_image_variables
           echo "ImageName ${IMAGE_NAME}"
-          PROJECT_NAME=$(echo "${DD_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
+          PROJECT_NAME=$(echo "${DEP_TRACK_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
           echo "PROJECT_NAME: ${PROJECT_NAME}"
           bomPath="/clusterscanner/data/bom.json"
           exportFilePath="/clusterscanner/data/findings.json"
@@ -472,7 +472,7 @@ spec:
 
           export UUID=$(cat /tmp/project-uuid.txt)
           if [ "${UUID}" == "" ]; then
-           echo "Error: UUID has the unexpceted value '${UUID}'"
+           echo "Error: UUID has the unexpected value '${UUID}'"
            exit 1
           fi
           if [ $(echo "${UUID}" | wc -l) -ne 1 ]; then
