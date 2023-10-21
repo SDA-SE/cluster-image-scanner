@@ -23,7 +23,7 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
 fi
 
 current_context=$(kubectl config current-context)
-k8s_contexts=("minikube", "docker-for-desktop")
+k8s_contexts=("minikube docker-for-desktop")
 
 found=0
 for context in "${k8s_contexts[@]}"; do
