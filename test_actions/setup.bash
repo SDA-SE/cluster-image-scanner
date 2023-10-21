@@ -20,12 +20,24 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   #read -n 1 -s
   kubectl config use-context minikube
-  if [ $(kubectl config current-context) != "minikube" ]; then
-    echo "Error, I am not in kubectx minikube"
-    exit 1
-  fi
 fi
-exit 1
+
+current_context=$(kubectl config current-context)
+k8s_contexts=("minikube", "docker-for-desktop")
+
+found=0
+for context in "${k8s_contexts[@]}"; do
+    # Check if the current context matches the target context
+    if [ "$context" == "$current_context" ]; then
+        found=1
+        break 
+    fi
+done
+if [ "$found" -eq 1 ]; then
+    echo "Current Kubernetes context ($current_context) is allowed."
+else
+    echo "Current Kubernetes context ($current_context) is not allowed."
+fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
 sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
