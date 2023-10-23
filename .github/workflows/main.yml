@@ -3,6 +3,8 @@ name: Build Image and Test with Minikube
 on:
   pull_request:
   push:
+  workflow_dispatch:
+
   schedule:
     - cron: "30 6 * * *"
 concurrency:
@@ -32,7 +34,8 @@ jobs:
       (github.event_name == 'schedule') ||
       (always() &&
       (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)) ||
-      (github.event_name == 'push')
+      (github.event_name == 'push') ||
+      (github.event_name == 'workflow_dispatch')
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - uses: ./.github/actions/build_image
@@ -278,7 +281,7 @@ jobs:
         build_notifier,
         build_syft
       ]
-    if: (github.event_name == 'schedule') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) || (github.event_name == 'push')
+    if: (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) || (github.event_name == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -300,7 +303,7 @@ jobs:
           GH_APP_LOGIN: "SDA-SE"
           GH_APP_ID: "143160"
           GH_INSTALLATION_ID: "19959424"
-          GIT_SOURCE_REPOSITORY: "https://api.github.com/repos/SDA-SE/cluster-image-scanner-sda-internal-test-images/tarball"
+          GIT_SOURCE_REPOSITORY: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/test-all.json"
           GIT_COLLECTOR_REPOSITORY: "github.com/SDA-SE/cluster-image-scanner-sda-internal-test-images.git"
         run: |
           pwd

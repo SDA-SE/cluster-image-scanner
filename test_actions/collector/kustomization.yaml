@@ -8,6 +8,6 @@ resources:
   - job.yml
   - service-account-authorization.yaml
 
-patches:
+patchesStrategicMerge:
   - secret-volume.yaml
 

@@ -9,6 +9,7 @@ set -e
 # export ARTIFACTS_PATH=/path/to/output/dir"
 # ./module.bash
 
+# shellcheck source=../../base/scan-common.bash
 source /clusterscanner/scan-common.bash
 
 scan_result_pre
@@ -26,7 +27,8 @@ done
 
 if [[ ${_shell_found} -eq 1 ]]; then
     cp /clusterscanner/distroless.json "${ARTIFACTS_PATH}/distroless.json"
-    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText}\"}")
+    #infoText should be part of the environment at this point. Failing otherwise
+    JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"${infoText:?}\"}")
 else
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"completed\", \"finding\": false}")
 fi

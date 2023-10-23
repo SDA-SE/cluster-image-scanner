@@ -10,7 +10,7 @@ spec:
     semaphore:
       configMapKeyRef:
         name: synchronization
-        key: workflow
+        key: workflow  
   arguments:
     parameters:
       - name: REGISTRY_SECRET

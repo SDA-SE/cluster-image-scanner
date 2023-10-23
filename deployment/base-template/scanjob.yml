@@ -164,6 +164,9 @@ spec:
             secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: tmp
           emptyDir: { }
+        - name: "additional-cas"
+          configMap:
+            name: "scanjob-env-parameter"
       script:
         resources:
           limits:
@@ -193,6 +196,10 @@ spec:
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
+            defaultMode: 0444
+          - name: additional-cas
+            mountPath: /etc/ssl/certs/additionalCAs.pem
+            subPath: ADDITIONAL_CAS
             defaultMode: 0444
         env:
           - name: IMAGE
@@ -392,7 +399,7 @@ spec:
           source ./scan-common.bash
           parse_and_set_image_variables
           echo "ImageName ${IMAGE_NAME}"
-          PROJECT_NAME=$(echo "${DD_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
+          PROJECT_NAME=$(echo "${DEPENDENCY_TRACK_PRODUCT_NAME_TEMPLATE}" | sed "s~###ENVIRONMENT###~${ENVIRONMENT}~" | sed "s~###NAMESPACE###~${NAMESPACE}~" | sed "s~###APP_NAME###~${IMAGE_NAME}~" )
           echo "PROJECT_NAME: ${PROJECT_NAME}"
           bomPath="/clusterscanner/data/bom.json"
           exportFilePath="/clusterscanner/data/findings.json"
@@ -465,7 +472,7 @@ spec:
 
           export UUID=$(cat /tmp/project-uuid.txt)
           if [ "${UUID}" == "" ]; then
-           echo "Error: UUID has the unexpceted value '${UUID}'"
+           echo "Error: UUID has the unexpected value '${UUID}'"
            exit 1
           fi
           if [ $(echo "${UUID}" | wc -l) -ne 1 ]; then
@@ -621,7 +628,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.217"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -829,7 +836,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -877,7 +884,7 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 64Mi
+            memory: 128Mi
           requests:
             cpu: '0.2'
             memory: 64Mi
@@ -890,7 +897,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: IfNotPresent 
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -946,7 +953,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # to have up to date signatures
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -1063,7 +1070,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.217"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -1141,74 +1148,108 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           set -e
-          
-          JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
-          find /tmp/results
-          echo '{ "findings": [] }' > /tmp/findings.json
 
-          # merge results
-          for j in $(ls /tmp/results/**/module_*.json ); do
-            echo "Collecting ${j}"
-            JSON_RESULT=$(cat "${j}" | jq -ScM .)
-            echo "${JSON_RESULT}"
-            JSON_RESULTS=$(echo "${JSON_RESULTS}" | jq -ScM ".scanResults += [${JSON_RESULT}]")
-          done
-          # merge findings
+          if [ -f /clusterscanner/scan-common.bash ]; then
+              source /clusterscanner/scan-common.bash
+              IMAGE="{{ workflow.parameters.image }}"
+              NAMESPACE="{{ workflow.parameters.namespace }}"
+              CLUSTER="{{ workflow.parameters.environment }}"
+              RESULTS_PATH="/tmp/results"
+              FINDINGS="/tmp/findings.json"
+              TMP_FINDINGS="/tmp/findings.tmp.json"
+              RESULTS_FILE="/tmp/result.json"
+          else 
+              source scan-common.bash
+              IMAGE="grafana@sha256:e5a9655dabef50b04847ee75da8bb9cf46f16480117b7a1d955d5648c1d6e5ba"
+              NAMESPACE="TEST"
+              CLUSTER="TEST-CLUSTER"
+              RESULTS_PATH="test-results/${IMAGE}"
+              FINDINGS="findings.json"
+              TMP_FINDINGS="findings.tmp.json"
+              RESULTS_FILE="result.json"
+          fi
+
           DATE=$(date +%Y-%m-%d)
-          for j in $(ls /tmp/results/**/*.json | grep -v "module_"); do
+
+          JSON_RESULTS=$(echo "{}" | jq -Sc '.+= {"scanResults": []}')
+          find ${RESULTS_PATH}
+          echo '{ "findings": [] }' > "${FINDINGS}"
+
+          export JSON_RESULTS
+
+          merge_result() {
+            echo "Collecting $1"
+            JSON_RESULT=$(jq -ScM '.' "$1" )
+            echo "${JSON_RESULT}"
+            JSON_RESULTS=$(jq -ScM ".scanResults += [${JSON_RESULT}]" <<< "${JSON_RESULTS}")
+          }
+
+          echo "merging results..."
+          while read -r f; do merge_result "$f"; done < <(find "${RESULTS_PATH}" -iname "module_*.json")
+          printf "\n\n"
+
+          echo "Results:"
+          echo "$JSON_RESULTS"
+
+          printf "%s\n\n" "------------------------"
+
+          echo "merging findings"
+          while read -r j; do
             echo "Collecting ${j}"
-            if [ -s "${j}" ]; then
-              echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in ${j}"
-              echo $(jq \
-                --arg image {{ workflow.parameters.image }} \
-                '.findings[].description.image = $image ' \
-                ${j}) > /tmp/finding.tmp
+            echo "checking ${j} for valid JSON:"
+            jq '.' "${j}" &> /dev/null
+            if [ $? -eq 0 ]; then
+              echo "${j} is valid JSON"
+              json=$(jq -cM '.' "$j")
+
+              echo "Will replace placeholder IMAGE ${IMAGE} in ${j}"
+              json=$(add_json_field image "$IMAGE" "$json" description)
 
               echo "Will replace placeholder environment in /tmp/finding.tmp"
-              echo $(jq \
-                --arg cluster {{ workflow.parameters.environment }} \
-                '.findings[].description.cluster = $cluster ' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
-    
-              echo "Will replace placeholder NAMESPACE in /tmp/finding.tmp"
-              echo $(jq \
-                --arg namespace {{ workflow.parameters.namespace }} \
-                '.findings[].description.namespace = $namespace ' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
+              json=$(add_json_field cluster "$CLUSTER" "$json" description)
 
-              echo $(jq \
-                --arg date "${DATE}" \
-                '.findings[].date = $date' \
-                /tmp/finding.tmp) > /tmp/finding.tmp
-              echo "/tmp/finding.tmp before desc"
-              cat /tmp/finding.tmp
-              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' "/tmp/finding.tmp")
-              echo $(jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' < "/tmp/finding.tmp") > "/tmp/finding.tmp"
-              cat "${j}"
-              echo $(jq --argfile f1 /tmp/findings.json --argfile f2 "/tmp/finding.tmp" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings') > /tmp/findings.json
+
+              echo "Will replace placeholder NAMESPACE in /tmp/finding.tmp"
+              json=$(add_json_field namespace "$NAMESPACE" "$json" description)
+
+
+              json=$(add_json_field date "$DATE" "$json")
+
+              desc=$(jq '.findings[].description | to_entries | map(.value) | join("\n")' <<<"$json")
+              jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' <<<"$json" > "$TMP_FINDINGS"
+              TMP=$(jq --argfile f1 "${FINDINGS}" --argfile f2 "${TMP_FINDINGS}" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings')
+
+              if  ! jq '.' <<<"$TMP" &>/dev/null ; then 
+                echo "Error: cannot merge findings files into one"
+                exit 2
+              fi
+              echo "final JSON:"
+              jq '.' <<<"$TMP"
+              echo "writing final JSON to ${FINDINGS}"
+              echo "$TMP" > "$FINDINGS"
             else
-              echo "Error: ${j} is empty"
+              echo "Error: ${j} does not contain valid JSON"
               exit 2
             fi  
 
-            if ! [ -s ${j} ]; then
+            if ! [ -s "${j}" ]; then
               echo "Error: ${j} is empty"
               exit 3
             fi
-          done
+          done < <(find ${RESULTS_PATH} -iname "*.json" ! -iname "module_*")
 
-          echo "Writing JSON_RESULTS to /tmp/result.json"
-          echo "${JSON_RESULTS}" > /tmp/result.json
-          sed -i "s~###DATE###~${DATE}~g" /tmp/result.json
-          echo "Will replace placeholder CLUSTER in /tmp/result.json"
-          sed -i "s/###CLUSTER###/{{ workflow.parameters.environment }}/g" /tmp/result.json
-          echo "Will replace placeholder IMAGE {{ workflow.parameters.image }} in /tmp/result.json"
-          sed -i "s\###IMAGE###\{{ workflow.parameters.image }}\g" /tmp/result.json
-          echo "Will replace placeholder NAMESPACE in/tmp/result.json"
-          sed -i "s/###NAMESPACE###/{{ workflow.parameters.namespace }}/g" /tmp/result.json
+          echo "Writing JSON_RESULTS to ${RESULTS_FILE}"
+          echo "${JSON_RESULTS}" > ${RESULTS_FILE}
+          sed -i.bak "s~###DATE###~${DATE}~g" ${RESULTS_FILE}
+          echo "Will replace placeholder CLUSTER in ${RESULTS_FILE}"
+          sed -i.bak "s/###CLUSTER###/$CLUSTER/g" ${RESULTS_FILE}
+          echo "Will replace placeholder IMAGE ${IMAGE} in ${RESULTS_FILE}"
+          sed -i.bak "s~###IMAGE###~$IMAGE~g" ${RESULTS_FILE}
+          echo "Will replace placeholder NAMESPACE in${RESULTS_FILE}"
+          sed -i.bak "s/###NAMESPACE###/$NAMESPACE/g" ${RESULTS_FILE}
 
-          echo "cat /tmp/findings.json"
-          cat /tmp/findings.json
+          echo "cat ${FINDINGS}"
+          cat ${FINDINGS}
           
 
     - name: results-generic-dd-upload
@@ -1234,10 +1275,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 256Mi
+            memory: 512Mi
           requests:
             cpu: '0.2'
-            memory: 256Mi
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -1246,7 +1287,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.217"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:merge-210"
         imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
@@ -1527,7 +1568,7 @@ spec:
           sendMessageViarocketchat() {
             channel="${1}"
           
-            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
+            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
             echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner workflow job execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
           
             if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
@@ -1550,7 +1591,7 @@ spec:
           sendMessageViaslack() {
             channel="${1}"
           
-            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
+            message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
             echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
             cat /tmp/slack-template.json
           
@@ -1573,6 +1614,7 @@ spec:
             echo "No message, exit 0" 
             exit 0
           fi
+
           echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
             channel=$(echo "${i}" | jq -r '.channel')
             type=$(echo "${i}" | jq -r '.type')

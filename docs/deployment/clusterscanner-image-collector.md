@@ -51,7 +51,7 @@ data:
 ```
 ### Sample cronjob.yaml
 ```
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: clusterscanner-image-collector-collector
@@ -116,7 +116,7 @@ resources:
 patchesJSON6902:
 - target:
   group: batch
-  version: v1beta1
+  version: v1
   kind: CronJob
   name: clusterscanner-image-collector-collector
   namespace: clusterscanner-image-collector
@@ -202,7 +202,7 @@ spec:
 
 ### secret-volume.yaml
 ```
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: clusterscanner-image-collector-collector

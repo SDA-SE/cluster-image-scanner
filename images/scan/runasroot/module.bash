@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=../../base/scan-common.bash
 source /clusterscanner/scan-common.bash
 
 scan_result_pre
