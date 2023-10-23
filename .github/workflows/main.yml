@@ -301,7 +301,7 @@ jobs:
           GH_APP_LOGIN: "SDA-SE"
           GH_APP_ID: "143160"
           GH_INSTALLATION_ID: "19959424"
-          GIT_SOURCE_REPOSITORY: "https://api.github.com/repos/SDA-SE/cluster-image-scanner-sda-internal-test-images/tarball"
+          GIT_SOURCE_REPOSITORY: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/test-all.json"
           GIT_COLLECTOR_REPOSITORY: "github.com/SDA-SE/cluster-image-scanner-sda-internal-test-images.git"
         run: |
           pwd
