@@ -420,6 +420,7 @@ spec:
             "${DEPENDENCY_TRACK_URL}/api/v1/bom" \
             -H 'Content-Type: application/json' \
             -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
+            -H  "Transfer-Encoding: chunked" \ 
             -d @/tmp/tmpfile \
             --silent \
             --show-error \
