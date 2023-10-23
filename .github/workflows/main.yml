@@ -2,7 +2,9 @@ name: Build Image and Test with Minikube
 
 on:
   pull_request:
+  push:
   workflow_dispatch:
+
   schedule:
     - cron: "30 6 * * *"
 concurrency:
