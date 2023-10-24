@@ -201,7 +201,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-notifier:{{ workflow.parameters.clusterImageScannerImageTag }}" # has mailx
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
