@@ -165,7 +165,7 @@ getPods() {
       if [ "${team}" == "" ] || [ "${team}" == "null" ]; then
         team="${DEFAULT_TEAM_NAME}"
       fi
-      team=$(echo "${team}")
+
       echo "setting namespaceContacts"
       if [ "${slack}" == "" ] || [ "${slack}" == "null" ]; then
         slack=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/slack"')
