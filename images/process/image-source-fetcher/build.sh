@@ -50,6 +50,9 @@ buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_o
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 find $mnt
 
+
+mkdir "${mnt}/clusterscanner/.aws"
+chown 1001:1001 "${mnt}/clusterscanner/.aws"
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 ./aws/install --install-dir "${mnt}/usr/local/aws-cli" --bin-dir "${mnt}/usr/local/bin"

@@ -6,7 +6,9 @@ source auth.bash # > /dev/null 2>&1
 echo "calling sp_authorize"
 sp_authorize || echo "Couldn't authorize, assuming the image-source-repo is accessible by anonymous." #> /dev/null 2>&1
 
-/usr/local/aws-cli/v2/2.13.29/bin/aws s3 ls --recursive s3://nimbuskube-api-landungsbruecken-image-collector-71xdqf1r
+echo "[profile cluster-scan]" > ~/.aws/config
+echo "${S3_ROLE_ARN}" >>  ~/.aws/config
+/usr/local/aws-cli/v2/2.13.29/bin/aws s3 ls --profile cluster-scan --recursive "${S3_BUCKET}"
 
 exit 0
 
