@@ -52,7 +52,7 @@ find $mnt
 
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
-./aws/install --install-dir "${mnt}/usr/local/aws-cli" --bin-dir "${mnt}/usr/local/aws-cli"
+./aws/install --install-dir "${mnt}/usr/local/aws-cli" --bin-dir "${mnt}/usr/local/bin"
 
 
 # Get a bill of materials
