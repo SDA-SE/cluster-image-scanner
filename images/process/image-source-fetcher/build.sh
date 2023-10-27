@@ -50,6 +50,11 @@ buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_o
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 find $mnt
 
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install --install-dir "${mnt}/usr/local/aws-cli" --bin-dir "${mnt}/usr/local/aws-cli"
+
+
 # Get a bill of materials
 base_bill_of_materials_hash=$(buildah inspect --type image "${base_image}"  | jq '.OCIv1.config.Labels."io.sda-se.image.bill-of-materials-hash"')
 #echo "base_bill_of_materials_hash $base_bill_of_materials_hash"
