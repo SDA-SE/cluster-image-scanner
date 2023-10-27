@@ -50,9 +50,11 @@ buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- /usr/bin/dnf clean "${dnf_o
 rm -rf "${mnt}"/var/{cache,log}/* "${mnt}"/tmp/*
 find $mnt
 
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-./aws/install --install-dir "${mnt}/usr/local/aws-cli" --bin-dir "${mnt}/usr/local/bin"
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- unzip awscliv2.zip
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- ./aws/install
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- rm -R ./aws/
+buildah run --volume "${mnt}:/mnt" "${ctr_tools}" -- rm awscliv2.zip
 
 
 # Get a bill of materials
