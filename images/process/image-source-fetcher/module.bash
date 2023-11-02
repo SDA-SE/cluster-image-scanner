@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 #echo "source auth.bash"
 #source auth.bash # > /dev/null 2>&1
