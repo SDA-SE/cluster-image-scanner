@@ -78,6 +78,9 @@ spec:
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
+        - name: "{{ workflow.parameters.s3SecretName }}"
+          secret:
+            secretName: "{{ workflow.parameters.s3SecretName }}"
         - name: out
           emptyDir: {}
         - name: tmp
@@ -118,7 +121,7 @@ spec:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
           - secretRef:
-              name: "s3-creds"
+              name: "{{ workflow.parameters.s3SecretName }}"
           - configMapRef:
               name: "scanjob-env-parameter"
 

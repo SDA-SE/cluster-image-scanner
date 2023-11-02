@@ -20,6 +20,8 @@ spec:
         value: "{{ workflow.creationTimestamp.Y }}{{ workflow.creationTimestamp.m }}{{ workflow.creationTimestamp.d }}-{{ workflow.creationTimestamp.H }}{{ workflow.creationTimestamp.M }}{{ workflow.creationTimestamp.S }}"
       - name: gitSecretName
         value: "github"
+      - name: s3SecretName
+        value: "s3-creds"
       - name: imageSourceListConfigMapName
         value: "image-source-list"
       - name: registrySecretName
