@@ -117,6 +117,8 @@ spec:
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
+          - secretRef:
+              name: "s3-creds"
           - configMapRef:
               name: "scanjob-env-parameter"
 
