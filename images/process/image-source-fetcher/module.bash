@@ -9,6 +9,7 @@ set -ex
 #echo "[profile cluster-scan]" > ~/.aws/config
 #echo "${S3_ROLE_ARN}" >> ~/.aws/config
 #/usr/local/aws-cli/v2/2.13.29/bin/aws ${S3_PARAMETER} "${S3_BUCKET}"
+mkdir -p /clusterscanner/out/merged
 curl --location 'https://api.test.sda-se.io/v1/all-image-collector-reports' \
 --header "x-api-key: ${API_KEY}" \
 --header "x-api-signature: ${SIGNATURE}" > /clusterscanner/out/merged/merged.json
