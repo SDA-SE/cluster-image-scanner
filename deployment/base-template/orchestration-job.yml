@@ -80,9 +80,6 @@ spec:
         - name: "{{ workflow.parameters.gitSecretName }}"
           secret:
             secretName: "{{ workflow.parameters.gitSecretName }}"
-        - name: "{{ workflow.parameters.s3SecretName }}"
-          secret:
-            secretName: "{{ workflow.parameters.s3SecretName }}"
         - name: out
           emptyDir: {}
         - name: tmp

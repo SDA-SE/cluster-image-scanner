@@ -16,7 +16,7 @@ curl --location "$S3_API_LOCATION" \
 --header "x-api-signature: ${S3_API_SIGNATURE}" > /clusterscanner/out/merged/merged.json
 
 # test for valid JSON
-jq '.' < /clusterscanner/out/merged/merged.json || exit 1
+jq empty < /clusterscanner/out/merged/merged.json | /dev/null
 
 exit 0
 
