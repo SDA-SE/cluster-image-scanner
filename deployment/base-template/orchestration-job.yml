@@ -19,6 +19,7 @@ spec:
     parameters:
       - workflow.parameters.imageSourceListConfigMapName
       - workflow.parameters.gitSecretName
+      - workflow.parameters.s3SecretName
       - workflow.parameters.scanId
       - workflow.parameters.registrySecretName
       - workflow.parameters.dependencyCheckDbConfigMapName
