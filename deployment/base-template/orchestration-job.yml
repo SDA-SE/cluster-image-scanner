@@ -20,6 +20,7 @@ spec:
       - workflow.parameters.imageSourceListConfigMapName
       - workflow.parameters.gitSecretName
       - workflow.parameters.s3SecretName
+      - workflow.parameters.s3ConfigName
       - workflow.parameters.scanId
       - workflow.parameters.registrySecretName
       - workflow.parameters.dependencyCheckDbConfigMapName
@@ -118,16 +119,6 @@ spec:
         env:
           - name: GH_KEY_FILE_PATH
             value: "/clusterscanner/github/github_private_key.pem"
-          - name: API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: s3-creds
-                key: API_KEY
-          - name: SIGNATURE
-            valueFrom:
-              secretKeyRef:
-                name: s3-creds
-                key: SIGNATURE
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
@@ -135,6 +126,8 @@ spec:
               name: "{{ workflow.parameters.s3SecretName }}"
           - configMapRef:
               name: "scanjob-env-parameter"
+          - configMapRef:
+              name: "{{ workflow.parameters.s3ConfigName }}"
 
     - name: subflow
       volumes:
