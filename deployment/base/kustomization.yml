@@ -13,13 +13,13 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - namespace.yml
+  - namespace.yml 
   - defectdojo.yml
   - depcheck.yml
   - rbac.yml
   - repolist.yml
-  - email.yml
   - synchronization.cm.yml
+  - email.yml
   - dependency-track.cm.yml
 #  - cleanup-scandata.yml
 #  - cleanup-unpacked.yml
