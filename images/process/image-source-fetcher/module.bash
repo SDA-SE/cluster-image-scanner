@@ -11,12 +11,15 @@ set -ex
 #/usr/local/aws-cli/v2/2.13.29/bin/aws ${S3_PARAMETER} "${S3_BUCKET}"
 
 mkdir -p /clusterscanner/out/merged
-curl --location "$S3_API_LOCATION" \
+curl --http1.1 --location "$S3_API_LOCATION" \
 --header "x-api-key: ${S3_API_KEY}" \
 --header "x-api-signature: ${S3_API_SIGNATURE}" > /clusterscanner/out/merged/merged.json
 
 # test for valid JSON
 jq empty < /clusterscanner/out/merged/merged.json > /dev/null
+
+# test for .message parameter in case of not authorized
+[ $(jq 'type=="array"' < /clusterscanner/out/merged/merged.json) == "true" ]
 
 exit 0
 
