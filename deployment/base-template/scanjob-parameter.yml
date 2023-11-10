@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: clusterscanner
+  namespace: argowf
   name: scanjob-env-parameter
   labels:
     # Note that this label is required for the informer to detect this ConfigMap.

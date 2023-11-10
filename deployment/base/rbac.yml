@@ -5,7 +5,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: argo-workflow
-  namespace: clusterscanner
+  namespace: argowf
 rules:
 # pod get/watch is used to identify the container IDs of the current pod
 # pod patch is used to annotate the step's outputs back to controller (e.g. artifact location)
@@ -35,7 +35,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: argo-default-workflow
-  namespace: clusterscanner
+  namespace: argowf
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -43,10 +43,10 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: clusterscanner
-  namespace: clusterscanner
+  namespace: argowf
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: clusterscanner
-  namespace: clusterscanner
+  namespace: argowf

@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
   name: cleanup-enforced-delte-pvc-wf-scandata
-  namespace: clusterscanner
+  namespace: argowf
 spec:
   schedule: "30 11 2 * *"
   concurrencyPolicy: "Forbid"

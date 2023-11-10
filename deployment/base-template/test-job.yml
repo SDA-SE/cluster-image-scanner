@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: test-job-template
-  namespace: clusterscanner
+  namespace: argowf
 spec:
   activeDeadlineSeconds: 3600
   entrypoint: main # Entry point for job execution
