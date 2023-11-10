@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: defectdojo
-  namespace: clusterscanner
+  namespace: argowf
 data:
   DD_BRANCHES_TO_KEEP: '*'
   DD_REPORT_PATH: '/tmp/dependency-check-results/dependency-check-report.xml'
