@@ -313,7 +313,7 @@ spec:
               if [ "${smtpauthpassword}" != "YOURPASSWORD" ] && [ "${smtpauthpassword}" != "" ] && [ "${smtpauthpassword}" != "smtp_auth_password_SECRET" ]; then
                 echo "Sending to email ${email}"
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
-                echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
+                echo -e "${message}" | mail -v -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
               else
                 echo "Warning: email set, but no email configured"
               fi
