@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: email
-  namespace: argowf
+  namespace: clusterscanner
 stringData:
   smtp: smtp_SECRET
   smtp-auth: smtp_auth_SECRET

@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: scan-image-job-template
-  namespace: argowf
+  namespace: clusterscanner
 spec:
   onExit: exit-handler
   activeDeadlineSeconds: 3600 # 60 min, needed for large scans

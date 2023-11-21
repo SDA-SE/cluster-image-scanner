@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: image-source-list
-  namespace: argowf
+  namespace: clusterscanner
 data:
   #cluster0: https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/output-short.json
   #all-tests: https://api.github.com/repos/SDA-SE/cluster-scan-test-images/tarball

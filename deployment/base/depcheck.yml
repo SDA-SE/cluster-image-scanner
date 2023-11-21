@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dependency-check-db
-  namespace: argowf
+  namespace: clusterscanner
 data:
   DEPSCAN_DB_DRIVER: ''
   DEPSCAN_DB_USERNAME: ''
