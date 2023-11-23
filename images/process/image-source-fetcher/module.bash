@@ -12,8 +12,10 @@ set -ex
 
 mkdir -p /clusterscanner/out/merged
 curl --http1.1 --location "$S3_API_LOCATION" \
---header "x-api-key: ${S3_API_KEY}" \
---header "x-api-signature: ${S3_API_SIGNATURE}" > /clusterscanner/out/merged/merged.json
+    --header "x-api-key: ${S3_API_KEY}" \
+    --header "x-api-signature: ${S3_API_SIGNATURE}" \
+    | jq '( .[] | select(.team == "") ).team |= "nobody"' \
+    > /clusterscanner/out/merged/merged.json
 
 # test for valid JSON
 jq empty < /clusterscanner/out/merged/merged.json > /dev/null
