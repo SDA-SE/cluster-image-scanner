@@ -22,10 +22,57 @@ while read -r line; do
     echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment') because it is null"
     continue
   fi
-  IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
+
+  if [ -n "$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME" ]; then
+    IS_SCAN_BASEIMAGE_LIFETIME="$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME"
+  else
+    IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_NEW_VERSION" ]; then
+    IS_SCAN_NEW_VERSION="$OVERRIDE_IS_SCAN_NEW_VERSION"
+  else
+    IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_DEPENDENCY_CHECK" ]; then
+    IS_SCAN_DEPENDENCY_CHECK="$OVERRIDE_IS_SCAN_DEPENDENCY_CHECK"
+  else
+    IS_SCAN_DEPENDENCY_CHECK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_check' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK" ]; then
+    IS_SCAN_DEPENDENCY_TRACK="$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK"
+  else
+    IS_SCAN_DEPENDENCY_TRACK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_check' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_LIFETIME" ]; then
+    IS_SCAN_LIFETIME="$OVERRIDE_IS_SCAN_LIFETIME"
+  else
+    IS_SCAN_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_lifetime' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_DISTROLESS" ]; then
+    IS_SCAN_DISTROLESS="$OVERRIDE_IS_SCAN_DISTROLESS"
+  else
+    IS_SCAN_DISTROLESS=$(echo "${DATA_JSON}" | jq -r .is_scan_distroless | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_MALWARE" ]; then
+    IS_SCAN_MALWARE="$OVERRIDE_IS_SCAN_MALWARE"
+  else
+    IS_SCAN_MALWARE=$(echo "${DATA_JSON}" | jq -r .is_scan_malware | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_RUNASROOT" ]; then
+    IS_SCAN_RUNASROOT="$OVERRIDE_IS_SCAN_RUNASROOT"
+  else
+    IS_SCAN_RUNASROOT=$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot | sed 's#null#true#')
+  fi
+
+
   containerType=$(echo "${DATA_JSON}" | jq -r '.container_type')
-  IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
-  is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
@@ -72,13 +119,13 @@ while read -r line; do
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
   sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
-  sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /tmp/template.yml
+  sed -i "s~###is_scan_lifetime###~${IS_SCAN_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
-  sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /tmp/template.yml
-  sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /tmp/template.yml
-  sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /tmp/template.yml
+  sed -i "s~###is_scan_distroless###~${IS_SCAN_DISTROLESS}~" /tmp/template.yml
+  sed -i "s~###is_scan_malware###~${IS_SCAN_MALWARE}~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_check###~${IS_SCAN_DEPENDENCY_CHECK}~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_track###~${IS_SCAN_DEPENDENCY_TRACK}~" /tmp/template.yml
+  sed -i "s~###is_scan_runasroot###~${IS_SCAN_RUNASROOT}~" /tmp/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /tmp/template.yml
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
