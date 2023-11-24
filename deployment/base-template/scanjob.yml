@@ -427,6 +427,7 @@ spec:
             -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
             -d @/tmp/tmpfile \
             --silent \
+            --http1.1 \
             --show-error \
             --output /tmp/token.json
 
