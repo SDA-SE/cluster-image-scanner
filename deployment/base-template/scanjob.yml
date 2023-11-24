@@ -1597,7 +1597,12 @@ spec:
             channel="${1}"
           
             message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
+            cat <<-EOF > /tmp/slack-template.json
+            {
+              "channel": "${channel}",
+              "blocks": "${message}"
+            }
+            EOF
             cat /tmp/slack-template.json
           
             if [ "${SLACK_CLI_TOKEN}" == "" ]; then
