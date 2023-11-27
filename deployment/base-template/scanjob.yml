@@ -217,8 +217,8 @@ spec:
             IMAGE_BY_HASH="$IMAGE"
           fi
 
-          IMAGE_BY_HASH=$(sed 's/\(^[^\.]*:\)/dockerhub.tools.u434.sda-se.io\/\1/' "$IMAGE_BY_HASH")
-          IMAGE_BY_HASH=$(sed 's/docker\.io/dockerhub.tools.u434.sda-se.io/' "$IMAGE_BY_HASH")
+          IMAGE_BY_HASH=$(echo "$IMAGE_BY_HASH" | sed 's/\(^[^\.]*:\)/dockerhub.tools.u434.sda-se.io\/\1/')
+          IMAGE_BY_HASH=$(echo "$IMAGE_BY_HASH" | sed 's/docker\.io/dockerhub.tools.u434.sda-se.io/')
           
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
