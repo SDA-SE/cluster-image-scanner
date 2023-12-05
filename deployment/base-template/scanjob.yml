@@ -211,7 +211,7 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
-          set -e
+          set -ex
 
           if [ -z "$IMAGE_BY_HASH" ]; then
             IMAGE_BY_HASH="$IMAGE"
@@ -248,7 +248,7 @@ spec:
                   echo with "${TO}"
                   echo
 
-                  IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed "s~${FROM}~${TO}~")
+                  IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed -e "s~${FROM}~${TO}~")
                   if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
                     IMAGE_BY_HASH="$IMAGE_BY_HASH_NEW"
                     break
