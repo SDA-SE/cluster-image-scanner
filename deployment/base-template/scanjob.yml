@@ -217,7 +217,8 @@ spec:
             IMAGE_BY_HASH="$IMAGE"
           fi
 
-          env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM" | while read r
+          OVERRIDES=$(env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM")
+          while read r <<<"$OVERRIDES"
           do
                   _FROM="${r}"
                   _TO="${r/%_FROM/_TO}"
