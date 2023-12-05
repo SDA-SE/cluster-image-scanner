@@ -249,7 +249,7 @@ spec:
                   echo
 
                   IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed "s~${FROM}~${TO}~")
-                  if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH"]; then
+                  if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
                     IMAGE_BY_HASH="$IMAGE_BY_HASH_NEW"
                     break
                   fi
