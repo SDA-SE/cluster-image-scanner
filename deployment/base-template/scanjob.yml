@@ -217,9 +217,46 @@ spec:
             IMAGE_BY_HASH="$IMAGE"
           fi
 
-          IMAGE_BY_HASH=$(echo "$IMAGE_BY_HASH" | sed 's/\(^[^\.]*:\)/dockerhub.tools.u434.sda-se.io\/\1/')
-          IMAGE_BY_HASH=$(echo "$IMAGE_BY_HASH" | sed 's/docker\.io/dockerhub.tools.u434.sda-se.io/')
+          env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM" | while read r
+          do
+                  _FROM="${r}"
+                  _TO="${r/%_FROM/_TO}"
+                  FROM="${!_FROM}"
+                  TO="${!_TO}"
           
+                  if [ -z "$TO" ]; then
+                    echo "Unmatched ${r/%_FROM/_TO} for ${r}"
+                    exit 1
+                  fi
+          
+                  # Validating input for sed. 
+                  # Break out of loop if a tilde is contained.
+
+                  FROM_NEW=$(tr -d "~" <<<"$FROM")
+                  if [ "$FROM_NEW" != "$FROM" ]; then
+                    echo "The value of ${_FROM} (${FROM}) contains a tilde and will be ignored"
+                    continue
+                  fi
+                  TO_NEW=$(tr -d "~" <<<"$TO")
+                  if [ "$TO_NEW" != "$TO" ]; then
+                    echo "The value of ${_TO} (${TO}) contains a tilde and will be ignored"
+                    continue
+                  fi
+          
+                  echo "Found registry replacement:"
+                  echo Replace "${FROM}"
+                  echo with "${TO}"
+                  echo
+
+                  IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed "s~${FROM}~${TO}~")
+                  if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH"]; then
+                    IMAGE_BY_HASH="$IMAGE_BY_HASH_NEW"
+                    break
+                  fi
+          done
+
+          echo "Using image URI '${IMAGE_BY_HASH}'"
+
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
