@@ -211,7 +211,7 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
-          set -ex
+          set -e
 
           if [ -z "$IMAGE_BY_HASH" ]; then
             IMAGE_BY_HASH="$IMAGE"
