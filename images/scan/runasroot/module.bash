@@ -6,7 +6,7 @@ set -e
 source /clusterscanner/scan-common.bash
 
 scan_result_pre
-skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} docker://"${IMAGE_BY_HASH}" > /dev/null || exit="true"
+skopeo inspect --config ${SKOPEO_INSPECT_PARAMETER} "docker://${IMAGE_BY_HASH}" > /dev/null || exit="true"
 if [ "${exit}" == "true" ]; then
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
