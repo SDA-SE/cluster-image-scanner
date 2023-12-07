@@ -217,6 +217,8 @@ spec:
             IMAGE_BY_HASH="$IMAGE"
           fi
 
+          echo "Initiating download of image ${IMAGE_BY_HASH}"
+
           OVERRIDES=$(env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM")
           while read r 
           do
@@ -243,16 +245,17 @@ spec:
               echo "The value of ${_TO} (${TO}) contains a tilde and will be ignored"
               continue
             fi
-          
-            echo "Found registry replacement:"
-            echo Replace "${FROM}"
-            echo with "${TO}"
-            echo
 
             IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed -e "s~${FROM}~${TO}~")
             if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
+              echo "Found registry replacement:"
+              echo "\tReplace ${FROM}"
+              echo "\twith ${TO}"
+              echo
               IMAGE_BY_HASH="$IMAGE_BY_HASH_NEW"
               break
+            else 
+              echo "Ignoring ${_FROM} because it doesn't match the image URI"
             fi
           done <<<"$OVERRIDES"
 
