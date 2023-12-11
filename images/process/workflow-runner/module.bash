@@ -9,8 +9,9 @@ if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
 fi
 
 #filter out amazon images
-FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </tmp/imageList.json)
-cat "$FILTERED_LIST" > /tmp/imageList.json
+echo "Filtering out Amazon ECR images"
+FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </clusterscanner/imageList.json)
+cat "$FILTERED_LIST" > /clusterscanner/imageList.json
 
 
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
