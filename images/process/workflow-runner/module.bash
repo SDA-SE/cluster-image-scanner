@@ -7,6 +7,12 @@ source ./scan-common.bash
 if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
   SERVICE_ACCOUNT_NAME="clusterscanner"
 fi
+
+#filter out amazon images
+FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </tmp/imageList.json)
+cat "$FILTERED_LIST" > /tmp/imageList.json
+
+
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
 totalCount=$(cat /clusterscanner/imageList.json | jq '.[].image' | wc -l)
 counter=0
