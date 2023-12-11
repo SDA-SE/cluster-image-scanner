@@ -11,13 +11,13 @@ fi
 #filter out amazon images
 echo "Filtering out Amazon ECR images"
 FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </clusterscanner/imageList.json)
-cat "$FILTERED_LIST" > /clusterscanner/imageList.json
+cat "$FILTERED_LIST" > /tmp/imageListFiltered.json
 
 
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
-totalCount=$(cat /clusterscanner/imageList.json | jq '.[].image' | wc -l)
+totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
 counter=0
-echo "Found ${totalCount} entries in /clusterscanner/imageList.json"
+echo "Found ${totalCount} entries in /tmp/imageListFiltered.json"
 while read -r line; do
   echo "Will read line"
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
