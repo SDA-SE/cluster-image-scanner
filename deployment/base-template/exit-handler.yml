@@ -43,6 +43,6 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: Always # TODO IfNotPresent
+        imagePullPolicy: IfNotPresent
         source: |
           
