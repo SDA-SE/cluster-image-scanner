@@ -340,7 +340,7 @@ spec:
             rocketchat=$(echo "${item}" | jq -r '.rocketchat')
             appName=$(echo "${item}" | jq -r '.appname'| tr -cd '[:alnum:]._-')
             email=$(echo "${item}" | jq -r '.email')
-            if [ "${ENFORCE_SLACK_CHANNEL}" != "" ]; then
+            if [ -n "${ENFORCE_SLACK_CHANNEL}" ]; then
               slack="${ENFORCE_SLACK_CHANNEL}"
             fi
             echo "Inspecting team ${team} for image ${image}"

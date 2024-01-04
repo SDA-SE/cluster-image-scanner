@@ -5,7 +5,7 @@ metadata:
   namespace: clusterscanner
 spec:
   onExit: exit-handler
-  activeDeadlineSeconds: 3600 # 60 min, needed for large scans
+  activeDeadlineSeconds: 7200 # 60 min, needed for large scans
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
