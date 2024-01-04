@@ -16,6 +16,7 @@ data:
   MAX_RUNNING_JOBS_IN_QUEUE: "3" # for subflows, too many jobs create disk pressure
   SLACK_MESSAGE_ENDPOINT: "https://slack.com/api/chat.postMessage"
   ERROR_NOTIFICATION_IGNORE: 'DiskPressure\|SOMETHING_ELSE_TO_IGNORE'
+  CLAMAV_SIGNATURE_IGNORE: "Sanesecurity.Foxhole.JS_Zip_11.UNOFFICIAL\|Sanesecurity.MalwareHash.HoneyPot.UNOFFICIAL"
   SLACK_TEMPLATE: |-
     {
       "channel": "###SLACK_CHANNEL###",
