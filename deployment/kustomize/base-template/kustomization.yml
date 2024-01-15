@@ -6,7 +6,7 @@ resources:
   - orchestration-job.yml
   - scanjob-parameter.yml
   - test-job.yml
-  - delete-test-products-template.yml 
+  - delete-test-products-template.yml
 
 
 commonLabels:

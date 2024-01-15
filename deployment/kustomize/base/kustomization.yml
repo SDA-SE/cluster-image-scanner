@@ -13,7 +13,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - namespace.yml 
+  - namespace.yml
   - defectdojo.yml
   - depcheck.yml
   - rbac.yml

@@ -5,7 +5,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - ../../deployment/overlays/test-local/
+  - ../../deployment/kustomize/overlays/test-local/
   - minio.auth.yml
   - minio.tenant.yml
   - auth.yml
