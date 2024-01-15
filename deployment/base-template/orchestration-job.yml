@@ -600,7 +600,7 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:4"
         imagePullPolicy: IfNotPresent 
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
