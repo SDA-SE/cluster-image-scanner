@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: cleanup-enforced-delte-pvc-wf-images
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "30 11 1 * *"
+  concurrencyPolicy: "Forbid"
+  startingDeadlineSeconds: 0
+  timezone: Europe/Berlin
+  activeDeadlineSeconds: 3600
+  workflowSpec:
+    entrypoint: pvc-cleanup
+    templates:
+      - name: pvc-cleanup
+        volumes:
+          - name: images
+            persistentVolumeClaim:
+              claimName: cluster-image-scanner-images
+        script:
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+          image: quay.io/sdase/clusterscanner-base:2
+          volumeMounts:
+            - name: images
+              mountPath: /clusterscanner/images
+          imagePullPolicy: IfNotPresent
+          command: [bash]
+          source: |
+            set -e
+            /usr/bin/whoami
+            echo "Deleting all data"
+            du -sh /clusterscanner/images/ || true
+
+            rm -Rf /clusterscanner/images/*
+            exit 0

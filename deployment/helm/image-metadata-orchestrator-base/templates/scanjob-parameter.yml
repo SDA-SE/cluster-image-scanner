@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: scanjob-env-parameter
+  labels:
+    # Note that this label is required for the informer to detect this ConfigMap.
+    workflows.argoproj.io/configmap-type: Parameter
+data:
+  SKOPEO_COPY_PARAMETER: "" # e.g. "--src-tls-verify=false "
+  SKOPEO_INSPECT_PARAMETER: "" # e.g. "tls-verify=false "
+  ADDITIONAL_CAS: "" # custom certificates
+  DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD: "12" # 0 disables cleanup
+  DD_PRODUCT_NAME_TEMPLATE: "###ENVIRONMENT### | ###NAMESPACE### | ###APP_NAME###"
+  DEPENDENCY_TRACK_PRODUCT_NAME_TEMPLATE: "###ENVIRONMENT### | ###NAMESPACE### | ###APP_NAME###"
+  MAX_RUNNING_JOBS_IN_QUEUE: "3" # for subflows, too many jobs create disk pressure
+  SLACK_MESSAGE_ENDPOINT: "https://slack.com/api/chat.postMessage"
+  ERROR_NOTIFICATION_IGNORE: 'DiskPressure\|SOMETHING_ELSE_TO_IGNORE'
+  SLACK_TEMPLATE: |-
+    {
+      "channel": "###SLACK_CHANNEL###",
+      "author_name": "ClusterImageScanner",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "###TITLE###",
+            "emoji": true
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "_INFO_"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*image:*\n###IMAGE###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*application:*\n###APP_NAME###"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*namespace:*\n###NAMESPACE###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*environment:*\n###ENVIRONMENT###"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*severity:*\n###SEVERITY###"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*scan job status:*\n###STATUS###"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "emoji": true,
+                "text": "Handle potential vulnerabilities"
+              },
+              "url": "###DD_LINK###",
+              "style": "primary"
+            }
+          ]
+        }
+      ]
+    }
+
+  #NO_PROXY: "" # e.g. IP of kubernetes.default.svc
+  #JAVA_OPTS: "" # e.g. proxy

@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dependency-check-db
+  namespace: {{ .Release.Namespace }}
+data:
+  DEPSCAN_DB_DRIVER: ''
+  DEPSCAN_DB_USERNAME: ''
+  DEPSCAN_DB_PASSWORD: ''
+  DEPSCAN_DB_CONNECTSRING: ''
