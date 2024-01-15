@@ -795,7 +795,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # TODO: change to IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
