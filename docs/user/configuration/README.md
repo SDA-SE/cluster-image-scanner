@@ -4,7 +4,7 @@ Teams using the cluster scanner to get notified.
 # Image Collector Configuration
 ## Via Annotations
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
-As a team, **annotations** can be set in the following way to enable/disable scanning:
+As a team, **labels** can be set in the following way to enable/disable scanning:
 
 ```
 # Notification configuration (namespace/object)
