@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: cleanup-enforced-delte-pvc-wf-scandata
+  name: cleanup-enforced-delta-pvc-wf-scandata
   namespace: {{ .Release.Namespace }}
 spec:
   schedule: "{{ .Values.cleanup.schedule }}"
