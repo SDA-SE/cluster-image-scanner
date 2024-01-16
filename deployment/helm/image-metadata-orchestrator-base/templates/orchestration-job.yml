@@ -706,7 +706,7 @@ spec:
           if [ "${JOB_EXECUTION_NAMESPACE}" == "" ]; then # comming from scanjob-parameter
             JOB_EXECUTION_NAMESPACE="clusterscanner"
           fi
-          failures='{{workflow.failures}}'
+          failures='{{ "{{" }}workflow.failures{{ "}}" }}'
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
           echo "failures"
           echo "${failures}"

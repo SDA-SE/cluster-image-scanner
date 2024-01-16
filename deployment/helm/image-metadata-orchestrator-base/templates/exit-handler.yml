@@ -27,7 +27,7 @@ spec:
       container:
         resources: {{ .Values.exitHandler.resources }}
         securityContext: {{ .Values.exitHandler.securityContext }}
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        image: "{{ "{{" }}workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         imagePullPolicy: IfNotPresent
         source: |
           
