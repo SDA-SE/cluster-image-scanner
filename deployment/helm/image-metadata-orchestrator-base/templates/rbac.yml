@@ -31,6 +31,7 @@ rules:
   - workflows
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
+{{- if .Values.serviceAccount.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -42,11 +43,16 @@ roleRef:
   name: argo-workflow
 subjects:
 - kind: ServiceAccount
-  name: clusterscanner
+  name: {{ .Values.serviceAccount.name }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: clusterscanner
+  name: {{ .Values.serviceAccount.name }}
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{ . }}
+  {{ end }}
+{{ end }}

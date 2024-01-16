@@ -5,15 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   onExit: exit-handler
-  activeDeadlineSeconds: 7200 # 60 min, needed for large scans
+  activeDeadlineSeconds: {{ .Values.scanjob.activeDeadlineSeconds }}
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
-  ttlStrategy:
-    secondsAfterSuccess: 900 # 15 min
-    secondsAfterFailure: 7200
-  retryStrategy:
-    limit: 1
+  ttlStrategy: {{ .Values.scanjob.ttlStrategy }}
+  retryStrategy: {{ .Values.scanjob.retryStrategy }}
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
@@ -58,55 +55,55 @@ spec:
           - name: sbom-generation
             depends: imagefetcher
             template: sbom-generation
-            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
           - name: scan-dependency-track
             depends: sbom-generation
             template: scan-dependency-track
-            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
           - name: dependency-track-notification-thresholds
             depends: scan-dependency-track
             template: dependency-track-notification-thresholds
-            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
           - name: results-dependency-track-dd-upload
             depends: dependency-track-notification-thresholds
             template: results-dependency-track-dd-upload
             arguments:
               parameters:
                 - name: dependency-track-notification-alerts
-                  value: "{{tasks.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-alerts}}"
-            when: "{{ workflow.parameters.is_scan_dependency_track }} == true"
+                  value: "{{ "{{" }} tasks.dependency-track-notification-thresholds.outputs.parameters.dependency-track-notification-alerts {{ "}}" }}"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track {{ "}}" }} == true"
           - name: scan-distroless
             depends: imagefetcher
             template: scan-distroless
-            when: "{{ workflow.parameters.is_scan_distroless }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_distroless {{ "}}" }} == true"
           - name: scan-lifetime
             depends: imagefetcher
             template: scan-lifetime
-            when: "{{ workflow.parameters.is_scan_lifetime }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_lifetime {{ "}}" }} == true"
           - name: scan-baseimage-lifetime
             depends: imagefetcher
             template: scan-baseimage-lifetime
-            when: "{{ workflow.parameters.is_scan_baseimage_lifetime }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_baseimage_lifetime {{ "}}" }} == true"
           - name: scan-dependency-check
             depends: imagefetcher
             template: scan-dependency-check
-            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_check {{ "}}" }} == true"
           - name: scan-runasroot
             depends: imagefetcher
             template: scan-runasroot
-            when: "{{ workflow.parameters.is_scan_runasroot }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_runasroot {{ "}}" }} == true"
           - name: scan-malware
             depends: imagefetcher
             template: scan-malware
-            when: "{{ workflow.parameters.is_scan_malware }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_malware {{ "}}" }} == true"
           - name: scan-new-version
             depends: imagefetcher
             template: scan-new-version
-            when: "{{ workflow.parameters.is_scan_new_version }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_new_version {{ "}}" }} == true"
           - name: results-dependency-check-dd-upload
             depends: scan-dependency-check
             template: results-dependency-check-dd-upload
-            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
+            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_check{{ "}}" }} == true"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
@@ -116,42 +113,42 @@ spec:
             arguments:
               artifacts:
                 - name: results-generic-findings
-                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
-            #when: "{{ scan-distroless.Succeeded }} == true || {{ scan-lifetime.Succeeded }} == true || {{ scan-baseimage-lifetime.Succeeded }} == true || {{ scan-runasroot.Succeeded }} == true || scan-malware.Succeeded || {{ scan-new-version.Succeeded}} == true"
+                  from: "{{ "{{" }} tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings{{ "}}" }}"
+            #when: "{{ "{{" }} scan-distroless.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-baseimage-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-runasroot.Succeeded {{ "}}" }} == true || scan-malware.Succeeded || {{ "{{" }} scan-new-version.Succeeded {{ "}}" }} == true"
           - name: results-aggregate
             depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
                 - name: results-dd-generic-test-link
-                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link }}"
+                  from: "{{ "{{" }} tasks.results-generic-dd-upload.outputs.artifacts.results-dd-generic-test-link{{ "}}" }}"
                   optional: true
                 - name: results-dd-generic-is-finding-file
-                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file }}"
+                  from: "{{ "{{" }} tasks.results-generic-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-generic-findings-file
-                  from: "{{ tasks.results-generic-dd-upload.outputs.artifacts.findings-file }}"
+                  from: "{{ "{{" }} tasks.results-generic-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
                   optional: true
                 - name: results-generic
-                  from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
+                  from: "{{ "{{" }} tasks.results-collect-generic-findings.outputs.artifacts.results-generic{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-check-test-link
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
+                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-check-is-finding-file
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
+                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-check-findings-file
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
+                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-track-test-link
-                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link }}"
+                  from: "{{ "{{" }} tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-track-is-finding-file
-                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.is-finding-file }}"
+                  from: "{{ "{{" }} tasks.results-dependency-track-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-track-findings-file
-                  from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.findings-file }}"
+                  from: "{{ "{{" }} tasks.results-dependency-track-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
                   optional: true
 
     - name: imagefetcher
@@ -161,29 +158,16 @@ spec:
             claimName: cluster-image-scanner-images
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: tmp
           emptyDir: { }
         - name: "additional-cas"
           configMap:
             name: "scanjob-env-parameter"
       script:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 512Mi
-          requests:
-            cpu: '0.2'
-            memory: 512Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.imagefetcher.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -191,7 +175,7 @@ spec:
             mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
+            subPath: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
           - name: registry-creds
             mountPath: /run/containers/auth.json
@@ -203,12 +187,12 @@ spec:
             defaultMode: 0444
         env:
           - name: IMAGE
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
         source: |
           # IMAGE_TAR_PATH from base image
           set -e
@@ -337,22 +321,9 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 2024Mi # due to inspecting the tar
-          requests:
-            cpu: '0.2'
-            memory: 2024Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-syft:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.sbomgeneration.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-syft:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
           "packages",
@@ -364,21 +335,21 @@ spec:
         ]
         env:
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_dependency_track }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
+            subPath: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/sbom"
 
     - name: scan-dependency-track
       volumes:
@@ -388,48 +359,35 @@ spec:
         - name: tmp
           emptyDir: { }
       script:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanDependencyTrack.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         env:
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_dependency_track }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }}"
           - name: APP_NAME
-            value: "{{ workflow.parameters.appname }}"
+            value: "{{ "{{" }} workflow.parameters.appname{{ "}}" }}"
           - name: APP_VERSION
-            value: "{{ workflow.parameters.appversion }}"
+            value: "{{ "{{" }} workflow.parameters.appversion{{ "}}" }}"
           - name: IMAGE
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: IMAGE_ID
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: DD_BRANCH_NAME
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: NAMESPACE
-            value: "{{ workflow.parameters.namespace }}"
+            value: "{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"
           - name: ENVIRONMENT
-            value: "{{ workflow.parameters.environment }}"
+            value: "{{ "{{" }} workflow.parameters.environment{{ "}}" }}"
           - name: TEAM
-            value: "{{ workflow.parameters.team }}"
+            value: "{{ "{{" }} workflow.parameters.team{{ "}}" }}"
         envFrom:
           - secretRef:
               name: "dependency-track"
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
           - configMapRef:
               name: "dependency-track"
         volumeMounts:
@@ -437,7 +395,7 @@ spec:
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/sbom"
         source: |
           set -e
           if [ "${IS_SCAN}" != "true" ]; then
@@ -581,27 +539,14 @@ spec:
             valueFrom:
               path: /tmp/output.json
       script:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 256Mi
-          requests:
-            cpu: '0.2'
-            memory: 256Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.dtrackNotificationThresholds.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
         env:
           - name: CONTAINER_TYPE
-            value: "{{ workflow.parameters.containerType }}"
+            value: "{{ "{{" }} workflow.parameters.containerType{{ "}}" }}"
           - name: DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION
             value: '{
               "maven": {"critical": 1, "high": 1, "medium": 100},
@@ -622,7 +567,7 @@ spec:
               "alpine": {"critical": 30, "high": 100, "medium": 9999}}'
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -663,51 +608,38 @@ spec:
             path: /tmp/findings.json
             optional: true
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 256Mi
-          requests:
-            cpu: '0.2'
-            memory: 256Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
+        resources: {{ .Values.scanjob.resultsUpload.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: scandata
             mountPath: /tmp/dependency-track-results
-            subPath: "results/{{ workflow.parameters.image_id }}/sbom"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/sbom"
             readOnly: true
         imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_CM{{ "}}" }}"
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
           - secretRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_SECRETS{{ "}}" }}"
         env:
           - name: APP_NAME
-            value: "{{ workflow.parameters.appname }}"
+            value: "{{ "{{" }} workflow.parameters.appname{{ "}}" }}"
           - name: DD_BRANCH_NAME
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: DD_REPORT_TYPE
             value: "Dependency Track Finding Packaging Format (FPF) Export"
           - name: NAMESPACE
-            value: "{{ workflow.parameters.namespace }}"
+            value: "{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"
           - name: ENVIRONMENT
-            value: "{{ workflow.parameters.environment }}"
+            value: "{{ "{{" }} workflow.parameters.environment{{ "}}" }}"
           - name: DD_TEAM
-            value: "{{ workflow.parameters.team }}"
+            value: "{{ "{{" }} workflow.parameters.team{{ "}}" }}"
           - name: DD_REPORT_PATH
             value: "/tmp/dependency-track-results/findings.json"
           - name: EXIT_CODE_ON_FINDING
@@ -717,7 +649,7 @@ spec:
           - name: DD_MINIMUM_SEVERITY # notify for each unhandled vulnerability of the given severity (or higher)
             value: "High"
           - name: DEPENDENCY_TRACK_UNHANDLED_PACKAGES_MINIMUM_TO_ALERT
-            value: "{{ inputs.parameters.dependency-track-notification-alerts }}"
+            value: "{{ "{{" }} inputs.parameters.dependency-track-notification-alerts{{ "}}" }}"
 
     - name: scan-distroless
       volumes:
@@ -731,22 +663,9 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-distroless:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanDistroless.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-distroless:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -754,19 +673,19 @@ spec:
             mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
+            subPath: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/distroless"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/distroless"
         env:
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_distroless }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_distroless{{ "}}" }}"
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-lifetime
       volumes:
@@ -775,26 +694,13 @@ spec:
             claimName: cluster-image-scanner-scandata
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanLifetime.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-lifetime:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -802,21 +708,21 @@ spec:
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/lifetime"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/lifetime"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: MAX_IMAGE_LIFETIME_IN_DAYS
-            value: "{{ workflow.parameters.scan_lifetime_max_days }}"
+            value: "{{ "{{" }} workflow.parameters.scan_lifetime_max_days{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_lifetime }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_lifetime{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-baseimage-lifetime
       volumes:
@@ -827,24 +733,11 @@ spec:
           emptyDir: { }
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanLifetimeBaseImage.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-lifetime:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -852,53 +745,40 @@ spec:
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/baseimage-lifetime"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/baseimage-lifetime"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: MAX_IMAGE_LIFETIME_IN_DAYS
-            value: "{{ workflow.parameters.scan_lifetime_max_days }}"
+            value: "{{ "{{" }} workflow.parameters.scan_lifetime_max_days{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_baseimage_lifetime }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_baseimage_lifetime{{ "}}" }}"
           - name: MODULE_NAME
             value: "scan-baseimage-lifetime"
           - name: IS_BASE_IMAGE_LIFETIME_SCAN
             value: "true"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-runasroot
       volumes:
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-runasroot:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanRunAsRoot.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-runasroot:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -906,47 +786,34 @@ spec:
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/runasroot"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/runasroot"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_runasroot }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_runasroot{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-new-version
       volumes:
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-new-version:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanNewVersion.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-new-version:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent 
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -954,23 +821,23 @@ spec:
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/new-version"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/new-version"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: IMAGE
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_new_version }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_new_version{{ "}}" }}"
           - name: IMAGE_SCAN_POSITIVE_FILTER
-            value: "{{ workflow.parameters.new_version_image_filter }}"
+            value: "{{ "{{" }} workflow.parameters.new_version_image_filter{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-malware
       volumes:
@@ -980,29 +847,16 @@ spec:
             readOnly: true
         - name: registry-creds
           secret:
-            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
+            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 1792Mi
-          requests:
-            cpu: '0.2'
-            memory: 1792Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-malware:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanMalware.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-malware:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: Always # to have up to date signatures
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -1010,25 +864,25 @@ spec:
             mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
+            subPath: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/generic/malware"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/malware"
           - name: registry-creds
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: IMAGE
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_malware }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_malware{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: scan-dependency-check
       volumes:
@@ -1047,22 +901,9 @@ spec:
             path: /clusterscanner/data/module_scan-dependency-check.json
             archiveLogs: true
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 368Mi
-          requests:
-            cpu: '0.2'
-            memory: 368Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-dependency-check:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.scanDependencyCheck.resources}}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-dependency-check:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
@@ -1070,21 +911,21 @@ spec:
             mountPath: /tmp
           - name: images
             mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
+            subPath: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
             readOnly: true
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/dependency-check"
         env:
           - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
+            value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
           - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_dependency_check }}"
+            value: "{{ "{{" }} workflow.parameters.is_scan_dependency_check{{ "}}" }}"
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
+              name: "{{ "{{" }} workflow.parameters.DEPENDENCY_SCAN_CM{{ "}}" }}"
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: results-dependency-check-dd-upload
       volumes:
@@ -1105,51 +946,38 @@ spec:
             path: /tmp/findings.json
             optional: true
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 256Mi
-          requests:
-            cpu: '0.2'
-            memory: 256Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
+        resources: {{ .Values.scanjob.resultsUpload.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: scandata
             mountPath: /tmp/dependency-check-results
-            subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/dependency-check"
             readOnly: true
         imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_CM{{ "}}" }}"
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
           - secretRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_SECRETS{{ "}}" }}"
         env:
           - name: APP_NAME
-            value: "{{ workflow.parameters.appname }}"
+            value: "{{ "{{" }} workflow.parameters.appname{{ "}}" }}"
           - name: DD_BRANCH_NAME
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: DD_REPORT_TYPE
             value: "Dependency Check Scan"
           - name: NAMESPACE
-            value: "{{ workflow.parameters.namespace }}"
+            value: "{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"
           - name: ENVIRONMENT
-            value: "{{ workflow.parameters.environment }}"
+            value: "{{ "{{" }} workflow.parameters.environment{{ "}}" }}"
           - name: DD_TEAM
-            value: "{{ workflow.parameters.team }}"
+            value: "{{ "{{" }} workflow.parameters.team{{ "}}" }}"
           - name: EXIT_CODE_ON_FINDING
             value: "0"
           - name: EXIT_CODE_ON_MISSING_REPORT
@@ -1170,40 +998,27 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.json
       script:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.collectFindings.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: scandata
             mountPath: /tmp/results
-            subPath: "results/{{ workflow.parameters.image_id }}/generic"
+            subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic"
         command: [/bin/bash]
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
         source: |
           set -e
 
           if [ -f /clusterscanner/scan-common.bash ]; then
               source /clusterscanner/scan-common.bash
-              IMAGE="{{ workflow.parameters.image }}"
-              NAMESPACE="{{ workflow.parameters.namespace }}"
-              CLUSTER="{{ workflow.parameters.environment }}"
+              IMAGE="{{ "{{" }} workflow.parameters.image{{ "}}" }}"
+              NAMESPACE="{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"
+              CLUSTER="{{ "{{" }} workflow.parameters.environment{{ "}}" }}"
               RESULTS_PATH="/tmp/results"
               FINDINGS="/tmp/findings.json"
               TMP_FINDINGS="/tmp/findings.tmp.json"
@@ -1322,36 +1137,23 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 512Mi
-          requests:
-            cpu: '0.2'
-            memory: 512Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
+        resources: {{ .Values.scanjob.resultsDDUpload.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_CM{{ "}}" }}"
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
           - secretRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
+              name: "{{ "{{" }} workflow.parameters.DEFECTDOJO_SECRETS{{ "}}" }}"
         env:
           - name: APP_NAME
-            value: "{{ workflow.parameters.appname }}"
+            value: "{{ "{{" }} workflow.parameters.appname{{ "}}" }}"
           - name: DD_BRANCH_NAME
-            value: "{{ workflow.parameters.image }}"
+            value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
           - name: DD_REPORT_TYPE
             value: "Generic Findings Import"
           - name: DD_REPORT_PATH
@@ -1359,11 +1161,11 @@ spec:
           - name: EXIT_CODE_ON_FINDING
             value: "0"
           - name: NAMESPACE
-            value: "{{ workflow.parameters.namespace }}"
+            value: "{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"
           - name: ENVIRONMENT
-            value: "{{ workflow.parameters.environment }}"
+            value: "{{ "{{" }} workflow.parameters.environment{{ "}}" }}"
           - name: DD_TEAM
-            value: "{{ workflow.parameters.team }}"
+            value: "{{ "{{" }} workflow.parameters.team{{ "}}" }}"
           - name: EXIT_CODE_ON_MISSING_REPORT
             value: "0" # make the job successful
           - name: DD_MINIMUM_SEVERITY
@@ -1412,63 +1214,50 @@ spec:
         - name: tmp
           emptyDir: { }
       script:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 256Mi
-          requests:
-            cpu: '0.2'
-            memory: 256Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        resources: {{ .Values.scanjob.aggregateResults.resources }}
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         volumeMounts:
           - name: tmp
             mountPath: /tmp
           - name: scandata
             mountPath: /clusterscanner/data
-            subPath: "{{ workflow.parameters.SCAN_ID }}"
+            subPath: "{{ "{{" }} workflow.parameters.SCAN_ID{{ "}}" }}"
             defaultMode: 0777 # to allow the cleanup to delete the folders
         command: [/bin/bash]
         envFrom:
           - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
+              name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
         source: |
           set -e
           field=1
-          if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+          if [ $(echo {{ "{{" }} workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
             field=2
           fi
-          IMAGE_NAME=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
+          IMAGE_NAME=$(echo "{{ "{{" }} workflow.parameters.image{{ "}}" }}" | cut -d: -f${field})
           IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
-          if [ $(echo {{ workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
+          if [ $(echo {{ "{{" }} workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
             field=2
           else 
             field=3 
           fi
-          IMAGE_TAG=$(echo "{{ workflow.parameters.image }}" | cut -d: -f${field})
-          IMAGE_HASH=$(echo "{{ workflow.parameters.image_id }}" | sed -e "s#/#__#g" | cut -d: -f${field})
+          IMAGE_TAG=$(echo "{{ "{{" }} workflow.parameters.image{{ "}}" }}" | cut -d: -f${field})
+          IMAGE_HASH=$(echo "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}" | sed -e "s#/#__#g" | cut -d: -f${field})
           if ! [ -e /tmp/result.json ]; then
             echo "{}" > /tmp/result.json
           fi
           JSON_RESULT=$(cat /tmp/result.json)
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageTag = \"${IMAGE_TAG}\"")
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".imageHash = \"${IMAGE_HASH}\"")
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.image = "{{ workflow.parameters.image }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.environment = "{{ workflow.parameters.environment }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.namespace = "{{ workflow.parameters.namespace }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.rocketchat = "{{ workflow.parameters.rocketchat }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.image = "{{ "{{" }} workflow.parameters.image{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.environment = "{{ "{{" }} workflow.parameters.environment{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.namespace = "{{ "{{" }} workflow.parameters.namespace{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ "{{" }} workflow.parameters.scm_source_branch{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ "{{" }} workflow.parameters.team{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ "{{" }} workflow.parameters.slack{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.rocketchat = "{{ "{{" }} workflow.parameters.rocketchat{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ "{{" }} workflow.parameters.email{{ "}}" }}"')
+          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ "{{" }} workflow.parameters.appname{{ "}}" }}"')
 
           JSON_DD_DEPENDENCY_TRACK=$(echo "{\"errors\":[]}")
           isFinding=$(cat /tmp/isFinding-dependency-track) || isFinding="false"
@@ -1554,9 +1343,9 @@ spec:
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
           fi
 
-          echo "Storing into /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
+          echo "Storing into /clusterscanner/data/{{ "{{" }} workflow.parameters.environment }}__{{ "{{" }} workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
           echo "${JSON_RESULT}"
-          echo "${JSON_RESULT}"  > /clusterscanner/data/{{ workflow.parameters.environment }}__{{ workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
+          echo "${JSON_RESULT}"  > /clusterscanner/data/{{ "{{" }} workflow.parameters.environment }}__{{ "{{" }} workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
           
 
     - name: exit-handler
@@ -1572,23 +1361,16 @@ spec:
           requests:
             cpu: '0.2'
             memory: 128Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
+        securityContext: {{ .Values.scanjob.securityContext }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         env: # TODO check for email creds
           - name: MESSAGE_TARGETS
-            value: "{{ workflow.parameters.errorTargets }}"
+            value: "{{ "{{" }} workflow.parameters.errorTargets{{ "}}" }}"
           - name: SLACK_CLI_TOKEN
             valueFrom:
               secretKeyRef:
-                name: "{{ workflow.parameters.slackTokenSecretName }}"
+                name: "{{ "{{" }} workflow.parameters.slackTokenSecretName{{ "}}" }}"
                 key: SLACK_CLI_TOKEN
         envFrom:
           - configMapRef:

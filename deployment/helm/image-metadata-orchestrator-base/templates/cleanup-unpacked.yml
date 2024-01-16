@@ -4,11 +4,11 @@ metadata:
   name: cleanup-enforced-delte-pvc-wf-images
   namespace: {{ .Release.Namespace }}
 spec:
-  schedule: "30 11 1 * *"
+  schedule: "{{ .Values.cleanup.schedule }}"
   concurrencyPolicy: "Forbid"
-  startingDeadlineSeconds: 0
+  startingDeadlineSeconds:  {{ .Values.cleanup.startingDeadlineSeconds }}
   timezone: Europe/Berlin
-  activeDeadlineSeconds: 3600
+  activeDeadlineSeconds: {{ .Values.cleanup.activeDeadlineSeconds }}
   workflowSpec:
     entrypoint: pvc-cleanup
     templates:
@@ -21,7 +21,7 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/clusterscanner-base:2
+          image: {{ .Values.cleanup.image.repo }}:{{ .Values.cleanup.image.tag }}
           volumeMounts:
             - name: images
               mountPath: /clusterscanner/images
