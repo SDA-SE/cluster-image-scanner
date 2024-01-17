@@ -48,7 +48,7 @@ spec:
             template: notify-teams
         - - name: generate-lifetime-statistics
             template: generate-lifetime-statistics
-    #            when: "{{ "{{" }} workflow.parameters.allResultsGitTarget }} == "
+    #            when: "{{ "{{" }} workflow.parameters.allResultsGitTarget {{ "}}" }} == "
         - - name: generate-response-statistics
             template: generate-response-statistics
         - - name: git-upload-response-statistics
