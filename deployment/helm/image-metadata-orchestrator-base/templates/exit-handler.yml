@@ -25,8 +25,10 @@ spec:
 
     - name: exit-handler
       container:
-        resources: {{ .Values.exitHandler.resources }}
-        securityContext: {{ .Values.exitHandler.securityContext }}
+        resources:
+          {{- toYaml .Values.exitHandler.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.exitHandler.securityContext | nindent 10 }}
         image: "{{ "{{" }}workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         imagePullPolicy: IfNotPresent
         source: |

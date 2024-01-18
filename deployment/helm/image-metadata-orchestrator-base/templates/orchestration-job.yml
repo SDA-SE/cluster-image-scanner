@@ -9,7 +9,8 @@ spec:
   entrypoint: main # Entry point for job execution
   workflowSpec:
     #serviceAccountName: clusterscanner
-    ttlStrategy: {{ .Values.orchestrationJob.ttlStrategy }}
+    ttlStrategy:
+      {{- toYaml .Values.orchestrationJob.ttlStrategy | nindent 6 }}
     artifactRepositoryRef:
       configMap: artifact-repositories
       key: default-v1
@@ -48,7 +49,7 @@ spec:
             template: notify-teams
         - - name: generate-lifetime-statistics
             template: generate-lifetime-statistics
-    #            when: "{{ "{{" }} workflow.parameters.allResultsGitTarget {{ "}}" }} == "
+        #            when: "{{ "{{" }} workflow.parameters.allResultsGitTarget {{ "}}" }} == "
         - - name: generate-response-statistics
             template: generate-response-statistics
         - - name: git-upload-response-statistics
@@ -86,8 +87,10 @@ spec:
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-image-source-fetcher:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
-        resources: {{ .Values.orchestrationJob.fetchImageList.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.fetchImageList.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         volumeMounts:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
@@ -124,8 +127,10 @@ spec:
         volumeMounts:
           - name: tmp
             mountPath: /tmp
-        resources: {{ .Values.orchestrationJob.subflow.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.subflow.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-workflow-runner:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: IfNotPresent
@@ -164,8 +169,10 @@ spec:
         - name: tmp
           emptyDir: {}
       script:
-        resources: {{ .Values.orchestrationJob.notifyTeams.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.notifyTeams.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-notifier:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}" # has mailx
         volumeMounts:
           - name: scandata
@@ -236,7 +243,7 @@ spec:
               sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
               sed -i "s#\#\#\#APP_NAME\#\#\##${appName}#g" /tmp/slack-template.json
               sed -i "s/###NAMESPACE###/${namespace}/g" /tmp/slack-template.json
-              sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json 
+              sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json
               sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
               sed -i "s#_INFO_#${infoNoNewline}#g" /tmp/slack-template.json
               #echo "/tmp/slack-template.json:"
@@ -254,7 +261,7 @@ spec:
                   -d @/tmp/slack-template.json \
                   "${SLACK_MESSAGE_ENDPOINT}"
               else
-                echo "Slack not configured in collector"          
+                echo "Slack not configured in collector"
               fi
               if [ "${rocketchat}" != "" ]; then
                 if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
@@ -262,7 +269,7 @@ spec:
                 fi
                 if [ "${SLACK_CLI_TOKEN}" == "" ]; then
                   echo "No SLACK_CLI_TOKEN set"
-                fi          
+                fi
                 echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
                 curl -H "Content-type: application/json" \
                   -d @/tmp/slack-template.json \
@@ -271,7 +278,7 @@ spec:
                   -X POST \
                   "${SLACK_MESSAGE_ENDPOINT}"
               else
-                echo "rocketchat not configured in collector"          
+                echo "rocketchat not configured in collector"
               fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
@@ -332,7 +339,7 @@ spec:
                                         if [ "$title" == "Image Has a New Version" ]; then
                                           echo "In new version, skipping. In a later version, we will inform after X days"
                                           continue;
-                                          
+
                     #                      echo "item: ${item}"
                     #                      scanResultFindingFinishedAt=$(echo "${item}" | jq -r '.scanResults[]["scan-new-version"].cachedUsedAt' | grep -v null) # doesn't work
                     #                      echo "scanResultFindingFinishedAt ${scanResultFindingFinishedAt}"
@@ -364,7 +371,7 @@ spec:
                       infoText="${infoText}; Error: ${errorText}"
                     fi
                     echo "will inform ${image}"
-                    inform 
+                    inform
                     sleep 1 # reduce risk of rate limit
                   done
                 done <<< "${notifications}"
@@ -384,8 +391,10 @@ spec:
           secret:
             secretName: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
       script:
-        resources: {{ .Values.orchestrationJob.generateLifetimeStatistics.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.generateLifetimeStatistics.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-imagecollector:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         volumeMounts:
           - name: tmp
@@ -417,7 +426,7 @@ spec:
         source: |
           set -e
           cd $HOME
-                  
+
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
@@ -430,7 +439,7 @@ spec:
           if [ "${RESULT_PATH}" == "" ]; then
             RESULT_PATH=/clusterscanner/data
           fi
-          
+
           if [ "${GIT_REPOSITORY}" == "" ]; then
             echo "No repo to upload stats"
             exit 0
@@ -446,7 +455,7 @@ spec:
           mkdir /tmp/clusterscanner-remote/${WORKFLOW_DATE} || true
           # echo "tmpdir: ${tmpdir}, tmpdirBaseImage: ${tmpdirBaseImage}"
           echo "${RESULT_PATH}"
-          ls -la "${RESULT_PATH}" 
+          ls -la "${RESULT_PATH}"
           for result in $(find ${RESULT_PATH} -name *.json); do
             team=$(cat $result | jq -r '.team' | sed 's/\s//g' || true)
             age=$(cat $result | jq -r '.scanResults[] | .["scan-lifetime"].age' | grep -v null || true)
@@ -470,7 +479,7 @@ spec:
                 echo "scan-baseimage-lifetime not found"
               fi
             done
-            
+
             if [ "${age}" != "" ]; then
               if [ "${reproducibleBuildImage}" == "true" ]; then
                 echo "Skipping age for ${image} due to reproducibleBuildImage"
@@ -485,12 +494,12 @@ spec:
                 echo "${image} ${baseImageAge}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/${environment}_invalid_creation_date_baseimage-lifetime_$${team}.txt
               else
                 echo ${baseImageAge} >> ${tmpdirBaseImage}/${environment}_${team}.txt
-              fi          
+              fi
             fi
           done
           echo "${tmpdir}"
           ls -la "${tmpdir}"
-          
+
           for j in $(ls ${tmpdir}); do
             result=$(cat ${tmpdir}/${j}  | awk '{if(min==""){min=max=$1}; if($1>max) {max=$1}; if($1<min) {min=$1}; total+=$1; count+=1} END {print total/count, max, min}')
             filename=$(echo ${j} | sed 's#.txt##g')
@@ -507,10 +516,10 @@ spec:
             echo " ${result} ${filename}" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv
           done
           cat /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv | sort -n >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.csv
-          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv 
-          
+          mv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview-tmp.csv /tmp/clusterscanner-remote/${WORKFLOW_DATE}/baseimage_lifetime_overview.csv
+
           echo "Start (SCAN_ID): ${SCAN_ID}, end: $(date)" >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/infos.txt
-          
+
           cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           git add * || true
@@ -531,10 +540,12 @@ spec:
         volumeMounts:
           - name: tmp
             mountPath: /tmp
-        resources: {{ .Values.orchestrationJob.generateResponseStatistics.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.generateResponseStatistics.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-statistic-client:3"
-        imagePullPolicy: IfNotPresent 
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -556,8 +567,10 @@ spec:
           - name: team-statistics
             path: /tmp/team-response-statistics.csv
       script:
-        resources: {{ .Values.orchestrationJob.gitUploadResponseStatistics.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.gitUploadResponseStatistics.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-imagecollector:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         volumeMounts:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
@@ -584,7 +597,7 @@ spec:
         source: |
           set -e
           cd $HOME
-          
+
           source auth.bash # > /dev/null 2>&1
           source git.bash # > /dev/null 2>&1
 
@@ -606,20 +619,22 @@ spec:
           cat /tmp/team-response-statistics.csv >> /tmp/clusterscanner-remote/${WORKFLOW_DATE}/team-response-statistics.csv
           cd /tmp/clusterscanner-remote/${WORKFLOW_DATE}
           ls -la /tmp/clusterscanner-remote/${WORKFLOW_DATE}
-          
+
           git add * || true
           git commit -m "add response statistics" || true
 
           git push -f origin master || true
-          
+
 
     - name: cleanup-dependency-track
       volumes:
         - name: tmp
           emptyDir: { }
       script:
-        resources: {{ .Values.orchestrationJob.cleanupDTrack.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.cleanupDTrack.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -653,7 +668,7 @@ spec:
             --header 'Accept: application/json' \
             -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}")
           echo $content | jq -r ".[] | select(.lastBomImport > ${maxAge}) | .uuid" > /tmp/projects-to-set-inactive
-          
+
           for uuid in $(cat /tmp/projects-to-set-inactive); do
             echo "UUID $uuid"
             name=$(curl  \
@@ -680,8 +695,10 @@ spec:
           emptyDir: { }
       script:
         command: [/bin/bash]
-        resources: {{ .Values.orchestrationJob.exitHandler.resources }}
-        securityContext: {{ .Values.orchestrationJob.securityContext }}
+        resources:
+          {{- toYaml .Values.orchestrationJob.exitHandler.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         imagePullPolicy: IfNotPresent
         env: # TODO check for email creds
@@ -712,10 +729,10 @@ spec:
           echo "${failures}"
           sendMessageViarocketchat() {
             channel="${1}"
-          
+
             message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner orchestrator execution\", \"attachments\": ${message{{ "}}" }}" > /tmp/slack-template.json
-          
+            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner orchestrator execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
+
             if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
               echo "No ROCKET_CHAT_USER_ID set"
               exit 3
@@ -724,7 +741,7 @@ spec:
               echo "No SLACK_CLI_TOKEN set"
               exit 2
             fi
-          
+
             echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${channel}"
             curl -H "Content-type: application/json" \
               -d @/tmp/slack-template.json \
@@ -735,16 +752,16 @@ spec:
           }
           sendMessageViaslack() {
             channel="${1}"
-          
+
             message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message{{ "}}" }}" > /tmp/slack-template.json
+            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
             cat /tmp/slack-template.json
-          
+
             if [ "${SLACK_CLI_TOKEN}" == "" ]; then
               echo "No SLACK_CLI_TOKEN set"
               exit 2
             fi
-          
+
             curl \
               -H "Content-type:application/json" \
               -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
@@ -752,11 +769,11 @@ spec:
               -d @/tmp/slack-template.json \
               "${SLACK_MESSAGE_ENDPOINT}"
           }
-          
+
           fn_exists() { declare -F "$1" > /dev/null; }
-          
+
           if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]] || [[ "${failures}" == "null" ]]; then
-            echo "No message, exit 0" 
+            echo "No message, exit 0"
             exit 0
           fi
           echo "${MESSAGE_TARGETS}" |  jq -c '.[]' | while read i; do
@@ -768,6 +785,6 @@ spec:
               echo "Message type '${type}' doesn't exit"
               exit 1
             fi
-          
+
             ${toCall} "${channel}"
           done

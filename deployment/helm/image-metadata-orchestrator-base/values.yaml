@@ -309,6 +309,14 @@ scanjob:
       requests:
         cpu: '0.2'
         memory: 256Mi
+  exitHandler:
+    resources:
+      limits:
+        cpu: '1'
+        memory: 128Mi
+      requests:
+        cpu: '0.2'
+        memory: 128Mi
 
 testjob:
   securityContext:

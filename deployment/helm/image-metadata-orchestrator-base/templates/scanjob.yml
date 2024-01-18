@@ -9,8 +9,10 @@ spec:
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
-  ttlStrategy: {{ .Values.scanjob.ttlStrategy }}
-  retryStrategy: {{ .Values.scanjob.retryStrategy }}
+  ttlStrategy:
+    {{- toYaml .Values.scanjob.ttlStrategy | nindent 4 }}
+  retryStrategy:
+    {{- toYaml .Values.scanjob.retryStrategy | nindent 4 }}
   entrypoint: main # Entry point for job execution
   inputs:
     parameters:
@@ -165,8 +167,10 @@ spec:
           configMap:
             name: "scanjob-env-parameter"
       script:
-        resources: {{ .Values.scanjob.imagefetcher.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.imagefetcher.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -321,8 +325,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.sbomgeneration.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.sbomgeneration.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-syft:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
@@ -359,8 +365,10 @@ spec:
         - name: tmp
           emptyDir: { }
       script:
-        resources: {{ .Values.scanjob.scanDependencyTrack.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanDependencyTrack.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -539,8 +547,10 @@ spec:
             valueFrom:
               path: /tmp/output.json
       script:
-        resources: {{ .Values.scanjob.dtrackNotificationThresholds.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.dtrackNotificationThresholds.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: [/bin/bash]
         imagePullPolicy: IfNotPresent
@@ -608,8 +618,10 @@ spec:
             path: /tmp/findings.json
             optional: true
       container:
-        resources: {{ .Values.scanjob.resultsUpload.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.resultsUpload.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
@@ -663,8 +675,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.scanDistroless.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanDistroless.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-distroless:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         imagePullPolicy: IfNotPresent
@@ -698,8 +712,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.scanLifetime.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanLifetime.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-lifetime:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
@@ -735,8 +751,10 @@ spec:
           secret:
             secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
       container:
-        resources: {{ .Values.scanjob.scanLifetimeBaseImage.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanLifetimeBaseImage.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-lifetime:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
@@ -776,8 +794,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.scanRunAsRoot.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanRunAsRoot.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-runasroot:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
@@ -811,8 +831,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.scanNewVersion.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanNewVersion.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-new-version:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent 
         command: ["/clusterscanner/entrypoint.bash"]
@@ -854,8 +876,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.scanMalware.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanMalware.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-malware:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: Always # to have up to date signatures
         command: ["/clusterscanner/entrypoint.bash"]
@@ -901,8 +925,10 @@ spec:
             path: /clusterscanner/data/module_scan-dependency-check.json
             archiveLogs: true
       container:
-        resources: {{ .Values.scanjob.scanDependencyCheck.resources}}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.scanDependencyCheck.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-dependency-check:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
@@ -946,8 +972,10 @@ spec:
             path: /tmp/findings.json
             optional: true
       container:
-        resources: {{ .Values.scanjob.resultsUpload.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.resultsUpload.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         volumeMounts:
           - name: tmp
@@ -998,8 +1026,10 @@ spec:
           - name: results-generic-findings
             path: /tmp/findings.json
       script:
-        resources: {{ .Values.scanjob.collectFindings.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.collectFindings.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         volumeMounts:
           - name: tmp
@@ -1137,8 +1167,10 @@ spec:
         - name: tmp
           emptyDir: { }
       container:
-        resources: {{ .Values.scanjob.resultsDDUpload.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.resultsDDUpload.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3.1.209"
         imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
@@ -1214,8 +1246,10 @@ spec:
         - name: tmp
           emptyDir: { }
       script:
-        resources: {{ .Values.scanjob.aggregateResults.resources }}
-        securityContext: {{ .Values.scanjob.securityContext }}
+        resources:
+          {{- toYaml .Values.scanjob.aggregateResults.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         volumeMounts:
           - name: tmp
@@ -1355,13 +1389,9 @@ spec:
       script:
         command: [/bin/bash]
         resources:
-          limits:
-            cpu: '1'
-            memory: 128Mi
-          requests:
-            cpu: '0.2'
-            memory: 128Mi
-        securityContext: {{ .Values.scanjob.securityContext }}
+          {{- toYaml .Values.scanjob.exitHandler.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         imagePullPolicy: IfNotPresent
         env: # TODO check for email creds
