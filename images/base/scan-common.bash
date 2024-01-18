@@ -56,8 +56,13 @@ function parse_and_set_image_variables {
       field=3
     fi
     export IMAGE_TAG=$(echo "${IMAGE}" | cut -d: -f${field})
+    if [ -z "$IMAGE_BY_HASH" ]; then
+      echo "Setting IMAGE_BY_HASH=$IMAGE"
+      export IMAGE_BY_HASH="$IMAGE"
+    fi
     if [ "${IMAGE_ID}" == "" ]; then
-        IMAGE_ID="${IMAGE_BY_HASH}"
+      echo "Setting IMAGE_ID=${IMAGE_BY_HASH}"
+      IMAGE_ID="${IMAGE_BY_HASH}"
     fi
     export IMAGE_HASH=$(echo "${IMAGE_ID}" | sed -e "s#/#__#g" | cut -d: -f${field})
 }
