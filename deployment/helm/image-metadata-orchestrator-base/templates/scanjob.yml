@@ -756,7 +756,7 @@ spec:
         securityContext:
           {{- toYaml .Values.scanjob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-lifetime:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
