@@ -325,6 +325,7 @@ spec:
                   mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
                 fi          
                 if [ "${SMTP_ENFORCE_MAILTO}" != "" ]; then
+                  echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
                   email="${SMTP_ENFORCE_MAILTO}"
                 fi
 
