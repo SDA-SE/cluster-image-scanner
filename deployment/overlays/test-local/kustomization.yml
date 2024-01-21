@@ -7,6 +7,8 @@ resources:
   - defectdojo-test.cm.yml
   - slack.yml
   - rbac.yml
+  - s3.api.secret.yml
+  - s3.api.cm.yml
 
 generatorOptions:
   labels:
