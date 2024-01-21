@@ -11,7 +11,7 @@ set -ex
 #/usr/local/aws-cli/v2/2.13.29/bin/aws ${S3_PARAMETER} "${S3_BUCKET}"
 
 mkdir -p /clusterscanner/out/merged
-curl --http1.1 --location "$S3_API_LOCATION" \
+curl --http1.1 --location "${S3_API_LOCATION}" \
     --header "x-api-key: ${S3_API_KEY}" \
     --header "x-api-signature: ${S3_API_SIGNATURE}" \
     | jq '( .[] | select(.team == "") ).team |= "nobody"' \
