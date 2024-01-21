@@ -21,6 +21,8 @@ resources:
   - synchronization.cm.yml
   - email.yml
   - dependency-track.cm.yml
+  - s3.api.secret.yml
+  - s3.api.cm.yml
 #  - cleanup-scandata.yml
 #  - cleanup-unpacked.yml
 configMapGenerator:

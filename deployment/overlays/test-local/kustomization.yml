@@ -41,6 +41,12 @@ secretGenerator:
     type: Secret
     envs:
       - config-source/s3.env
+  - name: s3-api-cred
+    namespace: clusterscanner
+    behavior: replace
+    type: Secret
+    envs:
+      - config-source/s3.api.secret.env
   - name: slacktoken
     namespace: clusterscanner
     behavior: replace
@@ -91,3 +97,9 @@ configMapGenerator:
     behavior: replace
     envs:
       - config-source/defectdojo-test.cm.env
+
+  - name: s3-api-cm
+    namespace: clusterscanner
+    behavior: replace
+    envs:
+      - config-source/s3.api.cm.env
