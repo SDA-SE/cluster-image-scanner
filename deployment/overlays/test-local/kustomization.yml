@@ -41,7 +41,7 @@ secretGenerator:
     type: Secret
     envs:
       - config-source/s3.env
-  - name: s3-api-cred
+  - name: s3-api-credentials
     namespace: clusterscanner
     behavior: replace
     type: Secret
@@ -98,7 +98,7 @@ configMapGenerator:
     envs:
       - config-source/defectdojo-test.cm.env
 
-  - name: s3-api-cm
+  - name: s3-api-config
     namespace: clusterscanner
     behavior: replace
     envs:
