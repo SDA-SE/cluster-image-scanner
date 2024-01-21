@@ -56,8 +56,8 @@ sed -i.bak "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_
 sed -i.bak "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
 
 
-sed -i.bak "s#S3_API_KEY_PLACEHOLDER#${S3_API_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/S3.api.secret.yml
-sed -i.bak "s#S3_API_SIGNATURE_PLACEHOLDER#${S3_API_SIGNATURE}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/S3.api.secret.yml
+sed -i.bak "s#S3_API_KEY_PLACEHOLDER#${S3_API_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.yml
+sed -i.bak "s#S3_API_SIGNATURE_PLACEHOLDER#${S3_API_SIGNATURE}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.yml
 sed -i.bak "s#S3_API_LOCATION_PLACEHOLDER#${S3_API_LOCATION}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.cm.yml
 
 echo "test-all=${GIT_SOURCE_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
