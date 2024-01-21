@@ -9,6 +9,8 @@ resources:
   - github.yml
   - registry.yml
   - dependency-track.secret.yml
+  - s3.api.cm.yml
+  - s3.api.secret.yml
 
 commonLabels:
     app.kubernetes.io/name: clusterscanner
