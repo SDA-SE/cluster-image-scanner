@@ -5,6 +5,7 @@ metadata:
   name: cluster-image-scanner-images
   namespace: {{ .Release.Namespace }}
 spec:
+  storageClassName: {{ .Values.storage.imagesPvc.storageClass }}
   accessModes:
     - ReadWriteMany
   resources:
@@ -17,6 +18,7 @@ metadata:
   name: cluster-image-scanner-scandata
   namespace: {{ .Release.Namespace }}
 spec:
+  storageClassName: {{ .Values.storage.scandataPvc.storageClass }}
   accessModes:
     - ReadWriteMany
   resources:

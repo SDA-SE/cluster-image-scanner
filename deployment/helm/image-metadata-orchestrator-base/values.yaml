@@ -330,6 +330,8 @@ testjob:
 
 storage:
   imagesPvc:
+    storageClass: standard
     capacity: 1000Gi
   scandataPvc:
+    storageClass: standard
     capacity: 50Gi
