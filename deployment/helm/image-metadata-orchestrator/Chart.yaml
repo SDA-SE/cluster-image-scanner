@@ -1,6 +1,6 @@
 apiVersion: v2
 name: image-metadata-orchestrator
-description: A chart that deploys the image metadata orchestrator
+description: A chart that deploys the image metadata orchestrator.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
