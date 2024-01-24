@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  image-metadata-orchestrator:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-01-24T16:21:59.090373841Z"
+    description: A chart that deploys the image metadata orchestrator.
+    digest: 80aea4d0d095549e75691d2e4576475d3c3a8aafdec14a6d5fb861f53747eafb
+    name: image-metadata-orchestrator
+    type: application
+    urls:
+    - https://github.com/SDA-SE/cluster-image-scanner/releases/download/image-metadata-orchestrator-0.1.0/image-metadata-orchestrator-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-01-24T16:21:59.090383599Z"
