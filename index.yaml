@@ -11,4 +11,16 @@ entries:
     urls:
     - https://github.com/SDA-SE/cluster-image-scanner/releases/download/image-metadata-orchestrator-0.1.0/image-metadata-orchestrator-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-24T16:21:59.090383599Z"
+  image-metadata-orchestrator-base:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-01-24T16:24:13.852319976Z"
+    description: This chart contains base resources required by the orchestrator.
+      It primarily contains argo workflow templates and their config.
+    digest: 1ab63e601818c98083116a89fa49cbe7c8e9f03e55282ba4bf51e3c2ff4c65da
+    name: image-metadata-orchestrator-base
+    type: application
+    urls:
+    - https://github.com/SDA-SE/cluster-image-scanner/releases/download/image-metadata-orchestrator-base-0.1.0/image-metadata-orchestrator-base-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-01-24T16:24:13.852329253Z"
