@@ -218,47 +218,52 @@ spec:
           fi
 
           echo "Initiating download of image ${IMAGE_BY_HASH}"
-
+          set +e
           OVERRIDES=$(env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM")
-          while read r 
-          do
-            _FROM="${r}"
-            _TO="${r/%_FROM/_TO}"
-            FROM="${!_FROM}"
-            TO="${!_TO}"
-          
-            if [ -z "$TO" ]; then
-              echo "Unmatched ${r/%_FROM/_TO} for ${r}"
-              exit 1
-            fi
-          
-            # Validating input for sed. 
-            # Break out of loop if a tilde is contained.
-
-            FROM_NEW=$(tr -d "~" <<<"$FROM")
-            if [ "$FROM_NEW" != "$FROM" ]; then
-              echo "Ignoring ${_FROM} (${FROM}) because it contains a tilde"
-              continue
-            fi
-            TO_NEW=$(tr -d "~" <<<"$TO")
-            if [ "$TO_NEW" != "$TO" ]; then
-              echo "Ignoring ${_TO} (${TO}) because it contains a tilde"
-              continue
-            fi
-
-            IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed -e "s~${FROM}~${TO}~")
-            if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
-              echo "Found registry replacement:"
-              echo "    Replace ${FROM}"
-              echo "    with ${TO}"
-              echo
-              IMAGE_BY_HASH="$IMAGE_BY_HASH_NEW"
-              break
-            else 
-              echo "Ignoring ${_FROM} (${FROM}) because it doesn't match the image URI"
-            fi
-          done <<<"$OVERRIDES"
-
+          echo "OVERRIDES: ${OVERRIDES}"
+          set -e
+          if [ "$OVERRIDES" == "" ]; then
+            echo "No registry overrides found"
+          else
+            while read r 
+            do
+              _FROM="${r}"
+              _TO="${r/%_FROM/_TO}"
+              FROM="${!_FROM}"
+              TO="${!_TO}"
+            
+              if [ -z "${TO}" ]; then
+                echo "Unmatched ${r/%_FROM/_TO} for ${r}"
+                exit 1
+              fi
+            
+              # Validating input for sed. 
+              # Break out of loop if a tilde is contained.
+  
+              FROM_NEW=$(tr -d "~" <<<"${FROM}")
+              if [ "$FROM_NEW" != "$FROM" ]; then
+                echo "Ignoring ${_FROM} (${FROM}) because it contains a tilde"
+                continue
+              fi
+              TO_NEW=$(tr -d "~" <<<"$TO")
+              if [ "$TO_NEW" != "$TO" ]; then
+                echo "Ignoring ${_TO} (${TO}) because it contains a tilde"
+                continue
+              fi
+  
+              IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed -e "s~${FROM}~${TO}~")
+              if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
+                echo "Found registry replacement:"
+                echo "    Replace ${FROM}"
+                echo "    with ${TO}"
+                echo
+                IMAGE_BY_HASH="${IMAGE_BY_HASH_NEW}"
+                break
+              else 
+                echo "Ignoring ${_FROM} (${FROM}) because it doesn't match the image URI"
+              fi
+            done <<<"$OVERRIDES"
+          fi
           echo "Using image URI '${IMAGE_BY_HASH}'"
 
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"

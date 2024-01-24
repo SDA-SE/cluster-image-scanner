@@ -7,6 +7,8 @@ resources:
   - defectdojo-test.cm.yml
   - slack.yml
   - rbac.yml
+  - s3.api.secret.yml
+  - s3.api.cm.yml
 
 generatorOptions:
   labels:
@@ -41,6 +43,7 @@ secretGenerator:
     type: Secret
     envs:
       - config-source/s3.env
+
   - name: slacktoken
     namespace: clusterscanner
     behavior: replace

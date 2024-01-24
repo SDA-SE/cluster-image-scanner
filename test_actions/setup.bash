@@ -55,6 +55,11 @@ sed -i.bak "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/
 sed -i.bak "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
 sed -i.bak "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
 
+
+sed -i.bak "s#S3_API_KEY_PLACEHOLDER#${S3_API_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.yml
+sed -i.bak "s#S3_API_SIGNATURE_PLACEHOLDER#${S3_API_SIGNATURE}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.yml
+sed -i.bak "s#S3_API_LOCATION_PLACEHOLDER#${S3_API_LOCATION}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.cm.yml
+
 echo "test-all=${GIT_SOURCE_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
 
 sed -i.bak "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
