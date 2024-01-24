@@ -30,6 +30,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: deployment/helm
-          pages_branch: gh-pages-dev
+          pages_branch: gh-pages
+          skip_existing: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
