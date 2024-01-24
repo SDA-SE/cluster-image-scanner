@@ -1,0 +1,15 @@
+---
+{{- if .Values.serviceAccount.create -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "image-metadata-orchestrator.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+  annotations:
+    {{- if .Values.serviceAccount.awsRoleArn}}
+    eks.amazonaws.com/role-arn: {{ .Values.serviceAccount.awsRoleArn }}
+    {{- end }}
+automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+{{- end }}

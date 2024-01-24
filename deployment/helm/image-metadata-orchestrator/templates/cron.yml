@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: clusterscan-orchestrator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cronSchedule }}"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 0
+  timezone: Europe/Berlin
+  suspend: false
+  workflowSpec:
+    serviceAccountName: {{ .Values.serviceAccount.name }}
+    podMetadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+    ttlStrategy:
+      secondsAfterSuccess: 3600
+      secondsAfterFailure: 6000
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+    entrypoint: main
+    arguments:
+      parameters:
+        - name: scanId
+          value: "{{ "{{" }} workflow.creationTimestamp.Y {{ "}}" }}{{ "{{" }} workflow.creationTimestamp.m {{ "}}" }}{{ "{{" }} workflow.creationTimestamp.d {{ "}}" }}-{{ "{{" }} workflow.creationTimestamp.H {{ "}}" }}{{ "{{" }} workflow.creationTimestamp.M {{ "}}" }}{{ "{{" }} workflow.creationTimestamp.S {{ "}}" }}-sda"
+        - name: gitSecretName
+          value: "github"
+        - name: s3SecretName
+          value: "api-credentials"
+        - name: s3ConfigName
+          value: "api-config"
+        - name: imageSourceListConfigMapName
+          value: "image-source-list"
+        - name: registrySecretName
+          value: "registry-sda-default"
+        - name: defectDojoConfigMapName # and secret
+          value: "defectdojo"
+        - name: slackTokenSecretName
+          value: "slacktoken"
+        - name: emailSecretName
+          value: "email"
+        - name: dependencyCheckDbConfigMapName # this mostly does not need to be adjusted
+          value: "dependency-check-db"
+        - name: enforceSlackChannel
+          value: "#security-notifications-test"
+        - name: dependencyCheckSuppressionsConfigMapName
+          value: "suppressions-sda"
+        - name: newVersionImageFilter
+          value: "quay.io/sdase/|dexidp/dex|quay.io/oauth2-proxy/oauth2-proxy|oliver006/redis_exporter|quay.io/prometheuscommunity/postgres-exporter"
+        - name: allResultsGitTarget
+          value: "github.com/SDA-SE/cluster-image-scanner-all-results-test"
+        - name: imageRegistryBase
+          value: "quay.io/sdase"
+        - name: clusterImageScannerImageTag
+          value: "feats3"  
+        - name: errorTargets
+          value: '[{ "channel":"#security-notifications", "type": "slack"} ]'  
+    templates:
+      - name: main
+        steps:
+          - - name: orchestration-job-sda
+              templateRef:
+                name: orchestration-job-template
+                template: main
