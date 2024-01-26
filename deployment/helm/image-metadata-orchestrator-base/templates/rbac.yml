@@ -29,6 +29,7 @@ rules:
   - "argoproj.io"
   resources:
   - workflows
+  - workflowtaskresults
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 {{- if .Values.serviceAccount.create }}
