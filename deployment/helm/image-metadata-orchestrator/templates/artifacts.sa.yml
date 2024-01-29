@@ -18,6 +18,8 @@ kind: RoleBinding
 metadata:
   name: argo-default-workflow-artifacts
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
