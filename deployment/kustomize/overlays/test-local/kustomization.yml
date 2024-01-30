@@ -11,6 +11,7 @@ resources:
   - rbac.yml
   - s3.api.secret.yml
   - s3.api.cm.yml
+  - artifacts.yml
 
 generatorOptions:
   labels:
