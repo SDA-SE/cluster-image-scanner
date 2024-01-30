@@ -44,7 +44,7 @@ secretGenerator:
     behavior: replace
     type: Secret
     envs:
-      - config-source/s3.env
+      - config-source/s3.api.secret.env
 
   - name: slacktoken
     namespace: clusterscanner
