@@ -44,7 +44,7 @@ sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 
 
 DEPLOYMENT_PATH=../deployment/kustomize
-git checkout ${DEPLOYMENT_PATH}/kustomize/overlays/
+git checkout ${DEPLOYMENT_PATH}/overlays/
 sed -i.bak "s#ACCESS_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.cm.env
 sed -i.bak "s#SECRET_KEY#testtesttest#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.env
 
