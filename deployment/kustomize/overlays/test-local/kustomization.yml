@@ -42,7 +42,7 @@ secretGenerator:
       - config-source/defectdojo.secret.env
   - name: s3-cred
     namespace: clusterscanner
-    behavior: replace
+    behavior: create
     type: Secret
     envs:
       - config-source/s3.api.secret.env
@@ -55,7 +55,7 @@ secretGenerator:
       - config-source/slack.env
   - name: github
     namespace: clusterscanner
-    behavior: replace
+    behavior: create
     type: Secret
     envs:
       - config-source/github.env
@@ -63,7 +63,7 @@ secretGenerator:
       - config-source/github_private_key.pem
   - name: dependency-track
     namespace: clusterscanner
-    behavior: replace
+    behavior: create
     envs:
       - config-source/dependency-track.secret.env
 
