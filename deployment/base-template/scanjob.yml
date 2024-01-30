@@ -373,7 +373,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: tmp
             mountPath: /tmp
