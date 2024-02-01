@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: clusterscanner
   name: s3-api-config
 data:
   S3_API_LOCATION: "S3_API_LOCATION_PLACEHOLDER"
