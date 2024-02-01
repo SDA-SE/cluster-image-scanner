@@ -211,6 +211,13 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
+          function cleanup {
+            echo "Cleaning up"
+            rm -rf "${tmp_dir}"
+          }
+            
+          trap cleanup ERR
+          
           set -e
 
           if [ -z "$IMAGE_BY_HASH" ]; then
@@ -271,7 +278,7 @@ spec:
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
-          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_TAR_FOLDER_PATH}/tmp")
+          tmp_dir=$(mktemp -d --tmpdir="/tmp")
           rm -Rf "${tmp_dir}" || true
           mkdir -p "${tmp_dir}"
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
@@ -327,8 +334,7 @@ spec:
           rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
           cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
-          echo "Cleaning up"
-          rm -rf "${tmp_dir}"
+          cleanup
 
     - name: sbom-generation
       volumes:
