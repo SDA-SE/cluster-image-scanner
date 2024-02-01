@@ -13,7 +13,6 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - cleanup-scandata.yml
   - namespace.yml 
   - defectdojo.yml
   - depcheck.yml
@@ -24,7 +23,7 @@ resources:
   - dependency-track.cm.yml
 
 #  - cleanup-scandata.yml
-#  - cleanup-unpacked.yml
+  - cleanup-unpacked.yml
 configMapGenerator:
   - name: suppressions
     files:
