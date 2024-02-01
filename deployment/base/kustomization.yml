@@ -13,7 +13,6 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - cleanup-scandata.yml
   - namespace.yml
   - defectdojo.yml
   - depcheck.yml
