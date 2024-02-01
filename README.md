@@ -52,6 +52,9 @@ We are looking forward to contributions. Take a look at our [Contribution Guidel
 # Responsible Disclosure and Security
 The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
 
+# Deployment
+Kustomize is deprecated in favor of helm.
+
 # Legal Notice
 The purpose of the ClusterImageScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.
 The ClusterImageScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
