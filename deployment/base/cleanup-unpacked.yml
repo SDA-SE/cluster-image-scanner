@@ -4,7 +4,7 @@ metadata:
   name: cleanup-enforced-delete-pvc-wf-images
   namespace: clusterscanner
 spec:
-  schedule: "0 15 * * *"
+  schedule: "4 15 * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
