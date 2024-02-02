@@ -46,9 +46,6 @@
                 "is_scan_malware": {
                   "type": "string"
                 },
-                "is_scan_dependency_check": {
-                  "type": "string"
-                },
                 "is_scan_runasroot": {
                   "type": "string"
                 },

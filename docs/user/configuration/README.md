@@ -11,7 +11,6 @@ As a team, **annotations** can be set in the following way to enable/disable sca
 contact.sdase.org/email: "clusterscannertest@sda.se" # email of the team
 contact.sdase.org/team: "the-fellowship-of-the-ring" # team
 contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/pod: derived from as <team>-security
-contact.sdase.org/rocketchat: "#fellowship-security" # in case rocket chat is used
 
 # In case some parts of the ISO 27001 requirement _A.8_ to establish an asset inventory are intended to get: Use `sdase.org/description` to describe the services in all namespaces. It will enforce an extra file `service-description.json` in the target repository of the CusterScannerImage Collector.
 sdase.org/description: "My service description"
@@ -35,7 +34,6 @@ scm.sdase.org/release="1.0.0" # String, see also labels, defaults to the image t
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-distroless: "true" # Boolean
-clusterscanner.sdase.org/is-scan-dependency-check: "true" # Boolean
 clusterscanner.sdase.org/is-scan-dependency-track: "false" # Boolean
 clusterscanner.sdase.org/is-scan-runasroot: "true" # Boolean
 clusterscanner.sdase.org/is-scan-new-version: "true" # Boolean

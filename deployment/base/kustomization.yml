@@ -15,7 +15,6 @@ generatorOptions:
 resources:
   - namespace.yml 
   - defectdojo.yml
-  - depcheck.yml
   - rbac.yml
   - repolist.yml
   - synchronization.cm.yml

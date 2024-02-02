@@ -16,7 +16,7 @@ An overview is depicted in the following figure:
 * The Image Collector, as the name suggests, collects the different images.
 * These images can be passed to the Fetcher via the Cluster Scan, via the GitOps process, or manually. The Fetcher then converts the CSV files into JSON files and provides additional fields with information about clusters, teams and images.
 * These files are kept in a separate directory and from there they are passed to the scanner.
-* This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
+* Multiple scanner are used, e.g. Dependency Track, Lifetime, Malware and further more.
 * The vulnerability management tool then collects the results and makes them available to the developers via a communication channel like Slack.
 
 ## Why using ClusterScanner
