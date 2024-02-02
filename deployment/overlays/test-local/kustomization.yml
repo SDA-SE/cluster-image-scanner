@@ -72,12 +72,6 @@ secretGenerator:
       - config-source/dependency-track.secret.env
 
 configMapGenerator:
-  - name: dependency-check-db
-    namespace: clusterscanner
-    behavior: replace
-    envs:
-      - config-source/depcheck.env
-
   - name: image-source-list
     namespace: clusterscanner
     behavior: replace
