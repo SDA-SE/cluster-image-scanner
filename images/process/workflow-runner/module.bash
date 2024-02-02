@@ -145,9 +145,9 @@ while read -r line; do
 
 
   echo "Setting workflow name"
-  workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
-  workflowGeneratedName="${workflowGeneratedName:0:62}"
-  workflowGeneratedName=$(echo "${workflowGeneratedName:0:62}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
+  workflowGeneratedName="${scanjobPrefix}${environment:0:10}-${namespace:0:10}-${team:0:10}-"
+  workflowGeneratedName="${workflowGeneratedName:0:50}"
+  workflowGeneratedName=$(echo "${workflowGeneratedName:0:50}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
   if [ "${IS_PRINT_TEMPLATE}" == "true" ]; then

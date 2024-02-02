@@ -1626,29 +1626,7 @@ spec:
           
           echo "failures"
           echo "${failures}"
-          sendMessageViarocketchat() {
-            channel="${1}"
-          
-            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner workflow job execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
-          
-            if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
-              echo "No ROCKET_CHAT_USER_ID set"
-              exit 3
-            fi
-            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-              echo "No SLACK_CLI_TOKEN set"
-              exit 2
-            fi
-          
-            echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${channel}"
-            curl -H "Content-type: application/json" \
-              -d @/tmp/slack-template.json \
-              -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-              -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
-              -X POST \
-              "${SLACK_MESSAGE_ENDPOINT}"
-          }
+
           sendMessageViaslack() {
             channel="${1}"
           
