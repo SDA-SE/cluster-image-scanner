@@ -14,6 +14,10 @@ if [ "${S3_API_LOCATION}" != "" ]; then
       --header "x-api-signature: ${S3_API_SIGNATURE}" \
       | jq '( .[] | select(.team == "") ).team |= "nobody"' \
       > /clusterscanner/out/metadata-api.json
+      # test for valid JSON
+      jq empty < /clusterscanner/out/metadata-api.json > /dev/null
+      # test for object/array in case of not authorized
+      [ $(jq 'type=="array"' < /clusterscanner/out/metadata-api.json) == "true" ]
 fi
 
 mkdir -p /clusterscanner/out/tmp

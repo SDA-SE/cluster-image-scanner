@@ -84,7 +84,7 @@ spec:
           emptyDir: {}
       container:
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-image-source-fetcher:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: ["/clusterscanner/entrypoint.bash"]
         resources:
           limits:
