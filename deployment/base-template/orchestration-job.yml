@@ -27,6 +27,7 @@ spec:
       - workflow.parameters.slackTokenSecretName
       - workflow.parameters.emailSecretName
       - workflow.parameters.enforceSlackChannel
+      - workflow.parameters.enforceMail
       - workflow.parameters.newVersionImageFilter
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
@@ -295,7 +296,22 @@ spec:
               if [ "${smtpauthpassword}" != "YOURPASSWORD" ] && [ "${smtpauthpassword}" != "" ] && [ "${smtpauthpassword}" != "smtp_auth_password_SECRET" ]; then
                 echo "Sending to email ${email}"
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
-                echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
+                mailParameter=""
+                if [ ${SMTP_MAILFROM} != "" ]; then
+                  mailParameter=" -S from=${SMTP_MAILFROM} "
+                fi
+                if [ ${SMTP_START_TLS} == "true" ]; then
+                  mailParameter="${mailParameter} -S smtp-use-starttls "
+                fi
+                if [ "${SMTP_MAIL_PARAMETER}" != "" ]; then
+                  mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
+                fi          
+                if [ "${SMTP_ENFORCE_MAILTO}" != "" ]; then
+                  echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
+                  email="${SMTP_ENFORCE_MAILTO}"
+                fi
+
+                echo -e "${message}" | mail ${mailParameter} -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
               else
                 echo "Warning: email set, but no email configured"
               fi

@@ -24,7 +24,7 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/clusterscanner-base:2
+          image: quay.io/sdase/cluster-image-scanner-base:2
           volumeMounts:
             - name: scandata
               mountPath: /clusterscanner/data
@@ -53,3 +53,4 @@ spec:
             find /clusterscanner/data/* -type d -empty -delete
             echo "Size of /clusterscanner/data/"
             du -sh /clusterscanner/data/
+
