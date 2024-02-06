@@ -1,4 +1,4 @@
-name: Build Image and Test with Minikube
+name: Build Images
 
 on:
   pull_request:
