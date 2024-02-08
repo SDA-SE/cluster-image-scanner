@@ -63,11 +63,12 @@ else
     fi
     ((i=i+1))
   done
-  mkdir -p /clusterscanner/out/merged
-  echo "Will flatten JSONs"
-  jq -s 'flatten | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
-  sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
 fi
+
+mkdir -p /clusterscanner/out/merged
+echo "Will flatten JSONs"
+jq -s 'flatten | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
+sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
 
 ls -la /clusterscanner/out/merged/
 # test for valid JSON
