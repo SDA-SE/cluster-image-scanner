@@ -19,16 +19,16 @@ spec:
     parameters:
       - workflow.parameters.imageSourceListConfigMapName
       - workflow.parameters.gitSecretName
+      - workflow.parameters.s3SecretName
+      - workflow.parameters.s3ConfigName
       - workflow.parameters.scanId
       - workflow.parameters.registrySecretName
-      - workflow.parameters.dependencyCheckDbConfigMapName
       - workflow.parameters.defectDojoConfigMapName
       - workflow.parameters.slackTokenSecretName
       - workflow.parameters.emailSecretName
       - workflow.parameters.enforceSlackChannel
       - workflow.parameters.enforceMail
       - workflow.parameters.newVersionImageFilter
-      - workflow.parameters.dependencyCheckSuppressionsConfigMapName
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
       - workflow.parameters.clusterImageScannerImageTag
@@ -118,8 +118,12 @@ spec:
         envFrom:
           - secretRef:
               name: "{{ workflow.parameters.gitSecretName }}"
+          - secretRef:
+              name: "{{ workflow.parameters.s3SecretName }}"
           - configMapRef:
               name: "scanjob-env-parameter"
+          - configMapRef:
+              name: "{{ workflow.parameters.s3ConfigName }}"
 
     - name: subflow
       volumes:
@@ -151,7 +155,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
@@ -160,14 +164,10 @@ spec:
             value: "{{ workflow.parameters.scanId }}"
           - name: REGISTRY_SECRET
             value: "{{ workflow.parameters.registrySecretName }}"
-          - name: DEPENDENCY_SCAN_CM
-            value: "{{ workflow.parameters.dependencyCheckDbConfigMapName }}"
           - name: DEFECTDOJO_CM
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
           - name: DEFECTDOJO_SECRETS
             value: "{{ workflow.parameters.defectDojoConfigMapName }}"
-          - name: dependencyCheckSuppressionsConfigMapName
-            value: "{{ workflow.parameters.dependencyCheckSuppressionsConfigMapName }}"
           - name: imageRegistryBase
             value: "{{ workflow.parameters.imageRegistryBase }}"
           - name: clusterImageScannerImageTag
@@ -209,7 +209,7 @@ spec:
             subPath: "{{ workflow.parameters.scanId }}"
           - name: tmp
             mountPath: /tmp
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: SLACK_CLI_TOKEN
             valueFrom:
@@ -258,15 +258,14 @@ spec:
           fi
 
           inform() {
-            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
-            if [ "${rocketchat}" == "null" ]; then rocketchat=""; fi
             if [ "${slack}" == "null" ]; then slack=""; fi
-            if [ "${slack}" != "" ] || [ "${rocketchat}" != "" ]; then
+            if [ "${slack}" != "" ]; then
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s/###ROCKETCHAT_CHANNEL###/${rocketchat}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
+              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
               sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
               sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
@@ -291,23 +290,6 @@ spec:
                   "${SLACK_MESSAGE_ENDPOINT}"
               else
                 echo "Slack not configured in collector"          
-              fi
-              if [ "${rocketchat}" != "" ]; then
-                if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
-                  echo "No ROCKET_CHAT_USER_ID set"
-                fi
-                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-                  echo "No SLACK_CLI_TOKEN set"
-                fi          
-                echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
-                curl -H "Content-type: application/json" \
-                  -d @/tmp/slack-template.json \
-                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-                  -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
-                  -X POST \
-                  "${SLACK_MESSAGE_ENDPOINT}"
-              else
-                echo "rocketchat not configured in collector"          
               fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
@@ -347,10 +329,9 @@ spec:
             namespace=$(echo "${item}" | jq -r '.namespace'| tr -cd '[:alnum:]._-')
             environment=$(echo "${item}" | jq -r '.environment'| tr -cd '[:alnum:]._-')
             slack=$(echo "${item}" | jq -r '.slack')
-            rocketchat=$(echo "${item}" | jq -r '.rocketchat')
             appName=$(echo "${item}" | jq -r '.appname'| tr -cd '[:alnum:]._-')
             email=$(echo "${item}" | jq -r '.email')
-            if [ "${ENFORCE_SLACK_CHANNEL}" != "" ]; then
+            if [ -n "${ENFORCE_SLACK_CHANNEL}" ]; then
               slack="${ENFORCE_SLACK_CHANNEL}"
             fi
             echo "Inspecting team ${team} for image ${image}"
@@ -598,10 +579,10 @@ spec:
         resources:
           limits:
             cpu: '1'
-            memory: 768Mi
+            memory: 2048Mi
           requests:
             cpu: '0.2'
-            memory: 512Mi
+            memory: 1500Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -610,8 +591,8 @@ spec:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:3"
-        imagePullPolicy: Always # TODO IfNotPresent
+        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:4"
+        imagePullPolicy: IfNotPresent 
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -799,7 +780,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-base:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: Always # TODO IfNotPresent
+        imagePullPolicy: IfNotPresent
         env: # TODO check for email creds
           - name: MESSAGE_TARGETS
             value: "{{ workflow.parameters.errorTargets }}"
@@ -826,29 +807,7 @@ spec:
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
           echo "failures"
           echo "${failures}"
-          sendMessageViarocketchat() {
-            channel="${1}"
-          
-            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner orchestrator execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
-          
-            if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
-              echo "No ROCKET_CHAT_USER_ID set"
-              exit 3
-            fi
-            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-              echo "No SLACK_CLI_TOKEN set"
-              exit 2
-            fi
-          
-            echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${channel}"
-            curl -H "Content-type: application/json" \
-              -d @/tmp/slack-template.json \
-              -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-              -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
-              -X POST \
-              "${SLACK_MESSAGE_ENDPOINT}"
-          }
+
           sendMessageViaslack() {
             channel="${1}"
           

@@ -117,7 +117,6 @@ buildah config \
   --env DEFAULT_SCAN_LIFETIME="true" \
   --env DEFAULT_SCAN_DISTROLESS="true" \
   --env DEFAULT_SCAN_MALWARE="true" \
-  --env DEFAULT_SCAN_DEPENDENCY_CHECK="true" \
   --env DEFAULT_SCAN_DEPENDENCY_TRACK="false" \
   --env DEFAULT_SCAN_RUNASROOT="true" \
   --env DEFAULT_SCAN_LIFETIME_MAX_DAYS="14" \
@@ -128,7 +127,6 @@ buildah config \
   --env SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime" \
   --env SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless" \
   --env SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware" \
-  --env SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check" \
   --env SCAN_DEPENDENCY_TRACK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-track" \
   --env SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot" \
   --env SCAN_BASEIMAGE_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-baseimage-lifetime" \

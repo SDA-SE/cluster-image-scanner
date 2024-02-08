@@ -11,7 +11,6 @@ export DEFAULT_SKIP="false"
 export DEFAULT_SCAN_LIFETIME="true"
 export DEFAULT_SCAN_DISTROLESS="true"
 export DEFAULT_SCAN_MALWARE="false"
-export DEFAULT_SCAN_DEPENDENCY_CHECK="true"
 export DEFAULT_SCAN_RUNASROOT="true"
 export DEFAULT_SCAN_BASEIMAGE_LIFETIME="true"
 export DEFAULT_SCAN_DEPENDENCY_TRACK="false"
@@ -19,7 +18,6 @@ export DEFAULT_CONTAINER_TYPE="application"
 export SCAN_LIFETIME_ANNOTATION="clusterscanner.sdase.org/is-scan-lifetime"
 export SCAN_DISTROLESS_ANNOTATION="clusterscanner.sdase.org/is-scan-distroless"
 export SCAN_MALWARE_ANNOTATION="clusterscanner.sdase.org/is-scan-malware"
-export SCAN_DEPENDENCY_CHECK_ANNOTATION="clusterscanner.sdase.org/is-scan-dependency-check"
 export SCAN_RUNASROOT_ANNOTATION="clusterscanner.sdase.org/is-scan-runasroot"
 #export NAMESPACE_SKIP_REGEX="\-pr\-"
 export DEFAULT_TEAM_NAME="test"
@@ -39,7 +37,6 @@ export NAMESPACE_MAPPINGS='{
             "is_scan_baseimage_lifetime": "false",
             "is_scan_distroless": "false",
             "is_scan_malware": "false",
-            "is_scan_dependency_check": "false",
             "is_scan_runasroot": "false"
           }
         }

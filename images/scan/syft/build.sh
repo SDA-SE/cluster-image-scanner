@@ -29,7 +29,7 @@ cleanup() {
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
-base_image="anchore/syft:v0.70.0"
+base_image="anchore/syft:v0.102.0"
 #base_image="quay.io/sdase/cluster-image-scanner-scan-syft:cataloger"
 
 ctr="$( buildah from --pull --quiet "${base_image}")"
@@ -53,8 +53,8 @@ bill_of_materials_hash="$( ( cat "${0}";
   ) | sha256sum | awk '{ print $1 }' )"
 echo "bill_of_materials: $bill_of_materials_hash";
 buildah config \
-  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner-scan-dependency-check" \
-  --label "${oci_prefix}.source=https://github.com/SDA-SE/clusterscanner-scan-dependency-check" \
+  --label "${oci_prefix}.url=https://quay.io/sdase/cluster-image-scanner-scan-syft" \
+  --label "${oci_prefix}.source=https://github.com/SDA-SE/cluster-image-scanner" \
   --label "${oci_prefix}.revision=$( git rev-parse HEAD )" \
   --label "${oci_prefix}.version=${VERSION}" \
   --label "${oci_prefix}.title=ClusterImageScanner SBOM Generation" \

@@ -1,10 +1,24 @@
 #!/bin/bash
-set -e
+set -ex
 
 echo "source auth.bash"
 source auth.bash # > /dev/null 2>&1
 echo "calling sp_authorize"
 sp_authorize || echo "Couldn't authorize, assuming the image-source-repo is accessible by anonymous." #> /dev/null 2>&1
+
+mkdir -p /clusterscanner/out/merged
+
+if [ "${S3_API_LOCATION}" != "" ]; then
+  curl --http1.1 --location "${S3_API_LOCATION}" \
+      --header "x-api-key: ${S3_API_KEY}" \
+      --header "x-api-signature: ${S3_API_SIGNATURE}" \
+      | jq '( .[] | select(.team == "") ).team |= "nobody"' \
+      > /clusterscanner/out/metadata-api.json
+      # test for valid JSON
+      jq empty < /clusterscanner/out/metadata-api.json > /dev/null
+      # test for object/array in case of not authorized
+      [ $(jq 'type=="array"' < /clusterscanner/out/metadata-api.json) == "true" ]
+fi
 
 mkdir -p /clusterscanner/out/tmp
 i=0
@@ -48,7 +62,13 @@ for repofile in /clusterscanner/image-source-list/*; do
 done
 mkdir -p /clusterscanner/out/merged
 echo "Will flatten JSONs"
-jq -s 'flatten  | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
+jq -s 'flatten | sort_by(.image, .namespace)' /clusterscanner/out/*.json > /clusterscanner/out/merged/merged.json
 sed -i 's#"scm_source_branch": null#"scm_source_branch": "notset"#g' /clusterscanner/out/merged/merged.json
+
 ls -la /clusterscanner/out/merged/
+# test for valid JSON
+jq empty < /clusterscanner/out/merged/merged.json > /dev/null
+# test for object/array in case of not authorized
+[ $(jq 'type=="array"' < /clusterscanner/out/merged/merged.json) == "true" ]
+
 exit 0

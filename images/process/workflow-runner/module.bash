@@ -1,31 +1,81 @@
 #!/bin/bash
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
-set -e
+set -ex
 
 source ./scan-common.bash
 
 if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
   SERVICE_ACCOUNT_NAME="clusterscanner"
 fi
+
+#filter out amazon images
+echo "Filtering out Amazon ECR images"
+FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </clusterscanner/imageList.json)
+echo "$FILTERED_LIST" > /tmp/imageListFiltered.json
+
+
 jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
-totalCount=$(cat  /clusterscanner/imageList.json | jq '.[].image' | wc -l)
+totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
 counter=0
-echo "Found ${totalCount} entries in /clusterscanner/imageList.json"
+echo "Found ${totalCount} entries in /tmp/imageListFiltered.json"
 while read -r line; do
   echo "Will read line"
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
   if [[ "$(echo "${DATA_JSON}" | jq -r '.skip')" == "true" ]]; then
-    echo "Skipping Image due to skip=true: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment')"
+    echo "Skipping Image due to skip=true: $(echo "${DATA_JSON}" | jq -r '.image') Namespace: $(echo "${DATA_JSON}" | jq -r '.namespace') Environment: $(echo "${DATA_JSON}" | jq -r '.environment')"
     continue
   fi
   if [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "" ]] || [[ "$(echo "${DATA_JSON}" | jq -r '.image')" == "null" ]]; then
-    echo "Skipping Image: $(echo ${DATA_JSON} | jq -r '.image') Namespace: $(echo ${DATA_JSON} | jq -r '.namespace') Environment: $(echo ${DATA_JSON} | jq -r '.environment') because it is null"
+    echo "Skipping Image: $(echo "${DATA_JSON}" | jq -r '.image') Namespace: $(echo "${DATA_JSON}" | jq -r '.namespace') Environment: $(echo "${DATA_JSON}" | jq -r '.environment') because it is null"
     continue
   fi
-  IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
+
+  env
+
+  if [ -n "$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME" ]; then
+    IS_SCAN_BASEIMAGE_LIFETIME="$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME"
+  else
+    IS_SCAN_BASEIMAGE_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_baseimage_lifetime' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_NEW_VERSION" ]; then
+    IS_SCAN_NEW_VERSION="$OVERRIDE_IS_SCAN_NEW_VERSION"
+  else
+    IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK" ]; then
+    IS_SCAN_DEPENDENCY_TRACK="$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK"
+  else
+    IS_SCAN_DEPENDENCY_TRACK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_LIFETIME" ]; then
+    IS_SCAN_LIFETIME="$OVERRIDE_IS_SCAN_LIFETIME"
+  else
+    IS_SCAN_LIFETIME=$(echo "${DATA_JSON}" | jq -r '.is_scan_lifetime' | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_DISTROLESS" ]; then
+    IS_SCAN_DISTROLESS="$OVERRIDE_IS_SCAN_DISTROLESS"
+  else
+    IS_SCAN_DISTROLESS=$(echo "${DATA_JSON}" | jq -r .is_scan_distroless | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_MALWARE" ]; then
+    IS_SCAN_MALWARE="$OVERRIDE_IS_SCAN_MALWARE"
+  else
+    IS_SCAN_MALWARE=$(echo "${DATA_JSON}" | jq -r .is_scan_malware | sed 's#null#true#')
+  fi
+
+  if [ -n "$OVERRIDE_IS_SCAN_RUNASROOT" ]; then
+    IS_SCAN_RUNASROOT="$OVERRIDE_IS_SCAN_RUNASROOT"
+  else
+    IS_SCAN_RUNASROOT=$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot | sed 's#null#true#')
+  fi
+
+
   containerType=$(echo "${DATA_JSON}" | jq -r '.container_type')
-  IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
-  is_scan_dependency_track=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#false#') # Test-Mode
   namespace=$(echo "${DATA_JSON}" | jq -r .namespace)
   environment=$(echo "${DATA_JSON}" | jq -r .environment)
   team=$(echo "${DATA_JSON}" | jq -r .team)
@@ -59,7 +109,6 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /tmp/template.yml
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /tmp/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
-  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
   sed -i "s~###team###~${team}~" /tmp/template.yml
   sed -i "s~###appname###~${appname}~" /tmp/template.yml
   sed -i "s~###appversion###~${appversion}~" /tmp/template.yml
@@ -70,15 +119,13 @@ while read -r line; do
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
-  sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
-  sed -i "s~###is_scan_lifetime###~$(echo "${DATA_JSON}" | jq -r .is_scan_lifetime)~" /tmp/template.yml
+  sed -i "s~###is_scan_lifetime###~${IS_SCAN_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
-  sed -i "s~###is_scan_distroless###~$(echo "${DATA_JSON}" | jq -r .is_scan_distroless)~" /tmp/template.yml
-  sed -i "s~###is_scan_malware###~$(echo "${DATA_JSON}" | jq -r .is_scan_malware)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_check###~$(echo "${DATA_JSON}" | jq -r .is_scan_dependency_check)~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_track###~${is_scan_dependency_track}~" /tmp/template.yml
-  sed -i "s~###is_scan_runasroot###~$(echo "${DATA_JSON}" | jq -r .is_scan_runasroot)~" /tmp/template.yml
+  sed -i "s~###is_scan_distroless###~${IS_SCAN_DISTROLESS}~" /tmp/template.yml
+  sed -i "s~###is_scan_malware###~${IS_SCAN_MALWARE}~" /tmp/template.yml
+  sed -i "s~###is_scan_dependency_track###~${IS_SCAN_DEPENDENCY_TRACK}~" /tmp/template.yml
+  sed -i "s~###is_scan_runasroot###~${IS_SCAN_RUNASROOT}~" /tmp/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml
   sed -i "s~###scan_lifetime_max_days###~$(echo "${DATA_JSON}" | jq -r .scan_lifetime_max_days)~" /tmp/template.yml
   sed -i "s~###new_version_image_filter###~${NEW_VERSION_IMAGE_FIILTER}~" /tmp/template.yml
@@ -89,9 +136,9 @@ while read -r line; do
 
 
   echo "Setting workflow name"
-  workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
-  workflowGeneratedName="${workflowGeneratedName:0:62}"
-  workflowGeneratedName=$(echo "${workflowGeneratedName:0:62}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
+  workflowGeneratedName="${scanjobPrefix}${environment:0:10}-${namespace:0:10}-${team:0:10}-"
+  workflowGeneratedName="${workflowGeneratedName:0:50}"
+  workflowGeneratedName=$(echo "${workflowGeneratedName:0:50}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
   if [ "${IS_PRINT_TEMPLATE}" == "true" ]; then

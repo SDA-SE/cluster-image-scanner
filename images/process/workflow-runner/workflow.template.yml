@@ -41,8 +41,6 @@ spec:
         value: "###image_id###"
       - name: slack
         value: "###slack###"
-      - name: rocketchat
-        value: "###rocketchat###"
       - name: email
         value: "###email###"
       - name: is_scan_baseimage_lifetime
@@ -53,8 +51,6 @@ spec:
         value: "###is_scan_distroless###"
       - name: is_scan_malware
         value: "###is_scan_malware###"
-      - name: is_scan_dependency_check
-        value: "###is_scan_dependency_check###"
       - name: is_scan_runasroot
         value: "###is_scan_runasroot###"
       - name: is_scan_new_version
@@ -63,8 +59,6 @@ spec:
         value: "###is_scan_dependency_track###"
       - name: scan_lifetime_max_days
         value: "###scan_lifetime_max_days###"
-      - name: dependencyCheckSuppressionsConfigMapName
-        value: "###dependencyCheckSuppressionsConfigMapName###"
       - name: new_version_image_filter
         value: "###new_version_image_filter###"
       - name: imageRegistryBase

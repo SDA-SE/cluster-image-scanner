@@ -4,5 +4,8 @@
 /deployment/overlays/test-local/config-source/
 .idea
 test/
+/test_actions/
 secrets
 .DS_Store
+*.bak
+*.swp

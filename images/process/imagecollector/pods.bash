@@ -101,12 +101,10 @@ getPods() {
       team=""
       email=""
       slack=""
-      rocketchat=""
       isScanLifetime=""
       isScanBaseimageLifetime=""
       isScanDistroless=""
       isScanMalware=""
-      isScanDependencyCheck=""
       isScanDependencyTrack=""
       isScanRunasroot=""
       isScanNewVersion=""
@@ -132,7 +130,6 @@ getPods() {
           team=$(echo ${mapping} | jq -rcM '.team')
           descriptionMapping=$(echo ${mapping} | jq -rcM '.description')
           slack=$(echo ${mapping} | jq -rcM '.slack')
-          rocketchat=$(echo ${mapping} | jq -rcM '.rocketchat' | sed "s/^null//")
           containerType=$(echo "${mapping}" | jq -rcM ".container_type" | sed "s/^null/${DEFAULT_CONTAINER_TYPE}/")
           skip=$(echo "${mapping}" | jq -rcM ".skip" | sed "s/^null/${DEFAULT_SKIP}/")
           for attributeName in ${configurationsToMap[@]}; do
@@ -175,9 +172,6 @@ getPods() {
       fi
       if [ "${slack}" != "#.*" ]; then
         echo "WARN: The given slack channel '${slack}' doesn't start with #"
-      fi
-      if [ "${rocketchat}" == "" ] || [ "${rocketchat}" == "null" ]; then
-        rocketchat=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/rocketchat"')
       fi
       if [ "${email}" == "" ] || [ "${email}" == "null" ]; then
         email=$(echo "${namespaceAnnotations}" | jq -r '."'${CONTACT_ANNOTATION_PREFIX}'/email"' | sed 's# ##g')
@@ -222,12 +216,6 @@ getPods() {
       if [ "${isScanMalware}" == "" ] || [ "${isScanMalware}" == "null" ]; then
         isScanMalware="${DEFAULT_SCAN_MALWARE}"
       fi
-      if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
-        isScanDependencyCheck=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_CHECK_ANNOTATION}\"]")
-      fi
-      if [ "${isScanDependencyCheck}" == "" ] || [ "${isScanDependencyCheck}" == "null" ]; then
-        isScanDependencyCheck="${DEFAULT_SCAN_DEPENDENCY_CHECK}"
-      fi
       if [ "${isScanDependencyTrack}" == "" ] || [ "${isScanDependencyTrack}" == "null" ]; then
         isScanDependencyTrack=$(echo "${namespaceAnnotations}" | jq -r ".[\"${SCAN_DEPENDENCY_TRACK_ANNOTATION}\"]")
       fi
@@ -267,7 +255,6 @@ getPods() {
         echo "${podDecoded}" | jq '{
           "email": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'email"],
           "slack": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'slack"],
-          "rocketchat": .metadata.annotations["'${CONTACT_ANNOTATION_PREFIX}/'rocketchat"],
           "scm_source_url": .metadata.annotations["'${SCM_URL_ANNOTATION}'"],
           "scm_source_branch": .metadata.annotations["'${SCM_BRANCH_ANNOTATION}'"],
           "scm_release": .metadata.annotations["'${SCM_RELEASE_ANNOTATION}'"],
@@ -282,7 +269,6 @@ getPods() {
           "is_scan_baseimage_lifetime": .metadata.annotations["'${SCAN_BASEIMAGE_LIFETIME_ANNOTATION}'"],
           "is_scan_distroless": .metadata.annotations["'${SCAN_DISTROLESS_ANNOTATION}'"],
           "is_scan_malware": .metadata.annotations["'${SCAN_MALWARE_ANNOTATION}'"],
-          "is_scan_dependency_check": .metadata.annotations["'${SCAN_DEPENDENCY_CHECK_ANNOTATION}'"],
           "is_scan_dependency_track": .metadata.annotations["'${SCAN_DEPENDENCY_TRACK_ANNOTATION}'"],
           "is_scan_runasroot": .metadata.annotations["'${SCAN_RUNASROOT_ANNOTATION}'"],
           "is_scan_new_version": .metadata.annotations["'${SCAN_NEW_VERSION_ANNOTATION}'"],
@@ -392,12 +378,10 @@ getPods() {
           if .skip == null then (if .image|test("'${skipImageBasedOnNamespaceRegex}'") then .skip=true else .skip='${skip}' end) else . end |
           if .email == null then .email="'${email}'" else . end |
           if .slack == null then .slack="'${slack}'" else . end |
-          if .rocketchat == null then .rocketchat="'${rocketchat}'" else . end |
           if .is_scan_distroless == null then .is_scan_distroless="'${isScanDistroless}'" else . end |
           if .is_scan_lifetime == null then .is_scan_lifetime="'${isScanLifetime}'" else . end |
           if .is_scan_baseimage_lifetime == null then .is_scan_baseimage_lifetime="'${isScanBaseimageLifetime}'" else . end |
           if .is_scan_malware == null then .is_scan_malware="'${isScanMalware}'" else . end |
-          if .is_scan_dependency_check == null then .is_scan_dependency_check="'${isScanDependencyCheck}'" else . end |
           if .is_scan_dependency_track == null then .is_scan_dependency_track="'${isScanDependencyTrack}'" else . end |
           if .is_scan_runasroot == null then .is_scan_runasroot="'${isScanRunasroot}'" else . end |
           if .is_scan_new_version == null then .is_scan_new_version="'${isScanNewVersion}'" else . end |

@@ -5,7 +5,7 @@ metadata:
   namespace: clusterscanner
 spec:
   onExit: exit-handler
-  activeDeadlineSeconds: 3600 # 60 min, needed for large scans
+  activeDeadlineSeconds: 7200 # 60 min, needed for large scans
   artifactRepositoryRef:
     configMap: artifact-repositories
     key: default-v1
@@ -31,18 +31,15 @@ spec:
       - name: appversion
       - name: appname
       - name: slack
-      - name: rocketchat
       - name: is_scan_lifetime
       - name: is_scan_baseimage_lifetime
       - name: is_scan_distroless
       - name: is_scan_malware
-      - name: is_scan_dependency_check
       - name: is_scan_runasroot
       - name: scan_lifetime_max_days
       - name: is_scan_new_version
       - name: is_scan_dependency_track
       - name: new_version_image_filter
-      - name: dependencyCheckSuppressionsConfigMapName
       - name: imageRegistryBase
       - name: scanjobEnvParameter
       - name: containerType
@@ -87,10 +84,6 @@ spec:
             depends: imagefetcher
             template: scan-baseimage-lifetime
             when: "{{ workflow.parameters.is_scan_baseimage_lifetime }} == true"
-          - name: scan-dependency-check
-            depends: imagefetcher
-            template: scan-dependency-check
-            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
           - name: scan-runasroot
             depends: imagefetcher
             template: scan-runasroot
@@ -103,10 +96,6 @@ spec:
             depends: imagefetcher
             template: scan-new-version
             when: "{{ workflow.parameters.is_scan_new_version }} == true"
-          - name: results-dependency-check-dd-upload
-            depends: scan-dependency-check
-            template: results-dependency-check-dd-upload
-            when: "{{ workflow.parameters.is_scan_dependency_check }} == true"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
@@ -119,7 +108,7 @@ spec:
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings }}"
             #when: "{{ scan-distroless.Succeeded }} == true || {{ scan-lifetime.Succeeded }} == true || {{ scan-baseimage-lifetime.Succeeded }} == true || {{ scan-runasroot.Succeeded }} == true || scan-malware.Succeeded || {{ scan-new-version.Succeeded}} == true"
           - name: results-aggregate
-            depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
+            depends: (results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
@@ -134,15 +123,6 @@ spec:
                   optional: true
                 - name: results-generic
                   from: "{{ tasks.results-collect-generic-findings.outputs.artifacts.results-generic }}"
-                  optional: true
-                - name: results-dd-dependency-check-test-link
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link }}"
-                  optional: true
-                - name: results-dd-dependency-check-is-finding-file
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file }}"
-                  optional: true
-                - name: results-dd-dependency-check-findings-file
-                  from: "{{ tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file }}"
                   optional: true
                 - name: results-dd-dependency-track-test-link
                   from: "{{ tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link }}"
@@ -211,13 +191,74 @@ spec:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
         source: |
           # IMAGE_TAR_PATH from base image
+          function cleanup {
+            echo "Cleaning up"
+            rm -rf "${tmp_dir}"
+          }
+            
+          trap cleanup ERR
+          
           set -e
+
+          if [ -z "$IMAGE_BY_HASH" ]; then
+            IMAGE_BY_HASH="$IMAGE"
+          fi
+
+          echo "Initiating download of image ${IMAGE_BY_HASH}"
+          set +e
+          OVERRIDES=$(env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM")
+          echo "OVERRIDES: ${OVERRIDES}"
+          set -e
+          if [ "$OVERRIDES" == "" ]; then
+            echo "No registry overrides found"
+          else
+            while read r 
+            do
+              _FROM="${r}"
+              _TO="${r/%_FROM/_TO}"
+              FROM="${!_FROM}"
+              TO="${!_TO}"
+            
+              if [ -z "${TO}" ]; then
+                echo "Unmatched ${r/%_FROM/_TO} for ${r}"
+                exit 1
+              fi
+            
+              # Validating input for sed. 
+              # Break out of loop if a tilde is contained.
+  
+              FROM_NEW=$(tr -d "~" <<<"${FROM}")
+              if [ "$FROM_NEW" != "$FROM" ]; then
+                echo "Ignoring ${_FROM} (${FROM}) because it contains a tilde"
+                continue
+              fi
+              TO_NEW=$(tr -d "~" <<<"$TO")
+              if [ "$TO_NEW" != "$TO" ]; then
+                echo "Ignoring ${_TO} (${TO}) because it contains a tilde"
+                continue
+              fi
+  
+              IMAGE_BY_HASH_NEW=$(echo "$IMAGE_BY_HASH" | sed -e "s~${FROM}~${TO}~")
+              if [ "$IMAGE_BY_HASH_NEW" != "$IMAGE_BY_HASH" ]; then
+                echo "Found registry replacement:"
+                echo "    Replace ${FROM}"
+                echo "    with ${TO}"
+                echo
+                IMAGE_BY_HASH="${IMAGE_BY_HASH_NEW}"
+                break
+              else 
+                echo "Ignoring ${_FROM} (${FROM}) because it doesn't match the image URI"
+              fi
+            done <<<"$OVERRIDES"
+          fi
+          echo "Using image URI '${IMAGE_BY_HASH}'"
+
           echo "fetching image ${IMAGE} with hash ${IMAGE_BY_HASH}"
 
           IMAGE_TAR_FOLDER_PATH=/clusterscanner/images
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/" || true
           mkdir -p "${IMAGE_TAR_FOLDER_PATH}/tmp" || true
-          tmp_dir=$(mktemp -d --tmpdir="${IMAGE_TAR_FOLDER_PATH}/tmp")
+          tmp_dir=$(mktemp -d --tmpdir="/tmp")
           rm -Rf "${tmp_dir}" || true
           mkdir -p "${tmp_dir}"
           image_copy_dir=$(mktemp -d --tmpdir="${tmp_dir}")
@@ -273,8 +314,7 @@ spec:
           rm -f "${IMAGE_TAR_FOLDER_PATH}/config.json" || true # in case an other fetcher runs in parallel
           cp "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json"
 
-          echo "Cleaning up"
-          rm -rf "${tmp_dir}"
+          cleanup
 
     - name: sbom-generation
       volumes:
@@ -319,7 +359,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
           - name: tmp
             mountPath: /tmp
@@ -422,6 +462,7 @@ spec:
             -H "X-API-Key: ${DEPENDENCY_TRACK_KEY}" \
             -d @/tmp/tmpfile \
             --silent \
+            --http1.1 \
             --show-error \
             --output /tmp/token.json
 
@@ -745,7 +786,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-lifetime:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always # TODO: change to IfNotPresent
         command: ["/clusterscanner/entrypoint.bash"]
         volumeMounts:
           - name: tmp
@@ -980,131 +1021,6 @@ spec:
           - configMapRef:
               name: "{{ workflow.parameters.scanjobEnvParameter }}"
 
-    - name: scan-dependency-check
-      volumes:
-        - name: images
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-images
-            readOnly: true
-        - name: scandata
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-scandata
-        - name: tmp
-          emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-dependency-check
-            path: /clusterscanner/data/module_scan-dependency-check.json
-            archiveLogs: true
-      container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 368Mi
-          requests:
-            cpu: '0.2'
-            memory: 368Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-scan-dependency-check:{{ workflow.parameters.clusterImageScannerImageTag }}"
-        imagePullPolicy: IfNotPresent
-        command: ["/clusterscanner/entrypoint.bash"]
-        volumeMounts:
-          - name: tmp
-            mountPath: /tmp
-          - name: images
-            mountPath: /clusterscanner/images
-            subPath: "{{ workflow.parameters.image_id }}"
-            readOnly: true
-          - name: scandata
-            mountPath: /clusterscanner/data
-            subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
-        env:
-          - name: IMAGE_BY_HASH
-            value: "{{ workflow.parameters.image_id }}"
-          - name: IS_SCAN
-            value: "{{ workflow.parameters.is_scan_dependency_check }}"
-        envFrom:
-          - configMapRef:
-              name: "{{ workflow.parameters.DEPENDENCY_SCAN_CM }}"
-          - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
-
-    - name: results-dependency-check-dd-upload
-      volumes:
-        - name: scandata
-          persistentVolumeClaim:
-            claimName: cluster-image-scanner-scandata
-        - name: tmp
-          emptyDir: { }
-      outputs:
-        artifacts:
-          - name: results-dd-dependency-check-test-link
-            path: /tmp/defectDojoTestLink.txt
-            optional: true
-          - name: is-finding-file
-            path: /tmp/isFinding
-            optional: true
-          - name: findings-file
-            path: /tmp/findings.json
-            optional: true
-      container:
-        resources:
-          limits:
-            cpu: '1'
-            memory: 256Mi
-          requests:
-            cpu: '0.2'
-            memory: 256Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1001
-        image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-client:3.1.209"
-        volumeMounts:
-          - name: tmp
-            mountPath: /tmp
-          - name: scandata
-            mountPath: /tmp/dependency-check-results
-            subPath: "results/{{ workflow.parameters.image_id }}/dependency-check"
-            readOnly: true
-        imagePullPolicy: IfNotPresent
-        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
-        envFrom:
-          - configMapRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_CM }}"
-          - configMapRef:
-              name: "{{ workflow.parameters.scanjobEnvParameter }}"
-          - secretRef:
-              name: "{{ workflow.parameters.DEFECTDOJO_SECRETS }}"
-        env:
-          - name: APP_NAME
-            value: "{{ workflow.parameters.appname }}"
-          - name: DD_BRANCH_NAME
-            value: "{{ workflow.parameters.image }}"
-          - name: DD_REPORT_TYPE
-            value: "Dependency Check Scan"
-          - name: NAMESPACE
-            value: "{{ workflow.parameters.namespace }}"
-          - name: ENVIRONMENT
-            value: "{{ workflow.parameters.environment }}"
-          - name: DD_TEAM
-            value: "{{ workflow.parameters.team }}"
-          - name: EXIT_CODE_ON_FINDING
-            value: "0"
-          - name: EXIT_CODE_ON_MISSING_REPORT
-            value: "0" # make the job successful
-
     - name: results-collect-generic-findings
       volumes:
         - name: scandata
@@ -1337,15 +1253,6 @@ spec:
           - name: results-generic
             path: /tmp/result.json
             optional: true
-          - name: results-dd-dependency-check-test-link
-            path: /tmp/dd-dependency-check-test-link.txt
-            optional: true
-          - name: results-dd-dependency-check-is-finding-file
-            path: /tmp/isFinding-dependency-check
-            optional: true
-          - name: results-dd-dependency-check-findings-file
-            path: /tmp/findings-dependency-check.json
-            optional: true
           - name: results-dd-dependency-track-test-link
             path: /tmp/dd-dependency-track-test-link.txt
             optional: true
@@ -1416,7 +1323,6 @@ spec:
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.scm_source_branch = "{{ workflow.parameters.scm_source_branch }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.team = "{{ workflow.parameters.team }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.slack = "{{ workflow.parameters.slack }}"')
-          JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.rocketchat = "{{ workflow.parameters.rocketchat }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.email = "{{ workflow.parameters.email }}"')
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM '.appname = "{{ workflow.parameters.appname }}"')
 
@@ -1447,33 +1353,6 @@ spec:
           fi
           JSON_DD_DEPENDENCY_TRACK=$(echo ${JSON_DD_DEPENDENCY_TRACK} | jq -Sc ". += {\"scanType\": \"Dependency Track\"}")
 
-          JSON_DD_DEPENDENCY_CHECK=$(echo "{\"errors\":[]}" )
-          isFinding=$(cat /tmp/isFinding-dependency-check) || isFinding="false"
-          if [ "$isFinding" == "true" ]; then
-            DD_LINK=$(cat /tmp/dd-dependency-check-test-link.txt)
-            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": true, \"infoText\": \"Potential unhandled known vulnerabilities found in image\", \"ddLink\": \"${DD_LINK}\"}")
-            if [ $(cat /tmp/findings-dependency-check.json | wc -c) -gt 5 ]; then
-              echo "Starting DepCheck Aggregate"
-              echo $JSON_DD_DEPENDENCY_CHECK > /tmp/dd-depcheck.json
-              FILESIZE=$(stat -c%s "/tmp/findings-dependency-check.json")
-              FILESIZE_LIMT=25600 # 20kb
-              if [ $FILESIZE -lt $FILESIZE_LIMT ]; then
-                echo "Filesize of $FILESIZE is lt $FILESIZE_LIMT"
-                JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check.json)
-              else
-                echo "Filesize of $FILESIZE is gt $FILESIZE_LIMT"
-                echo '[{ "title": "Dependency Check Finding", "description": "OWASP Dependency Check found some findings, please check DefectDojo" }]' > /tmp/findings-dependency-check-zero.json
-                JSON_DD_DEPENDENCY_CHECK=$(jq '.findings += input'  /tmp/dd-depcheck.json /tmp/findings-dependency-check-zero.json)
-              fi
-            else
-              JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"findings\": []}")
-              echo "Warning: /tmp/findings-dependency-check.json is empty"
-            fi
-          else
-            JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
-          fi
-          JSON_DD_DEPENDENCY_CHECK=$(echo ${JSON_DD_DEPENDENCY_CHECK} | jq -Sc ". += {\"scanType\": \"Dependency Check\"}")
-
           echo "Starting Generic"
           JSON_DD_GENERIC=$(echo "{\"errors\":[]}" )
           JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")          
@@ -1492,13 +1371,12 @@ spec:
             JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"status\": \"completed\", \"finding\": false, \"ddLink\": \"${DD_LINK}\", \"findings\": []}")
           fi
           echo "defining uploadResults"
-          uploadResults="[{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyCheckUpload\": ${JSON_DD_DEPENDENCY_CHECK}}, {\"ddDependencyTrackUpload\": ${JSON_DD_DEPENDENCY_TRACK}}]"
+          uploadResults="[{\"ddGenericUpload\": ${JSON_DD_GENERIC}}, {\"ddDependencyTrackUpload\": ${JSON_DD_DEPENDENCY_TRACK}}]"
           echo "uploadResults: ${uploadResults}"
           JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults += ${uploadResults}")
-          DD_DEPENDENCY_CHECK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyCheckUpload) | .ddDependencyCheckUpload.finding")
           DD_DEPENDENCY_TRACK_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddDependencyTrackUpload) | .ddDependencyTrackUpload.finding")
           DD_GENERIC_FINDING=$(echo "${JSON_RESULT}" | jq -ScM ".uploadResults[] | select(.ddGenericUpload) | .ddGenericUpload.finding")
-          if [ "xX${DD_DEPENDENCY_CHECK_FINDING}" == "xXtrue" ] || [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ] || [ "xX${DD_DEPENDENCY_TRACK_FINDING}" == "xXtrue" ]; then
+          if [ "xX${DD_GENERIC_FINDING}" == "xXtrue" ] || [ "xX${DD_DEPENDENCY_TRACK_FINDING}" == "xXtrue" ]; then
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = true")
           else
             JSON_RESULT=$(echo "${JSON_RESULT}" | jq -ScM ".notificationRequired = false")
@@ -1565,34 +1443,12 @@ spec:
           
           echo "failures"
           echo "${failures}"
-          sendMessageViarocketchat() {
-            channel="${1}"
-          
-            message=$(echo "${failures}" | jq -r '.[] | {"pretext": "_INFO_","fields": [{"title": "", "short": true, "value": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}]}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"text\": \"Problem during ClusterImageScanner workflow job execution\", \"attachments\": ${message}}" > /tmp/slack-template.json
-          
-            if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
-              echo "No ROCKET_CHAT_USER_ID set"
-              exit 3
-            fi
-            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-              echo "No SLACK_CLI_TOKEN set"
-              exit 2
-            fi
-          
-            echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${channel}"
-            curl -H "Content-type: application/json" \
-              -d @/tmp/slack-template.json \
-              -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-              -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
-              -X POST \
-              "${SLACK_MESSAGE_ENDPOINT}"
-          }
+
           sendMessageViaslack() {
             channel="${1}"
           
             message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *image:* _{{workflow.parameters.image}}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
+            echo "{\"channel\": \"${channel}\", \"blocks\": ${message}}" > /tmp/slack-template.json
             cat /tmp/slack-template.json
           
             if [ "${SLACK_CLI_TOKEN}" == "" ]; then

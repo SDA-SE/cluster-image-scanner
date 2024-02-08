@@ -4,12 +4,15 @@ metadata:
   name: cleanup-enforced-delete-pvc-wf-images
   namespace: clusterscanner
 spec:
-  schedule: "57 14 * * *"
+  schedule: "0 0 * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
     entrypoint: pvc-cleanup
     templates:
       - name: pvc-cleanup
@@ -30,8 +33,25 @@ spec:
           source: |
             set -e
             /usr/bin/whoami
-            echo "Deleting all data"
-            #du -sh /clusterscanner/images/ || true
 
-            rm -Rf /clusterscanner/images/openpolicyagent
-            exit 0
+            SECONDS_IN_WEEK=$((7 * 24 * 60 * 60))
+
+            CURRENT_TIME=$(date +%s)
+
+            for file in /clusterscanner/images/*; do
+              if [ -f "$file" ]; then
+                LAST_ACCESS_TIME=$(stat -c %X "$file")
+                
+                TIME_DIFF=$((CURRENT_TIME - LAST_ACCESS_TIME))
+                
+                if [ "${TIME_DIFF}" -gt "${SECONDS_IN_WEEK}" ]; then
+                  rm -f "$file"
+                  echo "File $file has been deleted"
+                fi
+              fi
+            done
+            
+            echo "Will delete empty directories in /clusterscanner/images/"
+            find /clusterscanner/images/* -type d -empty -delete
+            echo "Size of /clusterscanner/images/"
+            du -sh /clusterscanner/images/
