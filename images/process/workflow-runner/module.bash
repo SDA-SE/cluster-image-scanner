@@ -44,16 +44,10 @@ while read -r line; do
     IS_SCAN_NEW_VERSION=$(echo "${DATA_JSON}" | jq -r '.is_scan_new_version' | sed 's#null#true#')
   fi
 
-  if [ -n "$OVERRIDE_IS_SCAN_DEPENDENCY_CHECK" ]; then
-    IS_SCAN_DEPENDENCY_CHECK="$OVERRIDE_IS_SCAN_DEPENDENCY_CHECK"
-  else
-    IS_SCAN_DEPENDENCY_CHECK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_check' | sed 's#null#true#')
-  fi
-
   if [ -n "$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK" ]; then
     IS_SCAN_DEPENDENCY_TRACK="$OVERRIDE_IS_SCAN_DEPENDENCY_TRACK"
   else
-    IS_SCAN_DEPENDENCY_TRACK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_check' | sed 's#null#true#')
+    IS_SCAN_DEPENDENCY_TRACK=$(echo "${DATA_JSON}" | jq -r '.is_scan_dependency_track' | sed 's#null#true#')
   fi
 
   if [ -n "$OVERRIDE_IS_SCAN_LIFETIME" ]; then
@@ -115,7 +109,6 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /tmp/template.yml
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /tmp/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
-  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
   sed -i "s~###team###~${team}~" /tmp/template.yml
   sed -i "s~###appname###~${appname}~" /tmp/template.yml
   sed -i "s~###appversion###~${appversion}~" /tmp/template.yml
@@ -126,13 +119,11 @@ while read -r line; do
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
-  sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
   sed -i "s~###is_scan_lifetime###~${IS_SCAN_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_distroless###~${IS_SCAN_DISTROLESS}~" /tmp/template.yml
   sed -i "s~###is_scan_malware###~${IS_SCAN_MALWARE}~" /tmp/template.yml
-  sed -i "s~###is_scan_dependency_check###~${IS_SCAN_DEPENDENCY_CHECK}~" /tmp/template.yml
   sed -i "s~###is_scan_dependency_track###~${IS_SCAN_DEPENDENCY_TRACK}~" /tmp/template.yml
   sed -i "s~###is_scan_runasroot###~${IS_SCAN_RUNASROOT}~" /tmp/template.yml
   sed -i "s~###is_scan_new_version###~${IS_SCAN_NEW_VERSION}~" /tmp/template.yml
@@ -145,9 +136,9 @@ while read -r line; do
 
 
   echo "Setting workflow name"
-  workflowGeneratedName="${scanjobPrefix}${environment}-${namespace}-${team}-"
-  workflowGeneratedName="${workflowGeneratedName:0:62}"
-  workflowGeneratedName=$(echo "${workflowGeneratedName:0:62}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
+  workflowGeneratedName="${scanjobPrefix}${environment:0:10}-${namespace:0:10}-${team:0:10}-"
+  workflowGeneratedName="${workflowGeneratedName:0:50}"
+  workflowGeneratedName=$(echo "${workflowGeneratedName:0:50}" | tr '[:upper:]' '[:lower:]') # argo workflows must be lower case
   sed -i "s~###workflow_name###~${workflowGeneratedName}~" /tmp/template.yml
 
   if [ "${IS_PRINT_TEMPLATE}" == "true" ]; then
