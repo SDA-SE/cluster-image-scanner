@@ -22,13 +22,12 @@ spec:
       - workflow.parameters.s3ConfigName
       - workflow.parameters.scanId
       - workflow.parameters.registrySecretName
-      - workflow.parameters.dependencyCheckDbConfigMapName
       - workflow.parameters.defectDojoConfigMapName
       - workflow.parameters.slackTokenSecretName
       - workflow.parameters.emailSecretName
       - workflow.parameters.enforceSlackChannel
+      - workflow.parameters.enforceMail
       - workflow.parameters.newVersionImageFilter
-      - workflow.parameters.dependencyCheckSuppressionsConfigMapName
       - workflow.parameters.allResultsGitTarget
       - workflow.parameters.imageRegistryBase
       - workflow.parameters.clusterImageScannerImageTag
@@ -229,15 +228,14 @@ spec:
           fi
 
           inform() {
-            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, rocketchat: ${rocketchat}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
             #slack="#nobody-security" # for testing
-            if [ "${rocketchat}" == "null" ]; then rocketchat=""; fi
             if [ "${slack}" == "null" ]; then slack=""; fi
-            if [ "${slack}" != "" ] || [ "${rocketchat}" != "" ]; then
+            if [ "${slack}" != "" ]; then
               # shellcheck disable=SC2001
               info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
               infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s/###ROCKETCHAT_CHANNEL###/${rocketchat}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
+              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
               sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
               sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
               sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
@@ -263,29 +261,27 @@ spec:
               else
                 echo "Slack not configured in collector"
               fi
-              if [ "${rocketchat}" != "" ]; then
-                if [ "${ROCKET_CHAT_USER_ID}" == "" ]; then # ROCKET_CHAT_USER_ID comes from cm scanjob-parameter
-                  echo "No ROCKET_CHAT_USER_ID set"
-                fi
-                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-                  echo "No SLACK_CLI_TOKEN set"
-                fi
-                echo "Sending to rocketchat ${SLACK_MESSAGE_ENDPOINT} ${rocketchat}"
-                curl -H "Content-type: application/json" \
-                  -d @/tmp/slack-template.json \
-                  -H "X-Auth-Token: ${SLACK_CLI_TOKEN}" \
-                  -H "X-User-Id: ${ROCKET_CHAT_USER_ID}" \
-                  -X POST \
-                  "${SLACK_MESSAGE_ENDPOINT}"
-              else
-                echo "rocketchat not configured in collector"
-              fi
             fi
             if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
               if [ "${smtpauthpassword}" != "YOURPASSWORD" ] && [ "${smtpauthpassword}" != "" ] && [ "${smtpauthpassword}" != "smtp_auth_password_SECRET" ]; then
                 echo "Sending to email ${email}"
                 message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
-                echo -e "${message}" | mail -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
+                mailParameter=""
+                if [ ${SMTP_MAILFROM} != "" ]; then
+                  mailParameter=" -S from=${SMTP_MAILFROM} "
+                fi
+                if [ ${SMTP_START_TLS} == "true" ]; then
+                  mailParameter="${mailParameter} -S smtp-use-starttls "
+                fi
+                if [ "${SMTP_MAIL_PARAMETER}" != "" ]; then
+                  mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
+                fi
+                if [ "${SMTP_ENFORCE_MAILTO}" != "" ]; then
+                  echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
+                  email="${SMTP_ENFORCE_MAILTO}"
+                fi
+
+                echo -e "${message}" | mail ${mailParameter} -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
               else
                 echo "Warning: email set, but no email configured"
               fi
@@ -303,7 +299,6 @@ spec:
             namespace=$(echo "${item}" | jq -r '.namespace'| tr -cd '[:alnum:]._-')
             environment=$(echo "${item}" | jq -r '.environment'| tr -cd '[:alnum:]._-')
             slack=$(echo "${item}" | jq -r '.slack')
-            rocketchat=$(echo "${item}" | jq -r '.rocketchat')
             appName=$(echo "${item}" | jq -r '.appname'| tr -cd '[:alnum:]._-')
             email=$(echo "${item}" | jq -r '.email')
             if [ -n "${ENFORCE_SLACK_CHANNEL}" ]; then

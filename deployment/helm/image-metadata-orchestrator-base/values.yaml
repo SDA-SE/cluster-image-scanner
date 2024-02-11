@@ -70,7 +70,7 @@ cleanup:
   activeDeadlineSeconds: 3600
   startingDeadlineSeconds: 0
   image:
-    repo: "quay.io/sdase/clusterscanner-base"
+    repo: "quay.io/sdase/cluster-image-scanner-base"
     tag: "2"
 exitHandler:
   activeDeadlineSeconds: 3600
@@ -277,14 +277,6 @@ scanjob:
       requests:
         cpu: '0.2'
         memory: 1792Mi
-  scanDependencyCheck:
-    resources:
-      limits:
-        cpu: '1'
-        memory: 368Mi
-      requests:
-        cpu: '0.2'
-        memory: 368Mi
   collectFindings:
     resources:
       limits:

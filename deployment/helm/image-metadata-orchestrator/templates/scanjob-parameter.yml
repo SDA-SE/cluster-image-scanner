@@ -27,7 +27,7 @@ data:
   #
   # Each can be set 'true' or 'false'
   #
-  OVERRIDE_IS_SCAN_DEPENDENCY_CHECK: '{{ .Values.scanjob.override.isScanDTrack }}'
+  OVERRIDE_IS_SCAN_DEPENDENCY_TRACK: '{{ .Values.scanjob.override.isScanDTrack }}'
 
 
   # Registry overrides:
