@@ -48,10 +48,10 @@ data:
   #
 
   REGISTRY_OVERRIDE_DOCKER_A_FROM: '{{ .Values.scanjob.registryOverride.dockerA.from }}'
-  REGISTRY_OVERRIDE_DOCKER_A_TO: '{{ required "A docker target is required." .Values.scanjob.registryOverride.dockerA.to }}'
+  REGISTRY_OVERRIDE_DOCKER_A_TO: '{{ .Values.scanjob.registryOverride.dockerA.to }}'
 
   REGISTRY_OVERRIDE_DOCKER_IO_FROM: '{{ .Values.scanjob.registryOverride.dockerIo.from }}'
-  REGISTRY_OVERRIDE_DOCKER_IO_TO: '{{ required "A docker target is required." .Values.scanjob.registryOverride.dockerIo.to }}'
+  REGISTRY_OVERRIDE_DOCKER_IO_TO: '{{ .Values.scanjob.registryOverride.dockerIo.to }}'
 
   REGISTRY_OVERRIDE_DEFAULT_FROM: '{{ .Values.scanjob.registryOverride.default.from }}'
-  REGISTRY_OVERRIDE_DEFAULT_TO: '{{ required "A docker target is required." .Values.scanjob.registryOverride.default.to }}'
+  REGISTRY_OVERRIDE_DEFAULT_TO: '{{ .Values.scanjob.registryOverride.default.to }}'

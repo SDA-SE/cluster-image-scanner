@@ -26,7 +26,7 @@ helm install image-metadata-orchestrator-base clusterscanner-dev/image-metadata-
 ```
 No values need to be set for the base chart, but you might want to set some for tweaking purposes.
 
-For the main chart, reate a new values file and set some basic mandatory values: 
+For the main chart, create a new values file and set some basic mandatory values: 
 
 ```yaml
 api:
@@ -40,7 +40,6 @@ storage:
 defectdojo:
   user: ""
   url: ""
-  dashboardUrl: ""
   token: ""
 dependencytrack:
   url: ""

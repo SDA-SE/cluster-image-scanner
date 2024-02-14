@@ -58,7 +58,6 @@ defectdojo:
   lead: "3"
   user: ""
   url: ""
-  dashboardUrl: ""
   importType: "import"
   markedAsActive: "true"
   markedAsInactive: "false"
