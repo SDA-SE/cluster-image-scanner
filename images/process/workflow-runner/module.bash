@@ -10,7 +10,7 @@ fi
 
 #filter out amazon images
 echo "Filtering out Amazon ECR images"
-FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </clusterscanner/imageList.json)
+FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not)' </clusterscanner/imageList.json)
 echo "$FILTERED_LIST" > /tmp/imageListFiltered.json
 
 
