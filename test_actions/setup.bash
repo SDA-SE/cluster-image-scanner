@@ -109,8 +109,8 @@ kubectl apply -k minio
 wait_for_pods_ready "minio" "minio-operator" 2 10 120
 wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
 
-helm install -f variables.yaml cis-base ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator-base/
-helm install -f variables.secret.yaml -f variables.yaml cis ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator/
+helm install -f $HOME/.clusterscanner/variables.secret.yaml -f variables.yaml cis-base ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator-base/ -n clusterscanner
+helm install -f $HOME/.clusterscanner/variables.secret.yaml -f variables.yaml cis-orchestrator ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator/ -n clusterscanner
 
 if ! which argo > /dev/null 2>&1; then
   curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.3.8/argo-linux-amd64.gz
@@ -120,6 +120,10 @@ if ! which argo > /dev/null 2>&1; then
   argo=./tmp/argo
   PATH=$PATH:./tmp
 fi
+
+kubectl kustomize --load-restrictor LoadRestrictionsNone base > tmp.yml
+kubectl apply -f tmp.yml
+rm tmp.yml
 
 sleep 30
 
@@ -135,11 +139,21 @@ kubectl -n clusterscanner port-forward svc/minio-hl 9000:9000 &
 
 sleep 2
 
+if ! which mc > /dev/null 2>&1; then
+  curl https://dl.min.io/client/mc/release/linux-amd64/mc \
+    --create-dirs \
+    -o ./tmp/mc
+
+  chmod +x ./tmp/mc
+  export PATH=$PATH:./tmp/
+fi
+
 mc alias set local http://127.0.0.1:9000 testtesttest testtesttest || true
 mc mb local/local || true
 
-#echo "submitting argo-main.yml"
-#argo submit -n clusterscanner ../argo-main.yml
+
+echo "submitting argo-main.yml"
+argo submit -n clusterscanner ../argo-main.yml
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "Token:"
@@ -148,34 +162,34 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
   echo "${server}"
 fi
-#
-#sleep 5
-#argo list workflows -A
-#workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
-#echo "will wait for workflow ${workflow}"
-#
-#until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
-#do
-#  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do
-#    argo get --no-utf8 $i -n clusterscanner;
-#    echo "######################################################################################################## argo get"
-#  done
-##  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating  | grep -v Pending | grep -v Completed | grep -v NAME | awk '{print $1}'); do
-##      echo "######################################################################################################## pod logs $pod"
-##      kubectl logs ${pod} -n clusterscanner || true
-##  done
-#  sleep 60;
-#done
-#echo "Listing all workflows"
-#argo list workflows -A
-#if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
-#  echo "ERRORs during workflow execution"
-#  for pod in $(kubectl get pod -n clusterscanner | grep -v "Completed" | awk '{print $1}'); do
-#      echo "######################################################################################################## pod logs ${pod}"
+
+sleep 5
+argo list workflows -A
+workflow=$(argo -n clusterscanner list | grep orchestration | awk '{print $1}')
+echo "will wait for workflow ${workflow}"
+
+until [[ $(argo list -A | grep ${workflow} | grep Running | wc -l) -ne "1" ]]
+do
+  for i in $(argo list -A | awk '{print $2}'| grep -v "^NAME"); do
+    argo get --no-utf8 $i -n clusterscanner;
+    echo "######################################################################################################## argo get"
+  done
+#  for pod in $(kubectl get pod -n clusterscanner | grep -v ContainerCreating  | grep -v Pending | grep -v Completed | grep -v NAME | awk '{print $1}'); do
+#      echo "######################################################################################################## pod logs $pod"
 #      kubectl logs ${pod} -n clusterscanner || true
 #  done
-#  exit 1
-#fi
-#rm -Rf ./tmp || true
+  sleep 60;
+done
+echo "Listing all workflows"
+argo list workflows -A
+if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
+  echo "ERRORs during workflow execution"
+  for pod in $(kubectl get pod -n clusterscanner | grep -v "Completed" | awk '{print $1}'); do
+      echo "######################################################################################################## pod logs ${pod}"
+      kubectl logs ${pod} -n clusterscanner || true
+  done
+  exit 1
+fi
+rm -Rf ./tmp || true
 
 exit 0

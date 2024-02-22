@@ -6,4 +6,4 @@ metadata:
   labels:
     {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
 data:
-  S3_API_LOCATION: "https://{{ required "An API host is required." .Values.api.host }}/{{ .Values.api.version }}/all-image-collector-reports"
+  S3_API_LOCATION: "https://{{ required "An API host is required." .Values.api.host }}{{ .Values.api.slash }}{{ .Values.api.version }}{{ required "Path is required, should start with a /." .Values.api.path }}"

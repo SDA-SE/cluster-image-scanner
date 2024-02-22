@@ -10,8 +10,8 @@ data:
       endpoint: minio-hl.clusterscanner.svc:9000
       insecure: true
       accessKeySecret:
-        name: s3-cred
+        name: minio-auth
         key: accesskey
       secretKeySecret:
-        name: s3-cred
+        name: minio-auth
         key: secretkey

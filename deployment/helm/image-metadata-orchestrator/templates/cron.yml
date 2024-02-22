@@ -52,7 +52,7 @@ spec:
         - name: imageRegistryBase
           value: "quay.io/sdase"
         - name: clusterImageScannerImageTag
-          value: "master"
+          value: "{{ .Values.image.tag }}"
         - name: errorTargets
           value: '[{ "channel":"#security-notifications", "type": "slack"} ]'  
     templates:

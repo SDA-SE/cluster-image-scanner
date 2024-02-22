@@ -39,6 +39,9 @@ cronSchedule: "*/1 * * * 1-5"
 api:
   host: ""
   version: "v1"
+  path: "all-image-collector-reports"
+  slash: "/"
+
 
 credentials:
   apikey: ""
@@ -79,7 +82,7 @@ registry:
   authJson: ""
 
 imageSourceList:
-  image-lifetime: "https://api.github.com/repos/SDA-SE/cluster-scan-test-images/contents/image-lifetime.json"
+  image-lifetime: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
 
 scanjob:
   ddDaysToKeepWithoutUpload: "0" # 0 disables cleanup
@@ -101,3 +104,6 @@ scanjob:
 
 slack:
   cliToken: ""
+
+image:
+  tag: "master"
