@@ -83,10 +83,6 @@ spec:
             depends: imagefetcher
             template: scan-baseimage-lifetime
             when: "{{ "{{" }} workflow.parameters.is_scan_baseimage_lifetime {{ "}}" }} == true"
-          - name: scan-dependency-check
-            depends: imagefetcher
-            template: scan-dependency-check
-            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_check {{ "}}" }} == true"
           - name: scan-runasroot
             depends: imagefetcher
             template: scan-runasroot
@@ -99,10 +95,6 @@ spec:
             depends: imagefetcher
             template: scan-new-version
             when: "{{ "{{" }} workflow.parameters.is_scan_new_version {{ "}}" }} == true"
-          - name: results-dependency-check-dd-upload
-            depends: scan-dependency-check
-            template: results-dependency-check-dd-upload
-            when: "{{ "{{" }} workflow.parameters.is_scan_dependency_check{{ "}}" }} == true"
           - name: results-collect-generic-findings
             depends: (scan-distroless.Succeeded || scan-lifetime.Succeeded || scan-baseimage-lifetime.Succeeded || scan-runasroot.Succeeded || scan-malware.Succeeded || scan-new-version.Succeeded)
             template: results-collect-generic-findings
@@ -115,7 +107,7 @@ spec:
                   from: "{{ "{{" }} tasks.results-collect-generic-findings.outputs.artifacts.results-generic-findings{{ "}}" }}"
             #when: "{{ "{{" }} scan-distroless.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-baseimage-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} scan-runasroot.Succeeded {{ "}}" }} == true || scan-malware.Succeeded || {{ "{{" }} scan-new-version.Succeeded {{ "}}" }} == true"
           - name: results-aggregate
-            depends: (results-dependency-check-dd-upload.Succeeded || results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
+            depends: (results-generic-dd-upload.Succeeded || results-dependency-track-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
@@ -130,15 +122,6 @@ spec:
                   optional: true
                 - name: results-generic
                   from: "{{ "{{" }} tasks.results-collect-generic-findings.outputs.artifacts.results-generic{{ "}}" }}"
-                  optional: true
-                - name: results-dd-dependency-check-test-link
-                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.results-dd-dependency-check-test-link{{ "}}" }}"
-                  optional: true
-                - name: results-dd-dependency-check-is-finding-file
-                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
-                  optional: true
-                - name: results-dd-dependency-check-findings-file
-                  from: "{{ "{{" }} tasks.results-dependency-check-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-track-test-link
                   from: "{{ "{{" }} tasks.results-dependency-track-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link{{ "}}" }}"
@@ -214,7 +197,7 @@ spec:
           OVERRIDES=$(env | cut -d= -f1 | sort | grep -e "REGISTRY_OVERRIDE_.*_FROM")
           echo "OVERRIDES: ${OVERRIDES}"
           set -e
-          if [ "$OVERRIDES" == "" ]; then
+          if [ "${OVERRIDES}" == "" ] || [ "${REGISTRY_OVERRIDE_DEFAULT_FROM}" == "" ]; then
             echo "No registry overrides found"
           else
             while read r
@@ -1126,15 +1109,6 @@ spec:
             optional: true
           - name: results-generic
             path: /tmp/result.json
-            optional: true
-          - name: results-dd-dependency-check-test-link
-            path: /tmp/dd-dependency-check-test-link.txt
-            optional: true
-          - name: results-dd-dependency-check-is-finding-file
-            path: /tmp/isFinding-dependency-check
-            optional: true
-          - name: results-dd-dependency-check-findings-file
-            path: /tmp/findings-dependency-check.json
             optional: true
           - name: results-dd-dependency-track-test-link
             path: /tmp/dd-dependency-track-test-link.txt

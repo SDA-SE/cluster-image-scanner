@@ -20,6 +20,9 @@ if [ "${IS_MINIKUBE}" == "true" ]; then
   #echo "Maybe you want to run 'minikube addons configure registry-creds' with registry 'https://index.docker.io/v1/', press any key to continue"
   #read -n 1 -s
   kubectl config use-context minikube
+  if [ "${DOCKER_SECRET}" != "" ]; then
+    minikube ssh  "docker login --password \"${DOCKER_SECRET}\" --username ${DOCKER_USER}"
+  fi
 fi
 
 current_context=$(kubectl config current-context)
@@ -41,55 +44,10 @@ fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
 sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
+sed -i.bak "s~###VERSION###~${VERSION}~g" ./collector/application/deployment.yaml
 
 
 DEPLOYMENT_PATH=../deployment
-#git checkout ${DEPLOYMENT_PATH}/overlays/
-
-#
-#sed -i.bak "s#DD_TOKEN_SECRET#${DD_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.secret.env
-#sed -i.bak "s#DD_URL_PLACEHOLDER#${DD_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
-#sed -i.bak "s#DD_USER_PLACEHOLDER#${DD_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo.cm.env
-#sed -i.bak "s#DD_TEST_TOKEN_SECRET#${DD_TEST_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.secret.env
-#sed -i.bak "s#DD_TEST_URL_PLACEHOLDER#${DD_TEST_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
-#sed -i.bak "s#DD_TEST_USER_PLACEHOLDER#${DD_TEST_USER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/defectdojo-test.cm.env
-#
-#
-#sed -i.bak "s#S3_API_KEY_PLACEHOLDER#${S3_API_KEY}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.env
-#sed -i.bak "s#S3_API_SIGNATURE_PLACEHOLDER#${S3_API_SIGNATURE}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.secret.env
-#sed -i.bak "s#S3_API_LOCATION_PLACEHOLDER#${S3_API_LOCATION}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/s3.api.cm.env
-#
-#echo "test-all=${GIT_SOURCE_REPOSITORY}" > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/repolist.env
-#
-#sed -i.bak "s#SLACK_CLI_TOKEN_SECRET#${SLACK_CLI_TOKEN_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/slack.env
-#
-#sed -i.bak "s#GH_APP_ID_PLACEHOLDER#${GH_APP_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-#sed -i.bak "s#GH_APP_LOGIN_PLACEHOLDER#${GH_APP_LOGIN}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-#sed -i.bak "s#GH_INSTALLATION_ID_PLACEHOLDER#${GH_INSTALLATION_ID}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github.env
-#
-#if [ -f ${GH_PRIVATE_KEY_PATH} ] && [ "${GH_PRIVATE_KEY_BASE64}" == "" ]; then
-#  cp "${GH_PRIVATE_KEY_PATH}" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
-#  export GH_PRIVATE_KEY_PATH=$(realpath "${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem")
-#fi
-#if [ "${GH_PRIVATE_KEY_BASE64}" != "" ]; then
-#  echo "Found GH_PRIVATE_KEY_BASE64, putting it"
-#  echo "${GH_PRIVATE_KEY_BASE64}" | base64 -d > ${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem
-#  export GH_PRIVATE_KEY_PATH=$(realpath "${DEPLOYMENT_PATH}/overlays/test-local/config-source/github_private_key.pem")
-#  echo "GH_PRIVATE_KEY_PATH: ${GH_PRIVATE_KEY_PATH}"
-#fi
-#
-#sed -i.bak "s#DEPSCAN_DB_DRIVER_PLACEHOLDER#${DEPSCAN_DB_DRIVER_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-#sed -i.bak "s#DEPSCAN_DB_USERNAME_PLACEHOLDER#${DEPSCAN_DB_USERNAME_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-#sed -i.bak "s#DEPSCAN_DB_PASSWORD_PLACEHOLDER#${DEPSCAN_DB_PASSWORD_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-#sed -i.bak "s#DEPSCAN_DB_CONNECTSRING_PLACEHOLDER#${DEPSCAN_DB_CONNECTSRING_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/depcheck.env
-#
-#sed -i.bak "s#smtp_SECRET#${smtp_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-#sed -i.bak "s#smtp_auth_SECRET#${smtp_auth_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-#sed -i.bak "s#smtp_auth-user_SECRET#${smtp_auth_user_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-#sed -i.bak "s#smtp_auth-password_SECRET#${smtp_auth_password_SECRET}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/email.env
-#
-#sed -i.bak "s#DEPENDENCY_TRACK_URL_PLACEHOLDER#${DEPENDENCY_TRACK_URL_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/dependency-track.cm.env
-#sed -i.bak "s#DEPENDENCY_TRACK_KEY_PLACEHOLDER#${DEPENDENCY_TRACK_KEY_PLACEHOLDER}#" ${DEPLOYMENT_PATH}/overlays/test-local/config-source/dependency-track.secret.env
 
 kubectl apply -k argocd
 wait_for_pods_ready "argocd" "argocd" 5 10 120
@@ -188,8 +146,17 @@ if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
       echo "######################################################################################################## pod logs ${pod}"
       kubectl logs ${pod} -n clusterscanner || true
   done
+  if [ "${IS_MINIKUBE}" == "true" ]; then
+    echo "Token:"
+    server=$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print $1}');
+    kubectl -n clusterscanner exec pod/$server -- argo auth token
+    echo "server=\$(kubectl get pods -n clusterscanner | grep argo-server | awk '{print \$1}'); kubectl -n clusterscanner exec pod/\$server -- argo auth token"
+    echo "${server}"
+  fi
   exit 1
 fi
 rm -Rf ./tmp || true
+
+
 
 exit 0

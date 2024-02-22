@@ -1,8 +1,10 @@
+{{- if .Values.isLocal }}
 apiVersion: v1
 kind: Secret
 metadata:
   name: minio-auth
-  namespace: clusterscanner
+  namespace:  {{ .Release.Namespace }}
 stringData:
   accesskey: "testtesttest"
   secretkey: "testtesttest"
+{{- end }}

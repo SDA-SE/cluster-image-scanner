@@ -15,3 +15,11 @@ data:
       bucket: {{ required "A bucket for temporary data is required." .Values.storage.s3.bucket }}
       insecure: {{ .Values.storage.s3.insecure }}
       useSDKCreds: {{ .Values.storage.s3.useSDKCreds }}
+{{- if .Values.isLocal }}
+      accessKeySecret:
+        name: minio-auth
+        key: accesskey
+      secretKeySecret:
+        name: minio-auth
+        key: secretkey
+{{- end }}

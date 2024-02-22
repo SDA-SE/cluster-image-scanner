@@ -87,19 +87,18 @@ imageSourceList:
 scanjob:
   ddDaysToKeepWithoutUpload: "0" # 0 disables cleanup
   errorNotificationIgnore: 'DiskPressure\|imagefetcher.*sj-tools-kube-system\|sj-si-verzahnung-defectdojo'
-  jobExecutionNamespace: "argowf"
   ddNameTemplate: "###ENVIRONMENT### | ###NAMESPACE###"
   override:
-    isScanDTrack: "false"
+    isScanDTrack: "true"
   registryOverride:
     dockerA:
-      from: "docker~io"
+      from: ""
       to: ""
     dockerIo:
-      from: 'docker\.io'
+      from: ''
       to: ""
     default:
-      from: '\(^[^\.]*:.*\)'
+      from: ''
       to: ''
 
 slack:
@@ -107,3 +106,5 @@ slack:
 
 image:
   tag: "master"
+
+isLocal: false

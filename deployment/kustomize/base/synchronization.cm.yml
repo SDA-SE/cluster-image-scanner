@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: synchronization
-  namespace: clusterscanner
-data:
-  workflow: "12"

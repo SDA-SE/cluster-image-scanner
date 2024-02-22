@@ -46,12 +46,17 @@ data:
   #  The first match of _FROM will be applied and follow-ups skipped. Variable pairs are processed
   #  in alphabetical order.
   #
-
+  {{- if .Values.scanjob.registryOverride.dockerA.from }}
   REGISTRY_OVERRIDE_DOCKER_A_FROM: '{{ .Values.scanjob.registryOverride.dockerA.from }}'
   REGISTRY_OVERRIDE_DOCKER_A_TO: '{{ .Values.scanjob.registryOverride.dockerA.to }}'
+  {{- end }}
 
+  {{- if .Values.scanjob.registryOverride.dockerIo.from }}
   REGISTRY_OVERRIDE_DOCKER_IO_FROM: '{{ .Values.scanjob.registryOverride.dockerIo.from }}'
   REGISTRY_OVERRIDE_DOCKER_IO_TO: '{{ .Values.scanjob.registryOverride.dockerIo.to }}'
+  {{- end }}
 
+  {{- if .Values.scanjob.registryOverride.default.from }}
   REGISTRY_OVERRIDE_DEFAULT_FROM: '{{ .Values.scanjob.registryOverride.default.from }}'
   REGISTRY_OVERRIDE_DEFAULT_TO: '{{ .Values.scanjob.registryOverride.default.to }}'
+  {{- end }}

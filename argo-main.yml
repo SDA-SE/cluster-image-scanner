@@ -21,9 +21,9 @@ spec:
       - name: gitSecretName
         value: "github"
       - name: s3SecretName
-        value: "s3-api-credentials"
+        value: "api-credentials"
       - name: s3ConfigName
-        value: "s3-api-config"
+        value: "api-config"
       - name: imageSourceListConfigMapName
         value: "image-source-list"
       - name: registrySecretName

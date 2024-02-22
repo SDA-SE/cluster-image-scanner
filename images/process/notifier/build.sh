@@ -83,7 +83,6 @@ buildah config \
   --env "smtp-auth-password=YOURPASSWORD" \
   --env "ssl-verify=strict" \
   --env "SLACK_MESSAGE_ENDPOINT=https://slack.com/api/chat.postMessage" \
-  --env "ROCKET_CHAT_USER_ID=" \
   "${ctr}"
 #  --env "set nss-config-dir=/etc/pki/nssdb/" \ # might be needed later?
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=
