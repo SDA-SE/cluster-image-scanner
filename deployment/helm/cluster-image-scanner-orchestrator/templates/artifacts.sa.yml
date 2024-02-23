@@ -3,10 +3,10 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "image-metadata-orchestrator.serviceAccountName" . }}
+  name: {{ include "cluster-image-scanner-orchestrator.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
   annotations:
     {{- if .Values.serviceAccount.awsRoleArn}}
     eks.amazonaws.com/role-arn: {{ .Values.serviceAccount.awsRoleArn }}
@@ -19,13 +19,13 @@ metadata:
   name: argo-default-workflow-artifacts
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: argo-workflow
 subjects:
   - kind: ServiceAccount
-    name: {{ include "image-metadata-orchestrator.serviceAccountName" . }}
+    name: {{ include "cluster-image-scanner-orchestrator.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 {{- end }}

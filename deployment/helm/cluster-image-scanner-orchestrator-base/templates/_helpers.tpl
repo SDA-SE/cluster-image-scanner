@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "image-metadata-orchestrator-base.name" -}}
+{{- define "cluster-image-scanner-orchestrator-base.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "image-metadata-orchestrator-base.fullname" -}}
+{{- define "cluster-image-scanner-orchestrator-base.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "image-metadata-orchestrator-base.chart" -}}
+{{- define "cluster-image-scanner-orchestrator-base.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "image-metadata-orchestrator-base.labels" -}}
-helm.sh/chart: {{ include "image-metadata-orchestrator-base.chart" . }}
-{{ include "image-metadata-orchestrator-base.selectorLabels" . }}
+{{- define "cluster-image-scanner-orchestrator-base.labels" -}}
+helm.sh/chart: {{ include "cluster-image-scanner-orchestrator-base.chart" . }}
+{{ include "cluster-image-scanner-orchestrator-base.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "image-metadata-orchestrator-base.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "image-metadata-orchestrator-base.name" . }}
+{{- define "cluster-image-scanner-orchestrator-base.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "cluster-image-scanner-orchestrator-base.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "image-metadata-orchestrator-base.serviceAccountName" -}}
+{{- define "cluster-image-scanner-orchestrator-base.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "image-metadata-orchestrator-base.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "cluster-image-scanner-orchestrator-base.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

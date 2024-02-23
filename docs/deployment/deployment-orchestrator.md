@@ -22,7 +22,7 @@ Add the helm repository:
 helm repo add clusterscanner https://raw.githubusercontent.com/SDA-SE/cluster-image-scanner/gh-pages
 ```
 ```shell
-helm install image-metadata-orchestrator-base clusterscanner-dev/image-metadata-orchestrator-base
+helm install cluster-image-scanner-orchestrator-base clusterscanner-dev/cluster-image-scanner-orchestrator-base
 ```
 No values need to be set for the base chart, but you might want to set some for tweaking purposes.
 
@@ -60,7 +60,7 @@ slack:
 Then, install the chart with the given values: 
 
 ```shell
-helm install -f values.yaml image-metadata-orchestrator clusterscanner-dev/image-metadata-orchestrator
+helm install -f values.yaml cluster-image-scanner-orchestrator clusterscanner-dev/cluster-image-scanner-orchestrator
 ```
 
 ### Deployment via terraform
@@ -70,8 +70,8 @@ You can use the helm charts mentioned above via terraform:
 ```terraform
 resource "helm_release" "clusterscanner_orchestrator_base" {
   repository  = "https://raw.githubusercontent.com/SDA-SE/cluster-image-scanner/gh-pages"
-  chart       = "image-metadata-orchestrator-base"
-  name        = "image-metadata-orchestrator-base"
+  chart       = "cluster-image-scanner-orchestrator-base"
+  name        = "cluster-image-scanner-orchestrator-base"
   namespace   = var.namespace
   version     = "0.1.0"
   max_history = 5
@@ -86,8 +86,8 @@ resource "helm_release" "clusterscanner_orchestrator_base" {
 
 resource "helm_release" "clusterscanner_orchestrator" {
   repository  = "https://raw.githubusercontent.com/SDA-SE/cluster-image-scanner/gh-pages"
-  chart       = "image-metadata-orchestrator"
-  name        = "image-metadata-orchestrator"
+  chart       = "cluster-image-scanner-orchestrator"
+  name        = "cluster-image-scanner-orchestrator"
   namespace   = var.namespace
   version     = "0.1.0"
   timeout     = 30

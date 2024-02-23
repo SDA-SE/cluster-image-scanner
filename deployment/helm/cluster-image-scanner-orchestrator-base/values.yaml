@@ -1,4 +1,4 @@
-# Default values for image-metadata-orchestrator-base.
+# Default values for cluster-image-scanner-orchestrator-base.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -95,6 +95,7 @@ exitHandler:
     runAsUser: 1001
 
 orchestrationJob:
+  imagePullPolicy: Always
   activeDeadlineSeconds: 21600 #6h
   ttlStrategy:
     secondsAfterSuccess: 7200 # 2 hours
@@ -173,6 +174,7 @@ orchestrationJob:
         memory: 128Mi
 
 scanjob:
+  imagePullPolicy: Always
   activeDeadlineSeconds: 7200 # 60 min, needed for large scans
   ttlStrategy:
     secondsAfterSuccess: 900 # 15 min

@@ -4,7 +4,7 @@ metadata:
   name: scanjob-env-parameter
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
 data:
   DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD: '{{ .Values.scanjob.ddDaysToKeepWithoutUpload }}'
   ERROR_NOTIFICATION_IGNORE: '{{ .Values.scanjob.errorNotificationIgnore }}'
@@ -27,7 +27,9 @@ data:
   #
   # Each can be set 'true' or 'false'
   #
+  {{- if .Values.scanjob.override.isScanDTrack }}
   OVERRIDE_IS_SCAN_DEPENDENCY_TRACK: '{{ .Values.scanjob.override.isScanDTrack }}'
+  {{- end }}
 
 
   # Registry overrides:

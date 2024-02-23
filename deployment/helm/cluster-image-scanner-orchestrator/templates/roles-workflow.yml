@@ -4,7 +4,7 @@ metadata:
   name: orchestrator-workflow
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
   annotations:
     checkov.io/skip1: CKV_K8S_21=The default namespace should not be used
     checkov.io/skip2: CKV_K8S_49=Minimize wildcard use in Roles and ClusterRoles
@@ -26,7 +26,7 @@ metadata:
   name: s3-account-binding-cis-wf
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" . | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" . | nindent 4 }}
   annotations:
     checkov.io/skip1: CKV_K8S_21=The default namespace should not be used
 roleRef:

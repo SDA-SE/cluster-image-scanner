@@ -45,6 +45,9 @@ fi
 echo "clusterImageScannerImageTag: ${VERSION}"
 sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 sed -i.bak "s~###VERSION###~${VERSION}~g" ./collector/application/deployment.yaml
+mkdir tmp || true
+cp variables.yaml tmp/variables.yaml
+sed sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
 
 
 DEPLOYMENT_PATH=../deployment
@@ -56,7 +59,7 @@ kubectl apply -f argocd.project.yml
 
 # kustomize is not supported
 echo "Installation argowf"
-mkdir tmp || true
+
 kubectl apply -k argowf
 curl -sL --output ./tmp/namespace-install.yaml "https://github.com/argoproj/argo-workflows/releases/download/v3.3.8/namespace-install.yaml"
 kubectl apply -f ./tmp/namespace-install.yaml -n clusterscanner
@@ -67,8 +70,8 @@ kubectl apply -k minio
 wait_for_pods_ready "minio" "minio-operator" 2 10 120
 wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
 
-helm install -f $HOME/.clusterscanner/variables.secret.yaml -f variables.yaml cis-base ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator-base/ -n clusterscanner
-helm install -f $HOME/.clusterscanner/variables.secret.yaml -f variables.yaml cis-orchestrator ${DEPLOYMENT_PATH}/helm/image-metadata-orchestrator/ -n clusterscanner
+helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml cis-base ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator-base/ -n clusterscanner
+helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml cis-orchestrator ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator/ -n clusterscanner
 
 if ! which argo > /dev/null 2>&1; then
   curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.3.8/argo-linux-amd64.gz

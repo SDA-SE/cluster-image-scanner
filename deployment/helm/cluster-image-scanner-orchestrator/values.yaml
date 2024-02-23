@@ -1,4 +1,4 @@
-# Default values for image-metadata-orchestrator.
+# Default values for cluster-image-scanner-orchestrator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -89,7 +89,7 @@ scanjob:
   errorNotificationIgnore: 'DiskPressure\|imagefetcher.*sj-tools-kube-system\|sj-si-verzahnung-defectdojo'
   ddNameTemplate: "###ENVIRONMENT### | ###NAMESPACE###"
   override:
-    isScanDTrack: "true"
+    isScanDTrack: "false"
   registryOverride:
     dockerA:
       from: ""

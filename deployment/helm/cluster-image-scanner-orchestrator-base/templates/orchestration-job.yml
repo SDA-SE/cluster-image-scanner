@@ -84,7 +84,7 @@ spec:
           emptyDir: {}
       container:
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-image-source-fetcher:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         command: ["/clusterscanner/entrypoint.bash"]
         resources:
           {{- toYaml .Values.orchestrationJob.fetchImageList.resources | nindent 10 }}
@@ -132,7 +132,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-workflow-runner:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
@@ -179,7 +179,7 @@ spec:
             subPath: "{{ "{{" }} workflow.parameters.scanId {{ "}}" }}"
           - name: tmp
             mountPath: /tmp
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         env:
           - name: SLACK_CLI_TOKEN
             valueFrom:
@@ -400,7 +400,7 @@ spec:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
             subPath: "github_private_key.pem"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         env:
           - name: ENVIRNOMENT
             value: "{{ "{{" }} workflow.parameters.scanId {{ "}}" }}"
@@ -540,7 +540,7 @@ spec:
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-statistic-client:4"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
@@ -573,7 +573,7 @@ spec:
             subPath: "github_private_key.pem"
           - name: tmp
             mountPath: /tmp
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         env:
           - name: SCAN_ID
             value: "{{ "{{" }} workflow.parameters.scanId {{ "}}" }}"
@@ -632,7 +632,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         command: [/bin/bash]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         envFrom:
           - secretRef:
               name: "dependency-track"
@@ -695,7 +695,7 @@ spec:
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         env: # TODO check for email creds
           - name: MESSAGE_TARGETS
             value: "{{ "{{" }} workflow.parameters.errorTargets {{ "}}" }}"

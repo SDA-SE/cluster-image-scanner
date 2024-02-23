@@ -7,7 +7,7 @@ metadata:
   name: unused
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
 spec:
   affinity:
     nodeAffinity:

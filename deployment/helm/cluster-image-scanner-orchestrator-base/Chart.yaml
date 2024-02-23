@@ -1,5 +1,5 @@
 apiVersion: v2
-name: image-metadata-orchestrator-base
+name: cluster-image-scanner-orchestrator-base
 description: This chart contains base resources required by the orchestrator. It primarily contains argo workflow templates and their config.
 
 # A chart can be either an 'application' or a 'library' chart.

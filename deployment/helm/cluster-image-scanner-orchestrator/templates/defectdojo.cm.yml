@@ -4,7 +4,7 @@ metadata:
   name: defectdojo
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
 data:
   DD_BRANCHES_TO_KEEP: "{{ .Values.defectdojo.branchesToKeep }}"
   DD_REPORT_PATH: "{{ .Values.defectdojo.reportPath }}"

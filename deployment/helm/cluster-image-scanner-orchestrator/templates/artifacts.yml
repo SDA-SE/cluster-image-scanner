@@ -4,7 +4,7 @@ metadata:
   name: artifact-repositories
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
   annotations:
     # v3.0 and after - if you want to use a specific key, put that's key into this annotation
     workflows.argoproj.io/default-artifact-repository: default-v1
