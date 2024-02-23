@@ -9,6 +9,7 @@ scan_result_pre
 echo "Checking image exists"
 skopeo inspect --config "${SKOPEO_INSPECT_PARAMETER}" "docker://${IMAGE_BY_HASH}" > /dev/null || exit="true"
 if [ "${exit}" == "true" ]; then
+    echo "skopeo inspect --config \"${SKOPEO_INSPECT_PARAMETER}\" \"docker://${IMAGE_BY_HASH}\""
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"status\": \"failed\"}")
     JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ".errors += [{\"errorText\": \"skopeo inspect failed for image\", \"command\": \"skopeo inspect docker://${IMAGE_BY_HASH}\"}]")
     scan_result_post
