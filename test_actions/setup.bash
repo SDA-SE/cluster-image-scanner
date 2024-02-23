@@ -47,7 +47,7 @@ sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 sed -i.bak "s~###VERSION###~${VERSION}~g" ./collector/application/deployment.yaml
 mkdir tmp || true
 cp variables.yaml tmp/variables.yaml
-sed sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
+sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
 
 
 DEPLOYMENT_PATH=../deployment
