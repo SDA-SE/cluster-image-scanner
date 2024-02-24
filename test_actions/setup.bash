@@ -43,7 +43,6 @@ else
 fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
-sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" ../argo-main.yml
 sed -i.bak "s~###VERSION###~${VERSION}~g" ./collector/application/deployment.yaml
 mkdir tmp || true
 cp variables.yaml tmp/variables.yaml
@@ -114,7 +113,9 @@ mc mb local/local || true
 
 
 echo "submitting argo-main.yml"
-argo submit -n clusterscanner ../argo-main.yml
+cp ../argo-main.yml tmp
+sed -i.bak "s~###clusterImageScannerImageTag###~${VERSION}~g" tmp/argo-main.yml
+argo submit -n clusterscanner tmp/argo-main.yml
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   echo "Token:"

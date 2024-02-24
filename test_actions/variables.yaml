@@ -1,0 +1,34 @@
+# Default values for cluster-image-scanner-orchestrator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+storage:
+  # An S3 bucket through which temporary data is handed over to subflows.
+  # Usually provided through the argo-wf installation.
+  s3:
+    endpoint: "minio-hl.clusterscanner.svc:9000"
+    bucket: "local"
+    insecure: true
+    useSDKCreds: false
+
+cronSchedule: "1 1 1 1 9" # close to never
+
+api:
+  host: "raw.githubusercontent.com"
+  version: ""
+  path: "/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
+  slash: ""
+
+imageSourceList:
+  image-lifetime: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
+  imagePullPolicy: Always
+
+scanjob:
+  imagePullPolicy: Always
+  override:
+    isScanDTrack: "false"
+
+image:
+  tag: "###VERSION###"
+
+isLocal: true

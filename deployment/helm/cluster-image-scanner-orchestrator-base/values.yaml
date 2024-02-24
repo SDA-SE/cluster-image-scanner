@@ -11,11 +11,11 @@ serviceAccount:
   create: true
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
-  # Annotations to add to the service account
-  annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "clusterscanner"
+  name: "argo-workflow"
+  # the Role to assume by the SA
+  awsRoleArn: ""
 
 podAnnotations: {}
 podLabels: {}

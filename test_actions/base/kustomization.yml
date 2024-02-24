@@ -6,7 +6,6 @@ generatorOptions:
 
 resources:
   - auth.yml
-  - sa.yaml
 
 commonLabels:
   app.kubernetes.io/name: clusterscanner
