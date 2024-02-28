@@ -1,7 +1,5 @@
 {
         "channel": "###SLACK_CHANNEL###",
         "author_name": "ClusterImageScanner",
-        "blocks": [
-                ###BLOCKS###
-        ]
+        "blocks": []
 }

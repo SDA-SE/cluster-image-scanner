@@ -227,67 +227,153 @@ spec:
             RESULT_PATH=/clusterscanner/data
           fi
 
-          inform() {
-            echo "image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, slackChannel: ${slack}, email: ${email}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
-            #slack="#nobody-security" # for testing
-            if [ "${slack}" == "null" ]; then slack=""; fi
-            if [ "${slack}" != "" ]; then
-              # shellcheck disable=SC2001
-              info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
-              infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
-              echo "${SLACK_TEMPLATE}" | sed "s/###SLACK_CHANNEL###/${slack}/g" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > /tmp/slack-template.json
-              sed -i "s|###STATUS###|${status}|g" /tmp/slack-template.json
-              sed -i "s|###DD_LINK###|${ddLink}|g" /tmp/slack-template.json
-              sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" /tmp/slack-template.json
-              sed -i "s#\#\#\#APP_NAME\#\#\##${appName}#g" /tmp/slack-template.json
-              sed -i "s/###NAMESPACE###/${namespace}/g" /tmp/slack-template.json
-              sed -i "s/###ENVIRONMENT###/${environment}/g" /tmp/slack-template.json
-              sed -i "s|###SEVERITY###|${severity}|g" /tmp/slack-template.json
-              sed -i "s#_INFO_#${infoNoNewline}#g" /tmp/slack-template.json
-              #echo "/tmp/slack-template.json:"
-              #cat /tmp/slack-template.json
-              if [ "${slack}" != "" ]; then
-                if [ "${SLACK_CLI_TOKEN}" == "" ]; then
-                  echo "SLACK_CLI_TOKEN not set, exit"
-                  exit 1
-                fi
-                echo "Sending to slack ${slack} with messageendpoint ${SLACK_MESSAGE_ENDPOINT}"
-                curl \
-                  -H "Content-type:application/json" \
-                  -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
-                  -X POST \
-                  -d @/tmp/slack-template.json \
-                  "${SLACK_MESSAGE_ENDPOINT}"
-              else
-                echo "Slack not configured in collector"
-              fi
-            fi
-            if [ "${email}" != "null" ] && [ "${email}" != "" ]; then
-              if [ "${smtpauthpassword}" != "YOURPASSWORD" ] && [ "${smtpauthpassword}" != "" ] && [ "${smtpauthpassword}" != "smtp_auth_password_SECRET" ]; then
-                echo "Sending to email ${email}"
-                message="$message\nimage: ${image}, app: ${appName}, namespace: ${namespace}, environment: ${environment}, link to DefectDojo: ${ddLink}"
-                mailParameter=""
-                if [ ${SMTP_MAILFROM} != "" ]; then
-                  mailParameter=" -S from=${SMTP_MAILFROM} "
-                fi
-                if [ ${SMTP_START_TLS} == "true" ]; then
-                  mailParameter="${mailParameter} -S smtp-use-starttls "
-                fi
-                if [ "${SMTP_MAIL_PARAMETER}" != "" ]; then
-                  mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
-                fi
-                if [ "${SMTP_ENFORCE_MAILTO}" != "" ]; then
-                  echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
-                  email="${SMTP_ENFORCE_MAILTO}"
-                fi
+          inputAsFileSystem() {
+            local notificationTarget="${1}" # e.g. mail, slack
+            # shellcheck disable=SC2001
+            echo "exporting notificationTargetForFs"
+            export notificationTargetForFs=$(echo ${notificationTarget} | sed 's/@//g' | sed "s/'//g" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g' )
+          }
 
-                echo -e "${message}" | mail ${mailParameter} -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
-              else
-                echo "Warning: email set, but no email configured"
-              fi
-            else
-              echo "Hint: email not set"
+          createNotificationSlack() {
+            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+              echo "SLACK_CLI_TOKEN not set, exit"
+              return;
             fi
+            local image="${1}"
+            local appName="${2}"
+            local team="${3}"
+            local namespace="$4"
+            local environment="$5"
+            local ddLink="$6"
+            local scanType="$7"
+            local title="$8"
+            local info="$9"
+            local status="${10}"
+            local findingSeverity="${11}"
+            local findingDescription="${12}"
+            local slack="${13}"
+            if [ "${slack}" == "null" ]; then slack=""; fi
+            if [ "${slack}" == "" ]; then
+              echo "Slack channel not set"
+              return;
+            fi
+            echo "In createNotificationMail, image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+
+            slackChannels=$(echo "${slackChannels}
+            ${slack}" | sort  | uniq)
+
+            inputAsFileSystem ${slack@Q}
+            rm -Rf /tmp/slack/ || true
+            echo "notificationTargetForFs slack: ${notificationTargetForFs}"
+            mkdir -p /tmp/slack/${notificationTargetForFs} || true
+            SLACK_TEMPLATE_ONE_BLOCK_TARGET=$(mktemp --tmpdir=/tmp/slack/${notificationTargetForFs})
+            echo "replacing template placeholder for slack"
+            cat "${SLACK_TEMPLATE_ONE_BLOCK}" | sed "s#\#\#\#TITLE\#\#\##${title}#g"  > ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s|###STATUS###|${status}|g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s|###DD_LINK###|${ddLink}|g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s#\#\#\#IMAGE\#\#\##${image}#g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s#\#\#\#APP_NAME\#\#\##${appName}#g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s/###NAMESPACE###/${namespace}/g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s/###ENVIRONMENT###/${environment}/g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            sed -i "s|###SEVERITY###|${findingSeverity}|g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+            infoNoNewline=$(echo ${info} | sed 's#"##g'| sed 's|#||g' | sed 's|\n|; |g')
+            sed -i "s#_INFO_#${infoNoNewline}#g" ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+
+            echo "${SLACK_TEMPLATE_ONE_BLOCK_TARGET}:"
+            cat ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
+          }
+
+
+          createNotificationMail() {
+            local image="${1}"
+            local appName="${2}"
+            local team="${3}"
+            local namespace="$4"
+            local environment="$5"
+            local ddLink="$6"
+            local scanType="$7"
+            local title="$8"
+            local info="$9"
+            local status="${10}"
+            local findingSeverity="${11}"
+            local findingDescription="${12}"
+            local email="${13}"
+            echo "In createNotificationMail, image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+
+            emails=$(echo "${emails}
+                        ${email}" | sort  | uniq)
+
+            inputAsFileSystem "${email@Q}"
+            rm -Rf /tmp/email/ || true
+            mkdir -p /tmp/email/${notificationTargetForFs} || true
+            MAIL_TEMPLATE_ONE_BLOCK_TARGET=$(mktemp --tmpdir=/tmp/email/${notificationTargetForFs})
+
+            message="image: ${image},\n app: ${appName},\n namespace:\n ${namespace},\n environment: ${environment},\n link to DefectDojo: ${ddLink}"
+            echo "${message@Q}" > ${MAIL_TEMPLATE_ONE_BLOCK_TARGET}
+          }
+
+          sendNotificationsSlack() {
+            if [ "${SLACK_CLI_TOKEN}" == "" ]; then
+              echo "SLACK_CLI_TOKEN not set, exit"
+              return;
+            fi
+            notificationPath="${1}"
+            slack="${2}"
+
+            blocks=$(jq 'flatten ' $(ls ${notificationPath}/*))
+            #slack="#nobody-security" # for testing
+            echo "Replacing slack \"${slack}\" channel"
+            cat ${SLACK_TEMPLATE} | sed "s/###SLACK_CHANNEL###/${slack}/g" > /tmp/slack-message-for-one-channel.json
+            echo "/tmp/slack-message-for-one-channel.json"
+            cat /tmp/slack-message-for-one-channel.json
+            echo "replacing blocks with $blocks"
+            #sed "s|###BLOCKS###|${blocks}|g" /tmp/slack-message-for-one-channel.json
+            jq --argjson block "${blocks}" '.blocks = $block' /tmp/slack-message-for-one-channel.json > /tmp/combined-blocks.json
+
+
+            echo "Sending to slack ${slack} with messageendpoint ${SLACK_MESSAGE_ENDPOINT}"
+            curl \
+              -H "Content-type:application/json" \
+              -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
+              -X POST \
+              -d @/tmp/combined-blocks.json \
+              "${SLACK_MESSAGE_ENDPOINT}"
+          }
+
+          sendNotificationsMail() {
+            local notificationPath="${1}"
+            local email="${2}"
+            if [ "${email}" == "null" ] || [ "${email}" == "" ]; then
+              return;
+            fi
+            if [ "${smtpauthpassword}" == "YOURPASSWORD" ] || [ "${smtpauthpassword}" == "" ] || [ "${smtpauthpassword}" == "smtp_auth_password_SECRET" ]; then
+              echo "Warning: email set, but no email configured"
+              return
+            fi
+
+
+            message=""
+            for file in $(ls ${notificationPath}/); do
+              message="${message}\n---\n$(cat ${file})"
+            done
+
+            echo "Sending to email ${email}"
+            mailParameter=""
+            if [ ${SMTP_MAILFROM} != "" ]; then
+              mailParameter=" -S from=${SMTP_MAILFROM} "
+            fi
+            if [ ${SMTP_START_TLS} == "true" ]; then
+              mailParameter="${mailParameter} -S smtp-use-starttls "
+            fi
+            if [ "${SMTP_MAIL_PARAMETER}" != "" ]; then
+              mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
+            fi
+            if [ "${SMTP_ENFORCE_MAILTO}" != "" ]; then
+              echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
+              email="${SMTP_ENFORCE_MAILTO}"
+            fi
+
+            echo -e "${message}" | mail ${mailParameter} -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
           }
           errors=""
           echo "Will iterate over files in ${RESULT_PATH}"
@@ -313,7 +399,9 @@ spec:
                   ddLinkTest=$(echo "${notification}" | jq -r ".ddLink")
                   echo "after defining ddLinkTest"
                   echo "${notification}" | jq -r ".infoText"
+                  # shellcheck disable=SC2001
                   infoText=$(echo "${notification}" | jq -r ".infoText" | sed 's#{#(#g' | sed 's#}#)#g' | sed 's#"#_#g' | tr -cd '[:alnum:]._ \n:@*+()[]-')   # at least { } needs to be removed for the slack cli
+                  info=$(echo "${infoText}" | sed 's#"##g'| sed 's|#||g' | sed 's|\n||g')
                   echo "after defining info"
                   errorText=$(echo "${notification}" | jq -r ".errorText" | tr -cd '[:alnum:]._ \n:@*+()[]-' || true)
                   status=$(echo "${notification}" | jq -r ".status" | tr -cd '[:alnum:]._ -')
@@ -356,9 +444,9 @@ spec:
                     #                      fi
                                         fi
                     title="${title} in ${image}"
-                    echo "${title} in ${image}"
-                    severity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
-                    description=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
+                    echo "${title}"
+                    findingSeverity=$(echo "${finding}" | jq -r ".severity" | tr -cd '[:alnum:]._ -')
+                    findingDescription=$(echo "${finding}" | jq -r '.description' | sed 's#{##g'| sed 's#}##g'  | tr -cd '[:alnum:]._ \n:@*+()[]-' | sed 's|#||g')
                     message="${infoText}; ${description}"
                     echo "created message, will create error if exists"
                     if [ "${errorText}" != "null" ] && [ "${errorText}" != "[]" ] && [ "${errorText}" != "" ]; then
@@ -366,11 +454,21 @@ spec:
                       infoText="${infoText}; Error: ${errorText}"
                     fi
                     echo "will inform ${image}"
-                    inform
-                    sleep 1 # reduce risk of rate limit
+                    createNotificationSlack "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${scanType}" "${title}" "${info}" "${status}" "${findingSeverity}" "${findingDescription}" "${slack}"
+                    createNotificationMail "${image}" "${appName}" "${team}" "${namespace}" "${environment}" "${ddLink}" "${scanType}" "${title}" "${info}" "${status}" "${findingSeverity}" "${findingDescription}" "${email}"
                   done
                 done <<< "${notifications}"
               done
+            done
+            for email in ${emails};do
+              inputAsFileSystem ${slack}
+              sendNotificationsMail "/tmp/email/${notificationTargetForFs}" "${email}"
+            done
+            echo "slackChannels $slackChannels"
+            for slack in ${slackChannels};do
+              echo "slack $slack"
+              inputAsFileSystem ${slack}
+              sendNotificationsSlack "/tmp/slack/${notificationTargetForFs}" "${slack}"
             done
           done
           echo "${errors}"
@@ -726,8 +824,8 @@ spec:
             channel="${1}"
 
             message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
-            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > /tmp/slack-template.json
-            cat /tmp/slack-template.json
+            echo "{\"channel\": \"${channel}\", \"author_name\": \"ClusterImageScanner\", \"blocks\": ${message}}" > ${SLACK_TEMPLATE_ONE_BLOCK}
+            cat ${SLACK_TEMPLATE_ONE_BLOCK}
 
             if [ "${SLACK_CLI_TOKEN}" == "" ]; then
               echo "No SLACK_CLI_TOKEN set"
@@ -738,7 +836,7 @@ spec:
               -H "Content-type:application/json" \
               -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
               -X POST \
-              -d @/tmp/slack-template.json \
+              -d @${SLACK_TEMPLATE_ONE_BLOCK} \
               "${SLACK_MESSAGE_ENDPOINT}"
           }
 

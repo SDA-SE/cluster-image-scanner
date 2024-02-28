@@ -21,6 +21,8 @@ api:
 
 imageSourceList:
   image-lifetime: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
+
+orchestrationJob:
   imagePullPolicy: Always
 
 scanjob:
