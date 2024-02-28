@@ -5,7 +5,7 @@ set -e
 source ./library.bash
 
 if [ "${SECRETS_PATH}" != "" ]; then
-  source ${SECRETS_PATH}
+  source "${SECRETS_PATH}"
 elif [ "${DD_TOKEN_SECRET}" == "" ]; then
   echo "Error, SECRETS_PATH doesn't exists and env variables not set";
   exit 1;

@@ -74,7 +74,7 @@ wait_for_pods_completed () {
 }
 
 export BRANCH=$(git rev-parse --abbrev-ref HEAD)
-export MAJOR="2"
+export MAJOR="3"
 export MINOR="0"
 export PATCH="${GITHUB_RUN_NUMBER}"
 export VERSION="${MAJOR}.${MINOR}.${PATCH}"

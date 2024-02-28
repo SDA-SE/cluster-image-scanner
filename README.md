@@ -52,7 +52,15 @@ We are looking forward to contributions. Take a look at our [Contribution Guidel
 The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
 
 # Deployment
-Kustomize is deprecated in favor of helm.
+## Test
+```bash
+cd test_actions
+export IS_MINIKUBE=true # if minikube is used
+./setup.bash
+```
+
+## Production
+helm files are in `deployment/helm`.
 
 # Legal Notice
 The purpose of the ClusterImageScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.

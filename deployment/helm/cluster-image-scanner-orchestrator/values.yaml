@@ -105,6 +105,6 @@ slack:
   cliToken: ""
 
 image:
-  tag: "master"
+  tag: "3"
 
 isLocal: false
