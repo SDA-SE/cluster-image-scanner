@@ -40,7 +40,7 @@ api:
   host: ""
   version: "v1"
   path: "all-image-collector-reports"
-  slash: "/"
+  pathSeparator: "/"
 
 
 credentials:
