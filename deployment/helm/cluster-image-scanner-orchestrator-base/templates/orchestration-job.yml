@@ -227,6 +227,9 @@ spec:
             RESULT_PATH=/clusterscanner/data
           fi
 
+          rm -Rf /tmp/email/ || true
+          rm -Rf /tmp/slack/ || true
+
           inputAsFileSystem() {
             local notificationTarget="${1}" # e.g. mail, slack
             # shellcheck disable=SC2001
@@ -263,7 +266,6 @@ spec:
             ${slack}" | sort  | uniq)
 
             inputAsFileSystem ${slack@Q}
-            rm -Rf /tmp/slack/ || true
             echo "notificationTargetForFs slack: ${notificationTargetForFs}"
             mkdir -p /tmp/slack/${notificationTargetForFs} || true
             SLACK_TEMPLATE_ONE_BLOCK_TARGET=$(mktemp --tmpdir=/tmp/slack/${notificationTargetForFs})
@@ -304,12 +306,11 @@ spec:
                         ${email}" | sort  | uniq)
 
             inputAsFileSystem "${email@Q}"
-            rm -Rf /tmp/email/ || true
             mkdir -p /tmp/email/${notificationTargetForFs} || true
             MAIL_TEMPLATE_ONE_BLOCK_TARGET=$(mktemp --tmpdir=/tmp/email/${notificationTargetForFs})
 
             message="image: ${image},\n app: ${appName},\n namespace:\n ${namespace},\n environment: ${environment},\n link to DefectDojo: ${ddLink}"
-            echo "${message@Q}" > ${MAIL_TEMPLATE_ONE_BLOCK_TARGET}
+            echo "${message}" > ${MAIL_TEMPLATE_ONE_BLOCK_TARGET}
           }
 
           sendNotificationsSlack() {
@@ -320,7 +321,10 @@ spec:
             notificationPath="${1}"
             slack="${2}"
 
-            blocks=$(jq 'flatten ' $(ls ${notificationPath}/*))
+            echo "ls"
+            ls ${notificationPath}/*
+            echo "gathering  ${notificationPath}/"
+            blocks=$(jq -n '[ inputs[]]' $(ls ${notificationPath}/*))
             #slack="#nobody-security" # for testing
             echo "Replacing slack \"${slack}\" channel"
             cat ${SLACK_TEMPLATE} | sed "s/###SLACK_CHANNEL###/${slack}/g" > /tmp/slack-message-for-one-channel.json
@@ -329,7 +333,6 @@ spec:
             echo "replacing blocks with $blocks"
             #sed "s|###BLOCKS###|${blocks}|g" /tmp/slack-message-for-one-channel.json
             jq --argjson block "${blocks}" '.blocks = $block' /tmp/slack-message-for-one-channel.json > /tmp/combined-blocks.json
-
 
             echo "Sending to slack ${slack} with messageendpoint ${SLACK_MESSAGE_ENDPOINT}"
             curl \
@@ -460,14 +463,14 @@ spec:
                 done <<< "${notifications}"
               done
             done
-            for email in ${emails};do
-              inputAsFileSystem ${slack}
+            for email in ${emails}; do
+              inputAsFileSystem "${email}"
               sendNotificationsMail "/tmp/email/${notificationTargetForFs}" "${email}"
             done
             echo "slackChannels $slackChannels"
-            for slack in ${slackChannels};do
+            for slack in ${slackChannels}; do
               echo "slack $slack"
-              inputAsFileSystem ${slack}
+              inputAsFileSystem "${slack}"
               sendNotificationsSlack "/tmp/slack/${notificationTargetForFs}" "${slack}"
             done
           done
