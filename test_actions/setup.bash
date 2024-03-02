@@ -43,7 +43,6 @@ else
 fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
-sed -i.bak "s~###VERSION###~${VERSION}~g" ./collector/application/deployment.yaml
 mkdir tmp || true
 cp variables.yaml tmp/variables.yaml
 sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
@@ -89,9 +88,11 @@ sleep 30
 
 wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
 
-cd collector
+cp -a collector tmp
+sed -i.bak "s~###VERSION###~${VERSION}~g" ./tmp/collector/application/deployment.yaml
+cd tmp/collector
 ./setup.bash
-cd ..
+cd ../..
 sleep 10
 echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &

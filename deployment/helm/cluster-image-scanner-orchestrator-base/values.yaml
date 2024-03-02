@@ -329,3 +329,11 @@ storage:
   scandataPvc:
     storageClass: standard
     capacity: 50Gi
+smtp:
+  smtp: "" # e.g. smtps://mail.example.example:465
+  auth: "login"
+  user: ""
+  password: ""
+  starttls: "true"
+  smtpMailParameter: ""
+  smtpEnforceMailTo: ""

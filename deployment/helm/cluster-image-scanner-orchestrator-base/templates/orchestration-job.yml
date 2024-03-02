@@ -190,27 +190,12 @@ spec:
             value: "{{ "{{" }} workflow.parameters.enforceSlackChannel {{ "}}" }}"
           - name: SCAN_NEW_VERSION_TOLERANCE_DAYS # time, in which the new version finding is in DefectDojo, but teams are not notified
             value: "4"
-          - name: smtp
-            valueFrom:
-              secretKeyRef:
-                name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
-                key: smtp
-          - name: smtp-auth
-            valueFrom:
-              secretKeyRef:
-                name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
-                key: smtp-auth
-          - name: smtp-auth-user
-            valueFrom:
-              secretKeyRef:
-                name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
-                key: smtp-auth-user
-          - name: smtpauthpassword # because - are not allowed in bash variable names
+          - name: smtp-auth-password
             valueFrom:
               secretKeyRef:
                 name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
                 key: smtp-auth-password
-          - name: smtp-auth-password
+          - name: smtpauthpassword
             valueFrom:
               secretKeyRef:
                 name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
@@ -218,6 +203,8 @@ spec:
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
+          - configMapRef:
+              name: "email-parameter"
         command: [/bin/bash]
         source: |
           set -e
@@ -309,7 +296,7 @@ spec:
             mkdir -p /tmp/email/${notificationTargetForFs} || true
             MAIL_TEMPLATE_ONE_BLOCK_TARGET=$(mktemp --tmpdir=/tmp/email/${notificationTargetForFs})
 
-            message="image: ${image},\n app: ${appName},\n namespace:\n ${namespace},\n environment: ${environment},\n link to DefectDojo: ${ddLink}"
+            message="image: ${image},\napp: ${appName},\nnamespace: ${namespace},\nenvironment: ${environment},\nlink to DefectDojo: ${ddLink},\ninfo: ${infoText},\nstatus: ${status}"
             echo "${message}" > ${MAIL_TEMPLATE_ONE_BLOCK_TARGET}
           }
 
@@ -354,20 +341,21 @@ spec:
               return
             fi
 
-
             message=""
             for file in $(ls ${notificationPath}/); do
-              message="${message}\n---\n$(cat ${file})"
+              message="${message}\n---\n$(cat ${notificationPath}/${file})"
             done
 
-            echo "Sending to email ${email}"
+            echo "Preparing to send email to ${email}"
             mailParameter=""
-            if [ ${SMTP_MAILFROM} != "" ]; then
+            if [ "${SMTP_MAILFROM}" != "" ]; then
               mailParameter=" -S from=${SMTP_MAILFROM} "
             fi
-            if [ ${SMTP_START_TLS} == "true" ]; then
+            echo "Checking SMTP_START_TLS ${SMTP_START_TLS}"
+            if [ "${SMTP_START_TLS}" == "true" ]; then
               mailParameter="${mailParameter} -S smtp-use-starttls "
             fi
+            echo "Checking SMTP_MAIL_PARAMETER ${SMTP_MAIL_PARAMETER}"
             if [ "${SMTP_MAIL_PARAMETER}" != "" ]; then
               mailParameter=" ${mailParameter} ${SMTP_MAIL_PARAMETER} "
             fi
@@ -375,7 +363,7 @@ spec:
               echo "Enforcing mailto override to ${SMTP_ENFORCE_MAILTO}"
               email="${SMTP_ENFORCE_MAILTO}"
             fi
-
+            echo "echo -e \"${message}\" | mail ${mailParameter} -s \"Found unhandled findings\" \"${email}\""
             echo -e "${message}" | mail ${mailParameter} -s "Found unhandled findings" "${email}" || echo "ERROR during sending ${message}"
           }
           errors=""

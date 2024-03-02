@@ -16,11 +16,10 @@ cronSchedule: "1 1 1 1 9" # close to never
 api:
   host: "raw.githubusercontent.com"
   version: ""
-  path: "/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
+  path: "/SDA-SE/cluster-scan-test-images/master/output.json"
   pathSeparator: ""
 
 imageSourceList:
-  image-lifetime: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
 
 orchestrationJob:
   imagePullPolicy: Always
@@ -34,3 +33,7 @@ image:
   tag: "###VERSION###"
 
 isLocal: true
+
+smtp:
+  smtpMailParameter: "" # e.g. -v for debugging
+  smtpEnforceMailTo: ""

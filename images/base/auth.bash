@@ -59,7 +59,7 @@ sp_getfile() {
     fi
 
     if [ "${src}" == "" ]; then
-      echo "${src} is empty, skipping"
+      echo "src ${src} is empty, skipping"
       return
     fi
 
