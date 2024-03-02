@@ -628,7 +628,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.generateResponseStatistics.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
-        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-statistic-client:4"
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-statistic-client:3"
         imagePullPolicy: {{ .Values.orchestrationJob.imagePullPolicy }}
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
