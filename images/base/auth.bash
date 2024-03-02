@@ -58,8 +58,8 @@ sp_getfile() {
       accept="application/vnd.github.v4.raw"
     fi
 
-    if [ "${dst}" == "" ]; then
-      echo "${dst} is empty, skipping"
+    if [ "${src}" == "" ]; then
+      echo "${src} is empty, skipping"
       return
     fi
 
