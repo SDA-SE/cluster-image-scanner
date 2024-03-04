@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scanjob-env-parameter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+data:
+  DEPENDENCY_TRACK_DAYS_TO_KEEP_PROJECT_WITHOUT_UPLOAD: '{{ .Values.scanjob.ddDaysToKeepWithoutUpload }}'
+  ERROR_NOTIFICATION_IGNORE: '{{ .Values.scanjob.errorNotificationIgnore }}'
+  DEFECTDOJO_URL: '{{ .Values.defectdojo.url }}'
+  JOB_EXECUTION_NAMESPACE: '{{ .Release.Namespace }}'
+  DD_PRODUCT_NAME_TEMPLATE: '{{ .Values.scanjob.ddNameTemplate }}'
+  SERVICE_ACCOUNT_NAME: '{{ .Values.serviceAccount.name }}'
+
+  # Each scan can be overridden globally.
+  # The override format follows the annotations to configure scans for images:
+  #
+  # OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME
+  # OVERRIDE_IS_SCAN_NEW_VERSION
+  # OVERRIDE_IS_SCAN_DEPENDENCY_CHECK
+  # OVERRIDE_IS_SCAN_DEPENDENCY_TRACK
+  # OVERRIDE_IS_SCAN_LIFETIME
+  # OVERRIDE_IS_SCAN_DISTROLESS
+  # OVERRIDE_IS_SCAN_MALWARE
+  # OVERRIDE_IS_SCAN_RUNASROOT
+  #
+  # Each can be set 'true' or 'false'
+  #
+  {{- if .Values.scanjob.override.isScanDTrack }}
+  OVERRIDE_IS_SCAN_DEPENDENCY_TRACK: '{{ .Values.scanjob.override.isScanDTrack }}'
+  {{- end }}
+
+
+  # Registry overrides:
+  # Any environment variable that starts with with REGISTRY_OVERRIDE_ and ends on FROM or TO will
+  # be parsed. Values in between can be freely chosen as long as they are identical for each pair.
+  #
+  # Example:
+  #
+  #  REGISTRY_OVERRIDE_DOCKER_IO_FROM: 'docker.io'
+  #  REGISTRY_OVERRIDE_DOCKER_IO_TO: 'docker.example.com'
+  #
+  #  Will override docker.io in a container URI to docker.example.com
+  #  Sed-compatible regexes can be used as long as the delimiter / is escaped
+  #  The tilde (~) character cannot be used. Inputs containing tildes will be skipped.
+  #
+  #  The first match of _FROM will be applied and follow-ups skipped. Variable pairs are processed
+  #  in alphabetical order.
+  #
+  {{- if .Values.scanjob.registryOverride.dockerA.from }}
+  REGISTRY_OVERRIDE_DOCKER_A_FROM: '{{ .Values.scanjob.registryOverride.dockerA.from }}'
+  REGISTRY_OVERRIDE_DOCKER_A_TO: '{{ .Values.scanjob.registryOverride.dockerA.to }}'
+  {{- end }}
+
+  {{- if .Values.scanjob.registryOverride.dockerIo.from }}
+  REGISTRY_OVERRIDE_DOCKER_IO_FROM: '{{ .Values.scanjob.registryOverride.dockerIo.from }}'
+  REGISTRY_OVERRIDE_DOCKER_IO_TO: '{{ .Values.scanjob.registryOverride.dockerIo.to }}'
+  {{- end }}
+
+  {{- if .Values.scanjob.registryOverride.default.from }}
+  REGISTRY_OVERRIDE_DEFAULT_FROM: '{{ .Values.scanjob.registryOverride.default.from }}'
+  REGISTRY_OVERRIDE_DEFAULT_TO: '{{ .Values.scanjob.registryOverride.default.to }}'
+  {{- end }}

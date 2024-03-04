@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dependency-track
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+data:
+  DEPENDENCY_TRACK_URL: "{{ required "A dependencytrack url is required." .Values.dependencytrack.url }}"

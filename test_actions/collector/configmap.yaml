@@ -24,7 +24,6 @@ data:
             "is_scan_baseimage_lifetime": "true",
             "is_scan_distroless": "true",
             "is_scan_malware": "false",
-            "is_scan_dependency_check": "true",
             "is_scan_runasroot": "true",
             "slack": "#security-notifications-test",
             "container_type": "third-party",

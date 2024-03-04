@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-parameter
+  namespace: {{ .Release.Namespace }}
+data:
+  smtp: "{{ .Values.smtp.smtp }}"
+  smtp-auth: "{{ .Values.smtp.auth }}"
+  smtp-auth-user: "{{ .Values.smtp.user }}"
+  SMTP_START_TLS: "{{ .Values.smtp.starttls }}"
+  SMTP_MAIL_PARAMETER: "{{ .Values.smtp.smtpMailParameter }}"
+  SMTP_ENFORCE_MAILTO: "{{ .Values.smtp.smtpEnforceMailTo }}"

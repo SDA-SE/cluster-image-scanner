@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: artifact-repositories
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+  annotations:
+    # v3.0 and after - if you want to use a specific key, put that's key into this annotation
+    workflows.argoproj.io/default-artifact-repository: default-v1
+data:
+  default-v1: |
+    s3:
+      endpoint: {{ .Values.storage.s3.endpoint }}
+      bucket: {{ required "A bucket for temporary data is required." .Values.storage.s3.bucket }}
+      insecure: {{ .Values.storage.s3.insecure }}
+      useSDKCreds: {{ .Values.storage.s3.useSDKCreds }}
+{{- if .Values.isLocal }}
+      accessKeySecret:
+        name: minio-auth
+        key: accesskey
+      secretKeySecret:
+        name: minio-auth
+        key: secretkey
+{{- end }}

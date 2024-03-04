@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  creationTimestamp: null
-  name: minio-auth
-  namespace: clusterscanner
-stringData:
-  accesskey: "testtesttest"
-  secretkey: "testtesttest"

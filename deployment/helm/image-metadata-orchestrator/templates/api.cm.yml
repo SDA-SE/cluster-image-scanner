@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: api-config
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "image-metadata-orchestrator.labels" .  | nindent 4 }}
-data:
-  S3_API_LOCATION: "https://{{ required "An API host is required." .Values.api.host }}/{{ .Values.api.version }}/all-image-collector-reports"

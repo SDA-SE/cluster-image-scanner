@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: s3-api-config
-data:
-  S3_API_LOCATION: "S3_API_LOCATION_PLACEHOLDER"

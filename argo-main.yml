@@ -21,9 +21,9 @@ spec:
       - name: gitSecretName
         value: "github"
       - name: s3SecretName
-        value: "s3-api-credentials"
+        value: "api-credentials"
       - name: s3ConfigName
-        value: "s3-api-config"
+        value: "api-config"
       - name: imageSourceListConfigMapName
         value: "image-source-list"
       - name: registrySecretName
@@ -34,14 +34,10 @@ spec:
         value: "slacktoken"
       - name: emailSecretName
         value: "email"
-      - name: dependencyCheckDbConfigMapName
-        value: "dependency-check-db"
       - name: enforceSlackChannel
         value: "#security-notifications-test"
       - name: newVersionImageFilter
         value: "quay.io/sdase/|swaggerapi/petstore"
-      - name: dependencyCheckSuppressionsConfigMapName
-        value: "suppressions-sda"
       - name: allResultsGitTarget
         value: "" # "github.com/SDA-SE/cluster-image-scanner-test-results"
       - name: imageRegistryBase

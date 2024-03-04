@@ -15,7 +15,7 @@ The following steps are conducted.
 2. The Orchestrator (implemented via ArgoWorkflows) starts the workflow periodically (e.g. nightly)
 3. The images from the Collector can be pulled by the Image Fetcher 
 4. These files are kept in a separate directory and from there they are passed to the scanner
-5. This scanner - which then receives the libraries to be ignored via the suppressions file - then executes the scans described in the definitions of Dependency Check, Lifetime, Virus and further more.
+5. Multiple scanner are used, e.g. Dependency Track, Lifetime, Malware and further more.
 6. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results 
 7. Non responded to findings are made available to the developers via a communication channel (Slack/Email).
 
@@ -29,7 +29,6 @@ The following steps are conducted.
 # Images
 Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 
-- `cluster-image-scanner-scan-dependency-check`
 - `cluster-image-scanner-scan-runasroot`
 - `cluster-image-scanner-scan-distroless`
 - `cluster-image-scanner-scan-lifetime`
@@ -51,6 +50,17 @@ We are looking forward to contributions. Take a look at our [Contribution Guidel
 
 # Responsible Disclosure and Security
 The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related topics like security patches.
+
+# Deployment
+## Test
+```bash
+cd test_actions
+export IS_MINIKUBE=true # if minikube is used
+./setup.bash
+```
+
+## Production
+helm files are in `deployment/helm`.
 
 # Legal Notice
 The purpose of the ClusterImageScanner is not to replace the penetration testers or make them obsolete. We strongly recommend running extensive tests by experienced penetration testers on all your applications.

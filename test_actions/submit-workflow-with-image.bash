@@ -15,7 +15,6 @@ fi
 sed -i.bak 's|###workflow_name###|test-scan|g' ${WORKFLOW_FILE}
 
 sed -i.bak 's|###REGISTRY_SECRET###|registry-default|g' ${WORKFLOW_FILE}
-sed -i.bak 's|###DEPENDENCY_SCAN_CM###|dependency-check-db|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###DEFECTDOJO_CM###|defectdojo|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###DEFECTDOJO_SECRETS###|defectdojo|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###SCAN_ID###|test-workflow|g' ${WORKFLOW_FILE}
@@ -28,7 +27,6 @@ sed -i.bak 's|###scm_source_branch###||g' ${WORKFLOW_FILE}
 sed -i.bak "s|###image###|${IMAGE}|g" ${WORKFLOW_FILE}
 sed -i.bak "s|###image_id###|${IMAGE_ID}|g" ${WORKFLOW_FILE}
 sed -i.bak 's|###slack###|#security-notifications-test|g' ${WORKFLOW_FILE}
-sed -i.bak 's|###rocketchat###||g' ${WORKFLOW_FILE}
 sed -i.bak 's|###email###||g' ${WORKFLOW_FILE}
 sed -i.bak 's|###is_scan_baseimage_lifetime###|true|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###is_scan_lifetime###|true|g' ${WORKFLOW_FILE}
@@ -37,7 +35,6 @@ sed -i.bak 's|###is_scan_malware###|true|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###is_scan_runasroot###|true|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###is_scan_new_version###|true|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###is_scan_dependency_track###|true|g' ${WORKFLOW_FILE}
-sed -i.bak 's|###is_scan_dependency_check###|true|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###scan_lifetime_max_days###|14|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###dependencyCheckSuppressionsConfigMapName###|suppressions-sda|g' ${WORKFLOW_FILE}
 sed -i.bak 's|###new_version_image_filter###|.*|g' ${WORKFLOW_FILE}

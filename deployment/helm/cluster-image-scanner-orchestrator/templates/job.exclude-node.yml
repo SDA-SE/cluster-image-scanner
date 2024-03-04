@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  # checkov:skip=CKV_K8S_21 The default namespace should not be used
+  # checkov:skip=CKV_ARGO_1: "Ensure Workflow pods are not using the default ServiceAccount"
+  # checkov:skip=CKV_ARGO_2: "Ensure Workflow pods are running as non-root user"
+  name: unused
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values: []

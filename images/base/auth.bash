@@ -58,9 +58,14 @@ sp_getfile() {
       accept="application/vnd.github.v4.raw"
     fi
 
+    if [ "${src}" == "" ]; then
+      echo "src ${src} is empty, skipping"
+      return
+    fi
+
     command="curl -L --output \"${dst}\" --header \"Accept: ${accept}\""
 
-    if [ "${GH_TOKEN}" != "" ]; then
+    if [ "${GH_TOKEN}" != "" ] && [ "${GH_TOKEN}" != "null" ]; then
       command="${command} --header \"Authorization: token ${GH_TOKEN}\""
     fi
     command="${command} \"${src}\""
