@@ -13,7 +13,7 @@ serviceAccount:
   automount: true
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "argo-workflow"
+  name: "clusterscanner"
   # the Role to assume by the SA
   awsRoleArn: ""
 
