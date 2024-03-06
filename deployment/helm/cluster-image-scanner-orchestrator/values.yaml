@@ -39,7 +39,7 @@ cronSchedule: "*/1 * * * 1-5"
 api:
   host: ""
   version: "v1"
-  path: "all-image-collector-reports"
+  path: "/all-image-collector-reports"
   pathSeparator: "/"
 
 
