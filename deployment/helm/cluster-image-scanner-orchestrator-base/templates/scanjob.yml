@@ -55,12 +55,12 @@ spec:
             depends: imagefetcher
             template: sbom-generation
             when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
-          - name: scan-dtrack
+          - name: dtrack
             depends: sbom-generation
-            template: scan-dtrack
+            template: dtrack
             when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
           - name: dtrack-notify-thresholds
-            depends: scan-dtrack
+            depends: dtrack
             template: dtrack-notify-thresholds
             when: "{{ "{{" }} workflow.parameters.is_scan_dependency_track{{ "}}" }} == true"
           - name: dtrack-dd-upload
@@ -95,33 +95,33 @@ spec:
             depends: imagefetcher
             template: new-version
             when: "{{ "{{" }} workflow.parameters.is_scan_new_version {{ "}}" }} == true"
-          - name: collect-generic-findings
+          - name: col-gen-finds # shortened from 'collect-generic-findings'
             depends: (distroless.Succeeded || lifetime.Succeeded || base-lifetime.Succeeded || runasroot.Succeeded || malware.Succeeded || new-version.Succeeded)
-            template: collect-generic-findings
-          - name: generic-dd-upload
-            depends: collect-generic-findings
-            template: generic-dd-upload
+            template: col-gen-finds
+          - name: gen-dd-upload # shortened from 'generic-dd-upload'
+            depends: col-gen-finds
+            template: gen-dd-upload
             arguments:
               artifacts:
                 - name: results-generic-findings
-                  from: "{{ "{{" }} tasks.collect-generic-findings.outputs.artifacts.results-generic-findings{{ "}}" }}"
+                  from: "{{ "{{" }} tasks.col-gen-finds.outputs.artifacts.results-generic-findings{{ "}}" }}"
             #when: "{{ "{{" }} distroless.Succeeded {{ "}}" }} == true || {{ "{{" }} lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} base-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} runasroot.Succeeded {{ "}}" }} == true || malware.Succeeded || {{ "{{" }} new-version.Succeeded {{ "}}" }} == true"
           - name: results-aggregate
-            depends: (generic-dd-upload.Succeeded || dtrack-dd-upload.Succeeded)
+            depends: (gen-dd-upload.Succeeded || dtrack-dd-upload.Succeeded)
             template: results-aggregate
             arguments:
               artifacts:
                 - name: results-dd-generic-test-link
-                  from: "{{ "{{" }} tasks.generic-dd-upload.outputs.artifacts.results-dd-generic-test-link{{ "}}" }}"
+                  from: "{{ "{{" }} tasks.gen-dd-upload.outputs.artifacts.results-dd-generic-test-link{{ "}}" }}"
                   optional: true
                 - name: results-dd-generic-is-finding-file
-                  from: "{{ "{{" }} tasks.generic-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
+                  from: "{{ "{{" }} tasks.gen-dd-upload.outputs.artifacts.is-finding-file{{ "}}" }}"
                   optional: true
                 - name: results-dd-generic-findings-file
-                  from: "{{ "{{" }} tasks.generic-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
+                  from: "{{ "{{" }} tasks.gen-dd-upload.outputs.artifacts.findings-file{{ "}}" }}"
                   optional: true
                 - name: results-generic
-                  from: "{{ "{{" }} tasks.collect-generic-findings.outputs.artifacts.results-generic{{ "}}" }}"
+                  from: "{{ "{{" }} tasks.col-gen-finds.outputs.artifacts.results-generic{{ "}}" }}"
                   optional: true
                 - name: results-dd-dependency-track-test-link
                   from: "{{ "{{" }} tasks.dtrack-dd-upload.outputs.artifacts.results-dd-dependency-track-test-link{{ "}}" }}"
@@ -349,7 +349,7 @@ spec:
             mountPath: /clusterscanner/data
             subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/sbom"
 
-    - name: scan-dtrack
+    - name: dtrack
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -900,7 +900,7 @@ spec:
           - configMapRef:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
-    - name: collect-generic-findings
+    - name: col-gen-finds
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -1037,7 +1037,7 @@ spec:
           cat ${FINDINGS}
           
 
-    - name: generic-dd-upload
+    - name: gen-dd-upload
       inputs:
         artifacts:
           - name: results-generic-findings
