@@ -1,5 +1,6 @@
 #!/bin/bash
-
+sj-test-tools-external-s-5xx-9xqgs-scan-dependency-track-3019035595
+sj-test-tools-kube-syste-nobody-k7hqc-scan-baseimage-lifetime-1414674291
 wait_for_pods_ready () {
   local name="${1}"; shift
   local namespace="${1}"; shift
