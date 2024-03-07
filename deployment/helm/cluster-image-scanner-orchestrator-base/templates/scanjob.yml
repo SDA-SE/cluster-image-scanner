@@ -1255,6 +1255,8 @@ spec:
               secretKeyRef:
                 name: "{{ "{{" }} workflow.parameters.slackTokenSecretName{{ "}}" }}"
                 key: SLACK_CLI_TOKEN
+          - name: SLACK_MESSAGE_ENDPOINT
+            value: "https://slack.com/api/chat.postMessage"
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"

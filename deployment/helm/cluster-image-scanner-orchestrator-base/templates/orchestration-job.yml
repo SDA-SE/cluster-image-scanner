@@ -200,6 +200,8 @@ spec:
               secretKeyRef:
                 name: "{{ "{{" }} workflow.parameters.emailSecretName {{ "}}" }}"
                 key: smtp-auth-password
+          - name: SLACK_MESSAGE_ENDPOINT
+            value: "https://slack.com/api/chat.postMessage"
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
