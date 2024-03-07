@@ -1291,6 +1291,8 @@ spec:
               echo "No SLACK_CLI_TOKEN set"
               exit 2
             fi
+
+            echo "Slack endpoint: ${SLACK_MESSAGE_ENDPOINT}"
           
             curl \
               -H "Content-type:application/json" \
