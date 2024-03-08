@@ -106,9 +106,9 @@ spec:
                 - name: results-generic-findings
                   from: "{{ "{{" }} tasks.col-gen-finds.outputs.artifacts.results-generic-findings{{ "}}" }}"
             #when: "{{ "{{" }} distroless.Succeeded {{ "}}" }} == true || {{ "{{" }} lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} base-lifetime.Succeeded {{ "}}" }} == true || {{ "{{" }} runasroot.Succeeded {{ "}}" }} == true || malware.Succeeded || {{ "{{" }} new-version.Succeeded {{ "}}" }} == true"
-          - name: results-aggregate
+          - name: aggregate
             depends: (gen-dd-upload.Succeeded || dtrack-dd-upload.Succeeded)
-            template: results-aggregate
+            template: aggregate
             arguments:
               artifacts:
                 - name: results-dd-generic-test-link
@@ -1096,7 +1096,7 @@ spec:
           - name: tmp
             mountPath: /tmp
 
-    - name: results-aggregate
+    - name: aggregate
       inputs:
         artifacts:
           - name: results-dd-generic-test-link
