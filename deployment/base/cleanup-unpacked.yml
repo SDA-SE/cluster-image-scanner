@@ -39,11 +39,9 @@ spec:
 
             du -sh /clusterscanner/images/ || true
 
-            for cleanupPath in $(find /clusterscanner/images/* -maxdepth 2 -mindepth 2 -mtime +${KEEP_FILE_DAYS}); do
-                echo "Removing ${cleanupPath}"
-                rm -Rf "${cleanupPath}" || echo "Error: Could not delete ${cleanupPath}"
-            done
-            find /clusterscanner/images/ -maxdepth 2 -empty -type d -delete
+            find -type f -name "manifest.json" -printf "%h\n" | xargs -n1 -I % find % -type d -delete -atime +${KEEP_FILE_DAYS}
+            
+            find /clusterscanner/images/ -empty -type d -delete
 
             echo "Size of /clusterscanner/images/"
             du -sh /clusterscanner/images/
