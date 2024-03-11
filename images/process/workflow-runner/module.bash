@@ -14,10 +14,10 @@ FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not) | select
 echo "$FILTERED_LIST" > /tmp/imageListFiltered.json
 
 
-jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
+jq -cMr '.[] | @base64' /tmp/imageListFiltered.json > /tmp/imageListSeparated.json
 totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
 counter=0
-echo "Found ${totalCount} entries in /tmp/imageListFiltered.json"
+echo "Found ${totalCount} entries in /tmp/imageListSeparated.json"
 while read -r line; do
   echo "Will read line"
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
