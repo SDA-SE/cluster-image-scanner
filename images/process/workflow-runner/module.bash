@@ -9,12 +9,12 @@ if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
 fi
 
 #filter out amazon images
-echo "Filtering out Amazon ECR images"
-FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not)' </clusterscanner/imageList.json)
-echo "$FILTERED_LIST" > /tmp/imageListFiltered.json
+echo "Filtering out images"
+echo "[" > /tmp/imageListFiltered.json
+cat /clusterscanner/imageList.json | jq -r '[ .[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not) | tostring ] | join(",") | tostring' >> /tmp/imageListFiltered.json
+echo "]" >> /tmp/imageListFiltered.json
 
-
-jq -cMr '.[] | @base64' /tmp/imageListFiltered.json > /tmp/imageListSeparated.json
+cat /tmp/imageListFiltered.json | jq -cMr '.[] | @base64' > /tmp/imageListSeparated.json
 totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
 counter=0
 echo "Found ${totalCount} entries in /tmp/imageListSeparated.json"
