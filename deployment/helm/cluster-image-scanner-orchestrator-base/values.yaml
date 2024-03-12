@@ -70,8 +70,8 @@ cleanup:
   activeDeadlineSeconds: 3600
   startingDeadlineSeconds: 0
   image:
-    repo: "quay.io/sdase/cluster-image-scanner-base"
-    tag: "2"
+    repo: "gcr.io/distroless/python3"
+    tag: "nonroot"
 exitHandler:
   activeDeadlineSeconds: 3600
   ttlStrategy:

@@ -1,7 +1,3 @@
-# Default values for cluster-image-scanner-orchestrator.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 storage:
   # An S3 bucket through which temporary data is handed over to subflows.
   # Usually provided through the argo-wf installation.
@@ -26,8 +22,7 @@ orchestrationJob:
 
 scanjob:
   imagePullPolicy: Always
-  override:
-    isScanDTrack: "false"
+
 
 image:
   tag: "###VERSION###"
@@ -37,3 +32,4 @@ isLocal: true
 smtp:
   smtpMailParameter: "" # e.g. -v for debugging
   smtpEnforceMailTo: ""
+

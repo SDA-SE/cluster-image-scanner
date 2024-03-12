@@ -11,26 +11,10 @@ data:
   DEFECTDOJO_URL: '{{ .Values.defectdojo.url }}'
   JOB_EXECUTION_NAMESPACE: '{{ .Release.Namespace }}'
   DD_PRODUCT_NAME_TEMPLATE: '{{ .Values.scanjob.ddNameTemplate }}'
+  DEPENDENCY_TRACK_PRODUCT_NAME_TEMPLATE: '{{ .Values.scanjob.dependencyTrackNameTemplate }}'
   SERVICE_ACCOUNT_NAME: '{{ .Values.serviceAccount.name }}'
-
-  # Each scan can be overridden globally.
-  # The override format follows the annotations to configure scans for images:
-  #
-  # OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME
-  # OVERRIDE_IS_SCAN_NEW_VERSION
-  # OVERRIDE_IS_SCAN_DEPENDENCY_CHECK
-  # OVERRIDE_IS_SCAN_DEPENDENCY_TRACK
-  # OVERRIDE_IS_SCAN_LIFETIME
-  # OVERRIDE_IS_SCAN_DISTROLESS
-  # OVERRIDE_IS_SCAN_MALWARE
-  # OVERRIDE_IS_SCAN_RUNASROOT
-  #
-  # Each can be set 'true' or 'false'
-  #
-  {{- if .Values.scanjob.override.isScanDTrack }}
-  OVERRIDE_IS_SCAN_DEPENDENCY_TRACK: '{{ .Values.scanjob.override.isScanDTrack }}'
-  {{- end }}
-
+  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY: '{{ .Values.scanjob.dependencyTrack.threshold.thirdParty }}'
+  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION: '{{ .Values.scanjob.dependencyTrack.threshold.application }}'
 
   # Registry overrides:
   # Any environment variable that starts with with REGISTRY_OVERRIDE_ and ends on FROM or TO will

@@ -402,7 +402,7 @@ spec:
             echo "Dependency Track scan is disabled"
             exit 0
           fi
-          
+
           source ./scan-common.bash
           parse_and_set_image_variables
           echo "ImageName ${IMAGE_NAME}"
@@ -418,7 +418,7 @@ spec:
           if ! [ -f "${bomPath}" ]; then
             echo "Could not find bom file in ${bomPath}"
             exit 5
-          fi          
+          fi
           bomBase64=$(cat "${bomPath}" | base64 -w 0)
           echo '{ "projectName": "'${PROJECT_NAME}'", "projectVersion": "'${IMAGE_TAG}'", "autoCreate": true, "bom": "'${bomBase64}'" }' > /tmp/tmpfile
           echo "bom file:"
@@ -439,7 +439,7 @@ spec:
           if [ "${RESPONSE}" -le 200 ]; then
             token=$(jq -r '.token' <<< "${BODY}")
             echo "token: ${TOKEN}"
-          else 
+          else
             echo "Received HTTP code ${RESPONSE} back form DependencyTrack"
             echo "Response body: ${BODY}"
             exit 1
@@ -489,10 +489,10 @@ spec:
           fi
 
           echo "Fetching ${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export"
-          
-          
-          
-          
+
+
+
+
           #purl="^(?:(?!pkg:deb).)*$"
           #purlEncodedValue=$(printf %s "${purl}" | jq -sRr @uri)
           curl "${DEPENDENCY_TRACK_URL}/api/v1/finding/project/${UUID}/export" \
@@ -575,9 +575,9 @@ spec:
             mountPath: /tmp
         source: |
           set -e
-          
+
           TARGET=/tmp/output.json
-          
+
           if [ "${CONTAINER_TYPE}" == "application" ]; then
             CONTENT="${DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION}"
           elif [ "${CONTAINER_TYPE}" == "third-party" ]; then
@@ -943,7 +943,7 @@ spec:
               FINDINGS="/tmp/findings.json"
               TMP_FINDINGS="/tmp/findings.tmp.json"
               RESULTS_FILE="/tmp/result.json"
-          else 
+          else
               source scan-common.bash
               IMAGE="grafana@sha256:e5a9655dabef50b04847ee75da8bb9cf46f16480117b7a1d955d5648c1d6e5ba"
               NAMESPACE="TEST"
@@ -1004,7 +1004,7 @@ spec:
               jq --arg desc "${desc}" '.findings[].description = ($desc | fromjson)' <<<"$json" > "$TMP_FINDINGS"
               TMP=$(jq --argfile f1 "${FINDINGS}" --argfile f2 "${TMP_FINDINGS}" -n '$f1 + $f2 | .findings = $f1.findings + $f2.findings')
 
-              if  ! jq '.' <<<"$TMP" &>/dev/null ; then 
+              if  ! jq '.' <<<"$TMP" &>/dev/null ; then
                 echo "Error: cannot merge findings files into one"
                 exit 2
               fi
@@ -1015,7 +1015,7 @@ spec:
             else
               echo "Error: ${j} does not contain valid JSON"
               exit 2
-            fi  
+            fi
 
             if ! [ -s "${j}" ]; then
               echo "Error: ${j} is empty"
@@ -1035,7 +1035,7 @@ spec:
 
           echo "cat ${FINDINGS}"
           cat ${FINDINGS}
-          
+
 
     - name: gen-dd-upload
       inputs:
@@ -1154,8 +1154,8 @@ spec:
           IMAGE_NAME_CLEANED=$(echo "${IMAGE_NAME}" | sed -e "s#/#__#g")
           if [ $(echo {{ "{{" }} workflow.parameters.image }} | sed 's#/.*##' | tr ':' '\n' | wc -l) -eq 1 ]; then # no port
             field=2
-          else 
-            field=3 
+          else
+            field=3
           fi
           IMAGE_TAG=$(echo "{{ "{{" }} workflow.parameters.image{{ "}}" }}" | cut -d: -f${field})
           IMAGE_HASH=$(echo "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}" | sed -e "s#/#__#g" | cut -d: -f${field})
@@ -1203,7 +1203,7 @@ spec:
 
           echo "Starting Generic"
           JSON_DD_GENERIC=$(echo "{\"errors\":[]}" )
-          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")          
+          JSON_DD_GENERIC=$(echo ${JSON_DD_GENERIC} | jq -Sc ". += {\"scanType\": \"Generic\"}")
           isFinding=$(cat /tmp/isFinding-generic) || isFinding="false"
           if [ "${isFinding}" == "true" ]; then
             DD_LINK=$(cat /tmp/dd-generic-test-link.txt)
@@ -1233,7 +1233,7 @@ spec:
           echo "Storing into /clusterscanner/data/{{ "{{" }} workflow.parameters.environment }}__{{ "{{" }} workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}"
           echo "${JSON_RESULT}"
           echo "${JSON_RESULT}"  > /clusterscanner/data/{{ "{{" }} workflow.parameters.environment }}__{{ "{{" }} workflow.parameters.namespace }}__${IMAGE_NAME_CLEANED}--${IMAGE_HASH}.json
-          
+
 
     - name: exit-handler
       volumes:
@@ -1263,7 +1263,7 @@ spec:
         volumeMounts:
           - name: tmp
             mountPath: /tmp
-        source: |         
+        source: |
           set -e
           if [ "${MESSAGE_TARGETS}" == "" ]; then
             echo "MESSAGE_TARGETS set, exiting"
@@ -1276,26 +1276,26 @@ spec:
           failures=$(echo "${failures:1:-1}" | sed 's#\\"#"#g')
           echo "ERROR_NOTIFICATION_IGNORE: ${ERROR_NOTIFICATION_IGNORE}"
           if [ $(echo "${failures}" | grep -c "${ERROR_NOTIFICATION_IGNORE}") -ne 0 ]; then
-            echo "Skipping notifiction because it is in ERROR_NOTIFICATION_IGNORE: \"${ERROR_NOTIFICATION_IGNORE}\"" 
+            echo "Skipping notifiction because it is in ERROR_NOTIFICATION_IGNORE: \"${ERROR_NOTIFICATION_IGNORE}\""
             exit 0
           fi
-          
+
           echo "failures"
           echo "${failures}"
           sendMessageViaslack() {
             channel="${1}"
-          
+
             message=$(echo "${failures}" | jq -r '.[] | {"type": "section","text": {"type": "mrkdwn","text": "- *name:* _ \(.displayName)_\n- *image:* _{{ "{{" }}workflow.parameters.image{{ "}}" }}_\n- *template:* _\(.templateName)_\n- *message:* _\(.message)_\n- *phase:* _\(.phase)_\n- *podName:* _\(.podName)_\n- *finishedAt:* _\(.finishedAt)_\n"}},{"type": "divider"}' | jq -s .)
             echo "{\"channel\": \"${channel}\", \"blocks\": ${message}}" > /tmp/slack-template.json
             cat /tmp/slack-template.json
-          
+
             if [ "${SLACK_CLI_TOKEN}" == "" ]; then
               echo "No SLACK_CLI_TOKEN set"
               exit 2
             fi
 
             echo "Slack endpoint: ${SLACK_MESSAGE_ENDPOINT}"
-          
+
             curl \
               -H "Content-type:application/json" \
               -H "Authorization: Bearer ${SLACK_CLI_TOKEN}" \
@@ -1303,11 +1303,11 @@ spec:
               -d @/tmp/slack-template.json \
               "${SLACK_MESSAGE_ENDPOINT}"
           }
-          
+
           functionExists() { declare -F "$1" > /dev/null; }
-          
+
           if [[ "${failures}" == "" ]] || [[ "${failures}" == "[]" ]] || [[ "${failures}" == "null" ]]; then
-            echo "No message, exit 0" 
+            echo "No message, exit 0"
             exit 0
           fi
 
@@ -1320,6 +1320,6 @@ spec:
               echo "Message type '${type}' doesn't exit"
               exit 1
             fi
-            
+
             ${toCall} "${channel}"
           done

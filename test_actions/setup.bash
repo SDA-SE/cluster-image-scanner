@@ -33,7 +33,7 @@ for context in "${k8s_contexts[@]}"; do
     # Check if the current context matches the target context
     if [ "$context" == "$current_context" ]; then
         found=1
-        break 
+        break
     fi
 done
 if [ "$found" -eq 1 ]; then
@@ -48,7 +48,7 @@ cp variables.yaml tmp/variables.yaml
 sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
 
 
-DEPLOYMENT_PATH=../deployment
+export DEPLOYMENT_PATH=$(realpath ../deployment)
 
 kubectl apply -k argocd
 wait_for_pods_ready "argocd" "argocd" 5 10 120
@@ -68,7 +68,7 @@ kubectl apply -k minio
 wait_for_pods_ready "minio" "minio-operator" 2 10 120
 wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
 
-helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml cis-base ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator-base/ -n clusterscanner
+helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml -f variables.base.yaml cis-base ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator-base/ -n clusterscanner
 helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml cis-orchestrator ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator/ -n clusterscanner
 
 if ! which argo > /dev/null 2>&1; then

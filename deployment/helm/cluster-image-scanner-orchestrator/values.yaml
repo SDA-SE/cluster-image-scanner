@@ -88,8 +88,7 @@ scanjob:
   ddDaysToKeepWithoutUpload: "0" # 0 disables cleanup
   errorNotificationIgnore: 'DiskPressure\|imagefetcher.*sj-tools-kube-system\|sj-si-verzahnung-defectdojo'
   ddNameTemplate: "###ENVIRONMENT### | ###NAMESPACE###"
-  override:
-    isScanDTrack: "false"
+  dependencyTrackNameTemplate: "###ENVIRONMENT### | ###NAMESPACE### | ###APP_NAME###"
   registryOverride:
     dockerA:
       from: ""
@@ -100,11 +99,29 @@ scanjob:
     default:
       from: ''
       to: ''
-
+  dependencyTrack:
+    threshold:
+      application: '{
+        "maven": {"critical": 1, "high": 1, "medium": 100},
+        "golang": {"critical": 1, "high": 1, "medium": 100},
+        "npm": {"critical": 1, "high": 1, "medium": 100},
+        "deb": {"critical": 8, "high": 20, "medium": 100},
+        "rpm": {"critical": 8, "high": 20, "medium": 100},
+        "pypi": {"critical": 8, "high": 20, "medium": 100},
+        "alpine": {"critical": 8, "high": 20, "medium": 100}}'
+      thirdParty: '{
+        "maven": {"critical": 99, "high": 999, "medium": 9999},
+        "golang": {"critical": 99, "high": 999, "medium": 9999},
+        "pypi": {"critical": 99, "high": 999, "medium": 9999},
+        "npm": {"critical": 99, "high": 9999, "medium": 9999},
+        "deb": {"critical": 30, "high": 100, "medium": 9999},
+        "rpm": {"critical": 30, "high": 100, "medium": 9999},
+        "alpine": {"critical": 30, "high": 100, "medium": 9999}}'
 slack:
   cliToken: ""
 
 image:
   tag: "feathelm" # TODO 3 in master
+
 
 isLocal: false

@@ -1,7 +1,5 @@
-/deployment/kustomize/test/config-placeholder/defectdojo-test-secret.yml
 /defectdojo-test-secret.yml
 /.idea
-/deployment/kustomize/overlays/test-local/config-source/
 .idea
 test/
 /test_actions/
