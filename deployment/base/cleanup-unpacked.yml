@@ -24,24 +24,20 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/cluster-image-scanner-base:2
+          image: gcr.io/distroless/python3:nonroot
           volumeMounts:
             - name: images
               mountPath: /clusterscanner/images
           imagePullPolicy: IfNotPresent
-          command: [bash]
+          command: [python3]
           source: |
-            set -e
-
-            /usr/bin/whoami
-
-            KEEP_FILE_DAYS=7
-
-            echo "Delete files /clusterscanner/images accessed more than $KEEP_FILE_DAYS before."
-            find /clusterscanner/images/ -type f -atime +$KEEP_FILE_DAYS -exec rm -f {} \; -exec echo "File {} has been deleted" \;
-            
-            echo "Will delete empty directories in /clusterscanner/images/"
-            find /clusterscanner/images/ -type d -empty -delete
-
-            echo "Size of /clusterscanner/images/"
-            du -sh /clusterscanner/images/
+            import os
+            import time
+            import shutil
+            KEEP_DAYS=7
+            print('Deleting in /clusterscanner/images')
+            for root, dirs, files in os.walk('/clusterscanner/images'):
+                if 'manifest.json' in files:
+                   if time.time() - os.path.getatime(root) > KEEP_DAYS  * 24 * 60 * 60:
+                        print(f"Directory {root} has been changed  more than {KEEP_DAYS} days ago. Deleting.")
+                        shutil.rmtree(root)
