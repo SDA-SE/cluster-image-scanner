@@ -13,11 +13,11 @@ data:
   DD_PRODUCT_NAME_TEMPLATE: '{{ .Values.scanjob.ddNameTemplate }}'
   DEPENDENCY_TRACK_PRODUCT_NAME_TEMPLATE: '{{ .Values.scanjob.dependencyTrackNameTemplate }}'
   SERVICE_ACCOUNT_NAME: '{{ .Values.serviceAccount.name }}'
-  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY: '{{ .Values.scanjob.dependencyTrack.threshold.thirdParty }}'
-  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION: '{{ .Values.scanjob.dependencyTrack.threshold.application }}'
+  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY: '{{ .Values.scanjob.dependencyTrack.threshold.thirdParty | toJson }}'
+  DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION: '{{ .Values.scanjob.dependencyTrack.threshold.application | toJson }}'
 
   # Registry overrides:
-  # Any environment variable that starts with with REGISTRY_OVERRIDE_ and ends on FROM or TO will
+  # Any environment variable that starts with REGISTRY_OVERRIDE_ and ends on FROM or TO will
   # be parsed. Values in between can be freely chosen as long as they are identical for each pair.
   #
   # Example:
