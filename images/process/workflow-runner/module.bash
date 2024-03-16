@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
-set -ex
+set -e
 
 source ./scan-common.bash
 
@@ -9,10 +9,13 @@ if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
 fi
 
 #filter out amazon images
-echo "Filtering out images"
+echo "Filtering out images, example of /clusterscanner/imageList.json:"
+cat /clusterscanner/imageList.json | head -n 20
 echo "[" > /tmp/imageListFiltered.json
 cat /clusterscanner/imageList.json | jq -r '[ .[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not) | tostring ] | join(",") | tostring' >> /tmp/imageListFiltered.json
 echo "]" >> /tmp/imageListFiltered.json
+echo "Filtering out images, example of /tmp/imageListFiltered.json:"
+cat /tmp/imageListFiltered.json | head -n 20
 
 cat /tmp/imageListFiltered.json | jq -cMr '.[] | @base64' > /tmp/imageListSeparated.json
 totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
@@ -84,10 +87,10 @@ while read -r line; do
   export IMAGE_ID #used in parse_and_set_image_variables
   export IMAGE #used in parse_and_set_image_variables
   parse_and_set_image_variables
-  
-  
+
+
   appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)
-  
+
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
     #IMAGE_NAME is exportet from parse_and_set_image_variables()
     appname="${IMAGE_NAME}"
