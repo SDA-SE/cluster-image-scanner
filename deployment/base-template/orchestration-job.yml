@@ -155,7 +155,7 @@ spec:
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/cluster-image-scanner-workflow-runner:{{ workflow.parameters.clusterImageScannerImageTag }}"
         command: ["/clusterscanner/entrypoint.bash"]
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         envFrom:
           - configMapRef:
               name: "scanjob-env-parameter"
@@ -592,7 +592,7 @@ spec:
           runAsNonRoot: true
           runAsUser: 1001
         image: "{{ workflow.parameters.imageRegistryBase }}/defectdojo-statistic-client:4"
-        imagePullPolicy: IfNotPresent 
+        imagePullPolicy: IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.Main" ]
         envFrom:
           - configMapRef:
