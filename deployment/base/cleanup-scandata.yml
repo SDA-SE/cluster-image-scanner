@@ -4,12 +4,13 @@ metadata:
   name: cleanup-enforced-delete-pvc-wf-scandata
   namespace: clusterscanner
 spec:
-  schedule: "0 0 * * *"
+  schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
   workflowSpec:
+    serviceAccountName: clusterscanner
     artifactRepositoryRef:
       configMap: artifact-repositories
       key: default-v1
@@ -24,25 +25,43 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-          image: quay.io/sdase/cluster-image-scanner-base:2
+          image: gcr.io/distroless/python3:nonroot
           volumeMounts:
             - name: scandata
               mountPath: /clusterscanner/data
           imagePullPolicy: IfNotPresent
           command: [bash]
           source: |
-            set -e
+          directory = "/clusterscanner/data/"
+          days = 7
 
-            /usr/bin/whoami
+          def find_and_delete_old_files(directory, days):
+              current_time = datetime.datetime.now()
+              threshold = current_time - datetime.timedelta(days=days)
+          
+              deleted_files = []
 
-            KEEP_FILE_DAYS=7
+              for root, dirs, files in os.walk(directory, topdown=False):
+                  for file in files:
+                      file_path = os.path.join(root, file)
+                      modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                      if modified_time < threshold:
+                          os.remove(file_path)
+                          deleted_files.append(file_path)
 
-            echo "Delete files /clusterscanner/data accessed more than $KEEP_FILE_DAYS before."
-            find /clusterscanner/data/ -type f -atime +$KEEP_FILE_DAYS -exec rm -f {} \; -exec echo "File {} has been deleted" \;
+              # Delete empty directories
+              for root, dirs, _ in os.walk(directory, topdown=False):
+                  for dir_name in dirs:
+                      dir_path = os.path.join(root, dir_name)
+                      if not os.listdir(dir_path):
+                          os.rmdir(dir_path)
 
-            echo "Will delete empty directories in /clusterscanner/data/"
-            find /clusterscanner/data/ -type d -empty -delete
+              return deleted_files
 
-            echo "Size of /clusterscanner/data/"
-            du -sh /clusterscanner/data/
+
+          deleted_files = find_and_delete_old_files(directory, days)
+      
+          print("Deleted files older than 7 days:")
+          for file in deleted_files:
+              print(file)
 
