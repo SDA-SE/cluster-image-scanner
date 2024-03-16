@@ -30,7 +30,7 @@ spec:
             - name: scandata
               mountPath: /clusterscanner/data
           imagePullPolicy: IfNotPresent
-          command: [bash]
+          command: [python3]
           source: |
             directory = "/clusterscanner/data/"
             days = 7
