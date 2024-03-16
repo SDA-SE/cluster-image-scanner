@@ -9,8 +9,8 @@ spec:
   startingDeadlineSeconds: 0
   timezone: Europe/Berlin
   activeDeadlineSeconds: 3600
-  serviceAccountName: clusterscanner
   workflowSpec:
+    serviceAccountName: clusterscanner
     artifactRepositoryRef:
       configMap: artifact-repositories
       key: default-v1
