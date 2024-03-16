@@ -32,6 +32,8 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [python3]
           source: |
+            import os
+            import datetime
             directory = "/clusterscanner/data/"
             days = 7
   
