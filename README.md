@@ -39,6 +39,7 @@ Images to be used by ArgoWorkflows are published in quay.io (2021-06-28):
 - `cluster-image-scanner-imagecollector`
 - `cluster-image-scanner-image-source-fetcher`
 - `cluster-image-scanner-workflow-runner`
+- [quay.io/sdase/image-metadata-collector](https://github.com/SDA-SE/image-metadata-collector)
 - [quay.io/sdase/defectdojo-client](https://github.com/SDA-SE/defectdojo-client)
 
 `cluster-image-scanner-base` is the base for all `cluster-image-scanner-*` images.
