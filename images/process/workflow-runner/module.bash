@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2154 # variables come via env, so they are not assigned
-set -ex
+set -e
 
 source ./scan-common.bash
 
@@ -9,15 +9,16 @@ if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
 fi
 
 #filter out amazon images
-echo "Filtering out Amazon ECR images"
-FILTERED_LIST=$(jq '.[] | select(.image|test("public\\.ecr\\.aws")|not)' </clusterscanner/imageList.json)
-echo "$FILTERED_LIST" > /tmp/imageListFiltered.json
+echo "Filtering out images"
+echo "[" > /tmp/imageListFiltered.json
+cat /clusterscanner/imageList.json | jq -r '[ .[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not) | tostring ] | join(",") | tostring' >> /tmp/imageListFiltered.json
+echo "]" >> /tmp/imageListFiltered.json
+echo "Filtering out images"
 
-
-jq -cMr '.[] | @base64' /clusterscanner/imageList.json > /tmp/imageListSeparated.json
+cat /tmp/imageListFiltered.json | jq -cMr '.[] | @base64' > /tmp/imageListSeparated.json
 totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
 counter=0
-echo "Found ${totalCount} entries in /tmp/imageListFiltered.json"
+echo "Found ${totalCount} entries in /tmp/imageListSeparated.json"
 while read -r line; do
   echo "Will read line"
   DATA_JSON=$(echo "${line}" | base64 -d | jq -cM .)
@@ -84,10 +85,10 @@ while read -r line; do
   export IMAGE_ID #used in parse_and_set_image_variables
   export IMAGE #used in parse_and_set_image_variables
   parse_and_set_image_variables
-  
-  
+
+
   appname=$(echo "${DATA_JSON}" | jq -r .app_kubernetes_io_name)
-  
+
   if [ "${appname}" == "" ] || [ "${appname}" == "null" ]; then
     #IMAGE_NAME is exportet from parse_and_set_image_variables()
     appname="${IMAGE_NAME}"
@@ -109,6 +110,7 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /tmp/template.yml
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /tmp/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
+  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
   sed -i "s~###team###~${team}~" /tmp/template.yml
   sed -i "s~###appname###~${appname}~" /tmp/template.yml
   sed -i "s~###appversion###~${appversion}~" /tmp/template.yml
@@ -119,6 +121,7 @@ while read -r line; do
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
+  sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
   sed -i "s~###is_scan_lifetime###~${IS_SCAN_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
