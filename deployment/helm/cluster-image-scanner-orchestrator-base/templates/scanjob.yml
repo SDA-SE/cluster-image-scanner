@@ -181,8 +181,11 @@ spec:
           # IMAGE_TAR_PATH from base image
           function cleanup {
             echo "Cleaning up"
-            if [ ${lockfile_created} ]; then
+            if [ "${lockfile_created}" == "true" ]; then
+              echo "Deleting ${lock_file_path}"
               rm -rf ${lock_file_path}
+            else
+              echo "${lock_file_path} doesn't exists"
             fi
             rm -rf "${tmp_dir}"
           }
@@ -261,6 +264,11 @@ spec:
           echo "Directory /run/containers"
           ls -lah /run/containers
 
+          echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
+          # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
+          timeout 30 skopeo inspect ${SKOPEO_INSPECT_PARAMETER} --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
+          ls -la "${config_dir}/config.json"
+
           check_and_handle_image_exists() {
             if [[ -f "${IMAGE_TAR_FOLDER_PATH}/config.json" ]] && diff -qs "${config_dir}/config.json" "${IMAGE_TAR_FOLDER_PATH}/config.json" && [ -f ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar ]; then
               echo "Already got image with identical config manifest, skipping"
@@ -269,19 +277,13 @@ spec:
               exit 0
             fi
           }
-
-          echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
-          # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
-          timeout 30 skopeo inspect ${SKOPEO_INSPECT_PARAMETER} --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
-          ls -la "${config_dir}/config.json"
-            check_and_handle_image_exists()
-          fi
+          check_and_handle_image_exists
 
           check_creation_date() {
               # Check if the file exists
               if [ ! -f "$1" ]; then
                   echo "File does not exist."
-                  return 1
+                  return 2
               fi
 
               # Get the creation time of the file in seconds since epoch
@@ -302,25 +304,29 @@ spec:
           }
 
           lock_file_path="${IMAGE_TAR_FOLDER_PATH}/image-download.lock"
-          if [ -f "${lock_file_path}" ]; then
-            lock_wait=45
-            for ((i=1; i<=lock_wait; i++)); do
-              if check_creation_date "${lock_file_path}"; then
-                echo "The file ${lock_file_path} was created more than ${lock_wait} minutes ago, re-creating lock file and downloading"
-                continue
+          lock_wait=180
+          for ((i=1; i<=lock_wait; i++)); do
+            if [ -f "${lock_file_path}" ]; then
+              echo "${lock_file_path} exists"
+              if [ "$(check_creation_date "${lock_file_path}")" == "0" ]; then
+                echo "The file ${lock_file_path} was created more than 60 minutes ago, re-creating lock file and downloading"
+                break
               else
-                echo "The file ${lock_file_path} was created within the last 60 minutes."
-                sleep 1m
+                echo "The file ${lock_file_path} was created within the last 60 minutes, waiting."
+                sleep 15
               fi
-            done
-            check_and_handle_image_exists()
+            else
+              echo "${lock_file_path} does NOT exists"
+              break
             fi
-          fi
+          done
+          check_and_handle_image_exists
 
           echo "Downloading image ${IMAGE_BY_HASH} to ${image_copy_dir}"
           rm -f ${lock_file_path}
           touch ${lock_file_path}
-          lockfile_created=true
+          echo "Lockfile ${lock_file_path} created"
+          export lockfile_created="true"
 
           skopeo copy ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}/"
           rm -Rf ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar || true
