@@ -44,7 +44,7 @@ spec:
         - name: emailSecretName
           value: "email"
         - name: enforceSlackChannel
-          value: "#security-notifications-test"
+          value: ""
         - name: newVersionImageFilter
           value: "quay.io/sdase/|dexidp/dex|quay.io/oauth2-proxy/oauth2-proxy|oliver006/redis_exporter|quay.io/prometheuscommunity/postgres-exporter"
         - name: allResultsGitTarget
