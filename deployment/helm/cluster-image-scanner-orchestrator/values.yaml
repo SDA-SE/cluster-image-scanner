@@ -163,7 +163,7 @@ slack:
   cliToken: ""
 
 image:
-  tag: "feathelm" # TODO 3 in master
+  tag: "master"
 
 
 isLocal: false
