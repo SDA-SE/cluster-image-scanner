@@ -43,9 +43,11 @@ else
 fi
 
 echo "clusterImageScannerImageTag: ${VERSION}"
-mkdir tmp || true
+rm -Rf ./tmp || true
+mkdir tmp
 cp variables.yaml tmp/variables.yaml
 sed -i.bak "s~###VERSION###~${VERSION}~g" tmp/variables.yaml
+
 
 
 export DEPLOYMENT_PATH=$(realpath ../deployment)
@@ -160,8 +162,5 @@ if [ $(argo list workflows -A | grep -c -i "Error\|Failed") -ne 0 ]; then
   fi
   exit 1
 fi
-rm -Rf ./tmp || true
-
-
 
 exit 0

@@ -9,11 +9,11 @@ if [ "${SERVICE_ACCOUNT_NAME}" == "" ]; then
 fi
 
 #filter out amazon images
-echo "Filtering out images"
+echo "Filtering out images, example of /clusterscanner/imageList.json:"
 echo "[" > /tmp/imageListFiltered.json
 cat /clusterscanner/imageList.json | jq -r '[ .[] | select(.image|test("public\\.ecr\\.aws")|not) | select(.image|test("istio/proxy")|not) | select(.image|test("securecodebox/")|not) | select(.image|test("owasp/zap2docker-stable")|not) | tostring ] | join(",") | tostring' >> /tmp/imageListFiltered.json
 echo "]" >> /tmp/imageListFiltered.json
-echo "Filtering out images"
+echo "Filtering out images, example of /tmp/imageListFiltered.json:"
 
 cat /tmp/imageListFiltered.json | jq -cMr '.[] | @base64' > /tmp/imageListSeparated.json
 totalCount=$(cat /tmp/imageListFiltered.json | jq '.[].image' | wc -l)
@@ -30,8 +30,6 @@ while read -r line; do
     echo "Skipping Image: $(echo "${DATA_JSON}" | jq -r '.image') Namespace: $(echo "${DATA_JSON}" | jq -r '.namespace') Environment: $(echo "${DATA_JSON}" | jq -r '.environment') because it is null"
     continue
   fi
-
-  env
 
   if [ -n "$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME" ]; then
     IS_SCAN_BASEIMAGE_LIFETIME="$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME"
@@ -110,7 +108,6 @@ while read -r line; do
   sed -i "s~###DEFECTDOJO_CM###~${DEFECTDOJO_CM}~" /tmp/template.yml
   sed -i "s~###DEFECTDOJO_SECRETS###~${DEFECTDOJO_SECRETS}~" /tmp/template.yml
   sed -i "s~###SCAN_ID###~${SCAN_ID}~" /tmp/template.yml
-  sed -i "s~###dependencyCheckSuppressionsConfigMapName###~${dependencyCheckSuppressionsConfigMapName}~" /tmp/template.yml
   sed -i "s~###team###~${team}~" /tmp/template.yml
   sed -i "s~###appname###~${appname}~" /tmp/template.yml
   sed -i "s~###appversion###~${appversion}~" /tmp/template.yml
@@ -121,7 +118,6 @@ while read -r line; do
   sed -i "s~###image###~$(echo "${DATA_JSON}" | jq -r .image)~" /tmp/template.yml
   sed -i "s~###image_id###~$(echo "${DATA_JSON}" | jq -r .image_id)~" /tmp/template.yml
   sed -i "s~###slack###~$(echo "${DATA_JSON}" | jq -r .slack)~" /tmp/template.yml
-  sed -i "s~###rocketchat###~$(echo "${DATA_JSON}" | jq -r .rocketchat)~" /tmp/template.yml
   sed -i "s~###email###~$(echo "${DATA_JSON}" | jq -r .email)~" /tmp/template.yml
   sed -i "s~###is_scan_lifetime###~${IS_SCAN_LIFETIME}~" /tmp/template.yml
   sed -i "s~###is_scan_baseimage_lifetime###~${IS_SCAN_BASEIMAGE_LIFETIME}~" /tmp/template.yml
