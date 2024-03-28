@@ -28,5 +28,5 @@ spec:
     spec:
       containers:
         - name: test-image
-          image: quay.io/sdase/cluster-image-scanner-test-image:###VERSION###
+          image: quay.io/sdase/cluster-image-scanner-test-image:feathelm-test
           imagePullPolicy: "Always"

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+data:
+  S3_API_LOCATION: "https://{{ required "An API host is required." .Values.api.host }}{{ .Values.api.pathSeparator }}{{ .Values.api.version }}{{ required "Path is required, should start with a /." .Values.api.path }}"

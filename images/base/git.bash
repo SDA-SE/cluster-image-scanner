@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-git config --global user.email ""
-git config --global user.name "ClusterImageScanner"
+git config user.email "" || true
+git config user.name "ClusterImageScanner" || true
 
 if [ $(echo "${GIT_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY} | sed 's#.*@##g')

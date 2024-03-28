@@ -53,6 +53,7 @@ curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack --
 chmod +x "${mnt}/bin/slack"
 
 cp slack-template.json "${mnt}/clusterscanner/slack-template.json"
+cp slack-template-one-block.json "${mnt}/clusterscanner/slack-template-one-block.json"
 
 echo "" >"${mnt}/clusterscanner/cache.bash" # "check for existing in module.bash
 
@@ -83,7 +84,8 @@ buildah config \
   --env "smtp-auth-password=YOURPASSWORD" \
   --env "ssl-verify=strict" \
   --env "SLACK_MESSAGE_ENDPOINT=https://slack.com/api/chat.postMessage" \
-  --env "ROCKET_CHAT_USER_ID=" \
+  --env "SLACK_TEMPLATE_ONE_BLOCK=/clusterscanner/slack-template-one-block.json" \
+  --env "SLACK_TEMPLATE=/clusterscanner/slack-template.json" \
   "${ctr}"
 #  --env "set nss-config-dir=/etc/pki/nssdb/" \ # might be needed later?
 buildah commit --quiet "${ctr}" "${IMAGE_NAME}:${VERSION}" && ctr=

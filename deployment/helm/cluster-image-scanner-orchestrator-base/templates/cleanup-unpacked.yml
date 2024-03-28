@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: cleanup-enforced-delete-pvc-wf-scandata
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "{{ .Values.cleanup.schedule }}"
+  concurrencyPolicy: "Forbid"
+  startingDeadlineSeconds: {{ .Values.cleanup.startingDeadlineSeconds }}
+  timezone: Europe/Berlin
+  activeDeadlineSeconds: {{ .Values.cleanup.activeDeadlineSeconds }}
+  workflowSpec:
+    serviceAccountName: "{{ .Values.serviceAccount.name }}"
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+    entrypoint: pvc-cleanup
+    templates:
+      - name: pvc-cleanup
+        volumes:
+          - name: scandata
+            persistentVolumeClaim:
+              claimName: cluster-image-scanner-scandata
+        script:
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+          image: {{ .Values.cleanup.image.repo }}:{{ .Values.cleanup.image.tag }}
+          volumeMounts:
+            - name: scandata
+              mountPath: /clusterscanner/data
+          imagePullPolicy: IfNotPresent
+          command: [python3]
+          source: |
+            import os
+            import datetime
+
+            directory = "/clusterscanner/data/"
+            days = 7
+
+            def find_and_delete_old_files(directory, days):
+              current_time = datetime.datetime.now()
+              threshold = current_time - datetime.timedelta(days=days)
+
+              deleted_files = []
+
+              for root, dirs, files in os.walk(directory, topdown=False):
+                for file in files:
+                  file_path = os.path.join(root, file)
+                  modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                  if modified_time < threshold:
+                    os.remove(file_path)
+                    deleted_files.append(file_path)
+
+                # Delete empty directories
+                for root, dirs, _ in os.walk(directory, topdown=False):
+                  for dir_name in dirs:
+                    dir_path = os.path.join(root, dir_name)
+                    if not os.listdir(dir_path):
+                      os.rmdir(dir_path)
+
+              return deleted_files
+
+
+            deleted_files = find_and_delete_old_files(directory, days)
+
+            print("Deleted files older than 7 days:")
+            for file in deleted_files:
+              print(file)

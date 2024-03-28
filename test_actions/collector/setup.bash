@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
-DEPLOYMENT_PATH=../../deployment
 
 if [ "${SECRETS_PATH}" != "" ]; then
   source ${SECRETS_PATH}
 fi
-source ../library.bash
+source ${DEPLOYMENT_PATH}/../test_actions/library.bash
 
 sed -i.bak "s~###VERSION###~2.0.225~g" application/deployment.yaml # test image has separate build with extra version
 cat application/deployment.yaml

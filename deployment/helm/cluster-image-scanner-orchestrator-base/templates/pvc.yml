@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cluster-image-scanner-images
+  namespace: {{ .Release.Namespace }}
+spec:
+  storageClassName: {{ .Values.storage.imagesPvc.storageClass }}
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.imagesPvc.capacity }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cluster-image-scanner-scandata
+  namespace: {{ .Release.Namespace }}
+spec:
+  storageClassName: {{ .Values.storage.scandataPvc.storageClass }}
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.scandataPvc.capacity }}

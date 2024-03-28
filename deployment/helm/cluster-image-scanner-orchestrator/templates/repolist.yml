@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-source-list
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cluster-image-scanner-orchestrator.labels" .  | nindent 4 }}
+data:
+  {{ .Values.imageSourceList | toYaml }}
+  #image-lifetime: https://api.github.com/repos/SDA-SE/cluster-scan-test-images/contents/image-lifetime.json

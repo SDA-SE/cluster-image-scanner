@@ -31,8 +31,6 @@ while read -r line; do
     continue
   fi
 
-  env
-
   if [ -n "$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME" ]; then
     IS_SCAN_BASEIMAGE_LIFETIME="$OVERRIDE_IS_SCAN_BASEIMAGE_LIFETIME"
   else

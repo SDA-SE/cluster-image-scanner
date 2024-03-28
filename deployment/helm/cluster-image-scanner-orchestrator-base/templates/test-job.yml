@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: test-job-template
+  namespace: {{ .Release.Namespace }}
+spec:
+  activeDeadlineSeconds: 3600
+  entrypoint: main # Entry point for job execution
+  workflowSpec:
+    #serviceAccountName: clusterscanner
+    ttlStrategy:
+      secondsAfterSuccess: 3600
+      secondsAfterFailure: 7200
+    artifactRepositoryRef:
+      configMap: artifact-repositories
+      key: default-v1
+  inputs:
+    parameters:
+      - workflow.parameters.defectDojoConfigMapName
+      - workflow.parameters.scanjobEnvParameter
+
+  templates:
+    - name: main
+      steps:
+        - - name: test-defectdojo-findings
+            template: test-defectdojo-findings
+
+    - name: test-defectdojo-findings
+      volumes:
+        - name: tmp
+          emptyDir: { }
+      container:
+        resources:
+          limits:
+            cpu: '1'
+            memory: 256Mi
+          requests:
+            cpu: '0.2'
+            memory: 64Mi
+        securityContext:
+          {{- toYaml .Values.testjob.securityContext | nindent 10 }}
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3"
+        imagePullPolicy: Always # TODO IfNotPresent
+        command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.uploadValidation.MainValidation" ]
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        envFrom:
+          - configMapRef:
+              name: "{{ "{{" }} workflow.parameters.defectDojoConfigMapName {{ "}}" }}"
+          - configMapRef:
+              name: "scanjob-env-parameter"
+          - secretRef:
+              name: "{{ "{{" }} workflow.parameters.defectDojoConfigMapName {{ "}}" }}"
+

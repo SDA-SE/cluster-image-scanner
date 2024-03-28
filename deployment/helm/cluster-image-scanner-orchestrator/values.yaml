@@ -1,0 +1,169 @@
+# Default values for cluster-image-scanner-orchestrator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "clusterscanner"
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+  runAsUser: 56315
+
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    memory: 128Mi
+    cpu: 50m
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+cronSchedule: "*/1 * * * 1-5"
+
+api:
+  host: ""
+  version: "v1"
+  path: "/all-image-collector-reports"
+  pathSeparator: "/"
+
+
+credentials:
+  apikey: ""
+  signature: ""
+
+storage:
+  # An S3 bucket through which temporary data is handed over to subflows.
+  # Usually provided through the argo-wf installation.
+  s3:
+    endpoint: "s3.eu-central-1.amazonaws.com"
+    bucket: ""
+    insecure: false
+    useSDKCreds: true
+defectdojo:
+  branchesToKeep: "*"
+  reportPath: "/tmp/dependency-check-results/dependency-check-report.xml"
+  lead: "3"
+  user: ""
+  url: ""
+  importType: "import"
+  markedAsActive: "true"
+  markedAsInactive: "false"
+  deduplicationOnEngagement: "false"
+  gitUrl: "https://github.com/sda-se"
+  token: ""
+
+dependencytrack:
+  url: ""
+  key: ""
+
+github:
+  appId: ""
+  appLogin: ""
+  installationId: ""
+  privateKeyPem: ""
+
+registry:
+  authJson: ""
+
+imageSourceList:
+  image-lifetime: "https://raw.githubusercontent.com/SDA-SE/cluster-scan-test-images/master/image-lifetime.json"
+
+scanjob:
+  ddDaysToKeepWithoutUpload: "0" # 0 disables cleanup
+  errorNotificationIgnore: 'DiskPressure\|imagefetcher.*sj-tools-kube-system\|sj-si-verzahnung-defectdojo'
+  ddNameTemplate: "###ENVIRONMENT### | ###NAMESPACE###"
+  dependencyTrackNameTemplate: "###ENVIRONMENT### | ###NAMESPACE### | ###APP_NAME###"
+  registryOverride:
+    dockerA:
+      from: ""
+      to: ""
+    dockerIo:
+      from: ''
+      to: ""
+    default:
+      from: ''
+      to: ''
+  dependencyTrack:
+    threshold:
+      application:
+        maven:
+          critical: 1
+          high: 1
+          medium: 100
+        golang:
+          critical: 1
+          high: 1
+          medium: 100
+        npm:
+          critical: 1
+          high: 1
+          medium: 100
+        deb:
+          critical: 8
+          high: 20
+          medium: 100
+        rpm:
+          critical: 8
+          high: 20
+          medium: 100
+        pypi:
+          critical: 8
+          high: 20
+          medium: 100
+        alpine:
+          critical: 8
+          high: 20
+          medium: 100
+      thirdParty:
+        maven:
+          critical: 99
+          high: 999
+          medium: 9999
+        golang:
+          critical: 99
+          high: 999
+          medium: 9999
+        npm:
+          critical: 99
+          high: 999
+          medium: 9999
+        deb:
+          critical: 30
+          high: 100
+          medium: 9999
+        rpm:
+          critical: 30
+          high: 100
+          medium: 9999
+        pypi:
+          critical: 99
+          high: 999
+          medium: 9999
+        alpine:
+          critical: 30
+          high: 100
+          medium: 9999
+slack:
+  cliToken: ""
+
+image:
+  tag: "feathelm" # TODO 3 in master
+
+
+isLocal: false

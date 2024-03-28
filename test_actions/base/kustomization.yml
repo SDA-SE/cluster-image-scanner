@@ -5,14 +5,11 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - ../../deployment/overlays/test-local/
-  - minio.auth.yml
-  - minio.tenant.yml
   - auth.yml
 
 commonLabels:
   app.kubernetes.io/name: clusterscanner
   app.kubernetes.io/instance: org.sda
 
-patches:
-  - path: artifacts.yml
+#patches:
+#  - path: artifacts.yml

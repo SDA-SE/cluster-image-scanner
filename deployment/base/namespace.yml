@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: clusterscanner
-  annotations:
-    contact.sdase.org/team: "security-journey"
-    sdase.org/description: "The cluster-image-scanner discovers vulnerabilities and container image misconfiguration in production environments."
