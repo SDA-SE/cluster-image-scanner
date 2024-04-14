@@ -47,7 +47,7 @@ JSON=$(add_json_field severity "Medium" "$JSON")
 if [ -z "$JSON" ]; then
   echo "failed to prepare JSON template"
   exit 1
-else 
+else
   echo "$JSON" > "$JSONFILE"
 fi
 
@@ -71,6 +71,7 @@ buildah config \
   --label "${oci_prefix}.description=${descr}" \
   --label "io.sda-se.image.bill-of-materials-hash=${bill_of_materials_hash}" \
   --env 'MAX_IMAGE_LIFETIME_IN_DAYS=14' \
+  --env 'MIN_IMAGE_LIFETIME_IN_YEARS_TO_BE_REPRODUCIBLE=30' \
   --env 'IS_BASE_IMAGE_LIFETIME_SCAN=false' \
   --env 'RESULT_CACHING_HOURS=20' \
   "${ctr}"
