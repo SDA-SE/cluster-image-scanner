@@ -73,8 +73,10 @@ hDiff="$(( tDiff/3600 ))" || true
 dDiff="$(( hDiff/24 ))" || true
 echo "dDiff: ${dDiff}"
 reproducibleBuild=false
-if [[ "${dt1}" == "1970-01-01T00:00:00Z" ]]; then
-    reproducibleBuild=true
+
+MIN_IMAGE_LIFETIME_IN_DAYS_TO_BE_REPRODUCIBLE=$((MIN_IMAGE_LIFETIME_IN_YEARS_TO_BE_REPRODUCIBLE * 365))
+if [ "${dDiff}" -gt "${MIN_IMAGE_LIFETIME_IN_DAYS_TO_BE_REPRODUCIBLE}" ]; then
+  reproducibleBuild=true
 fi
 JSON_RESULT=$(echo "${JSON_RESULT}" | jq -Sc ". += {\"buildDate\": \"${dt1}\", \"maxAge\": ${MAX_IMAGE_LIFETIME_IN_DAYS}, \"age\": ${dDiff}, \"reproducibleBuild\": ${reproducibleBuild}, \"imageType\": \"${IMAGE_TYPE}\"}")
 
@@ -95,7 +97,12 @@ EOF
 
   JSON=$(<"$JSONFILE")
   JSON=$(add_json_field references "$references" "$JSON")
-  JSON=$(add_json_field title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" "$JSON")
+  if [ "${reproducibleBuild}"  == "true" ]; then
+    JSON=$(add_json_field title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days due to reproducible build" "$JSON")
+    JSON=$(add_json_field severity "Low" "$JSON")
+  else
+    JSON=$(add_json_field title "${IMAGE_TYPE} Age > ${MAX_IMAGE_LIFETIME_IN_DAYS} Days" "$JSON")
+  fi
 
   if [ -z "$JSON" ]; then
     echo "failed to create JSON results"
