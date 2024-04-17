@@ -190,6 +190,7 @@ scanjob:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
     runAsUser: 1001
+  caBundle: # overwrite /etc/ssl/certs/ca-bundle.crt with the content BASE64 encoded placed here
 
   imagefetcher:
     resources:
@@ -337,3 +338,4 @@ smtp:
   starttls: "true"
   smtpMailParameter: ""
   smtpEnforceMailTo: ""
+

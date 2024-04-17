@@ -166,7 +166,7 @@ spec:
             subPath: auth.json
             defaultMode: 0444
           - name: additional-cas
-            mountPath: /etc/ssl/certs/additionalCAs.pem
+            mountPath: /etc/ssl/certs/ca-bundle.crt
             subPath: ADDITIONAL_CAS
             defaultMode: 0444
         env:
