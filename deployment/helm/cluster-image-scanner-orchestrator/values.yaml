@@ -159,6 +159,7 @@ scanjob:
           critical: 30
           high: 100
           medium: 9999
+  caBundle: # overwrite /etc/ssl/certs/ca-bundle.crt with the content BASE64 encoded placed here
 slack:
   cliToken: ""
 
