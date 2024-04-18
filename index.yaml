@@ -3,6 +3,16 @@ entries:
   cluster-image-scanner-orchestrator:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2024-04-18T08:34:06.601824986Z"
+    description: A chart that deploys the image metadata orchestrator.
+    digest: c8967a401e0de2b107c6f8abf3e0f1329bcf8598fe3e36fd12ee9d46dde4a2c2
+    name: cluster-image-scanner-orchestrator
+    type: application
+    urls:
+    - https://github.com/SDA-SE/cluster-image-scanner/releases/download/cluster-image-scanner-orchestrator-0.1.2/cluster-image-scanner-orchestrator-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2024-04-08T13:19:09.547619143Z"
     description: A chart that deploys the image metadata orchestrator.
     digest: dbeac1d3365fea72b0992ef92e9ece28d1a9b9f0d0ba698c1b3255ad8d87ec27
@@ -22,6 +32,17 @@ entries:
     - https://github.com/SDA-SE/cluster-image-scanner/releases/download/cluster-image-scanner-orchestrator-0.1.0/cluster-image-scanner-orchestrator-0.1.0.tgz
     version: 0.1.0
   cluster-image-scanner-orchestrator-base:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-04-18T08:34:06.725375111Z"
+    description: This chart contains base resources required by the orchestrator.
+      It primarily contains argo workflow templates and their config.
+    digest: 6cfd487d6a8bd09861eb213e0976068a7f34ce4876ca85e100ad88bb85b46a27
+    name: cluster-image-scanner-orchestrator-base
+    type: application
+    urls:
+    - https://github.com/SDA-SE/cluster-image-scanner/releases/download/cluster-image-scanner-orchestrator-base-0.1.2/cluster-image-scanner-orchestrator-base-0.1.2.tgz
+    version: 0.1.2
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2024-04-08T13:19:09.664024976Z"
@@ -67,4 +88,4 @@ entries:
     urls:
     - https://github.com/SDA-SE/cluster-image-scanner/releases/download/image-metadata-orchestrator-base-0.1.0/image-metadata-orchestrator-base-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-08T13:19:09.664040245Z"
+generated: "2024-04-18T08:34:06.725398535Z"
