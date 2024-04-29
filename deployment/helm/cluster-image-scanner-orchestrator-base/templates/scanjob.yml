@@ -143,9 +143,11 @@ spec:
             secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: tmp
           emptyDir: { }
+{{- if .Values.scanjob.caBundle }}
         - name: "additional-cas"
           configMap:
             name: "scanjob-env-parameter"
+{{- end }}
       script:
         resources:
           {{- toYaml .Values.scanjob.imagefetcher.resources | nindent 10 }}
@@ -165,10 +167,12 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
+{{- if .Values.scanjob.caBundle }}
           - name: additional-cas
             mountPath: /etc/ssl/certs/ca-bundle.crt
             subPath: ADDITIONAL_CAS
             defaultMode: 0444
+{{- end }}
         env:
           - name: IMAGE
             value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"

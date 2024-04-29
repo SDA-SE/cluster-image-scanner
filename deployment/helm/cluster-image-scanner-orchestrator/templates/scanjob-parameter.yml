@@ -15,10 +15,8 @@ data:
   SERVICE_ACCOUNT_NAME: '{{ .Values.serviceAccount.name }}'
   DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_THIRD_PARTY: '{{ .Values.scanjob.dependencyTrack.threshold.thirdParty | toJson }}'
   DEPENDENCY_TRACK_NOTIFICATION_THRESHOLDS_APPLICATION: '{{ .Values.scanjob.dependencyTrack.threshold.application | toJson }}'
-  {{- if .Values.scanjob.caBundle }}
   ADDITIONAL_CAS: |
-    '{{ .Values.scanjob.caBundle | b64enc }}'
-  {{- end }}
+{{- if .Values.scanjob.caBundle }}  '{{ .Values.scanjob.caBundle | b64enc }}'{{- end }}
 
   # Registry overrides:
   # Any environment variable that starts with REGISTRY_OVERRIDE_ and ends on FROM or TO will

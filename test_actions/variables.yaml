@@ -2,7 +2,7 @@ storage:
   # An S3 bucket through which temporary data is handed over to subflows.
   # Usually provided through the argo-wf installation.
   s3:
-    endpoint: "minio-hl.clusterscanner.svc:9000"
+    endpoint: "minio-service.clusterscanner.svc:9000"
     bucket: "local"
     insecure: true
     useSDKCreds: false

@@ -5,6 +5,6 @@ metadata:
   name: minio-auth
   namespace:  {{ .Release.Namespace }}
 stringData:
-  accesskey: "testtesttest"
-  secretkey: "testtesttest"
+  accesskey: "minioadmin"
+  secretkey: "minioadmin"
 {{- end }}

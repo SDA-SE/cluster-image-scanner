@@ -12,7 +12,7 @@ elif [ "${DD_TOKEN_SECRET}" == "" ]; then
 fi
 
 
-for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio-hl"  | awk '{print $2}');do kill $pid;done
+for pid in $(ps -ef | grep port-forward | grep "svc/argo-server\|svc/minio"  | awk '{print $2}');do kill $pid;done
 
 if [ "${IS_MINIKUBE}" == "true" ]; then
   minikube delete
@@ -67,8 +67,8 @@ kubectl apply -f ./tmp/namespace-install.yaml -n clusterscanner
 
 kubectl apply -k minio
 
-wait_for_pods_ready "minio" "minio-operator" 2 10 120
-wait_for_pods_ready "argo-workflow" "clusterscanner" 2 10 120
+#wait_for_pods_ready "minio" "minio-operator" 2 10 120
+wait_for_pods_ready "workflow-controller" "clusterscanner" 3 10 60
 
 helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml -f variables.base.yaml cis-base ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator-base/ -n clusterscanner
 helm install -f $HOME/.clusterscanner/variables.secret.yaml -f tmp/variables.yaml cis-orchestrator ${DEPLOYMENT_PATH}/helm/cluster-image-scanner-orchestrator/ -n clusterscanner
@@ -88,8 +88,6 @@ rm tmp.yml
 
 sleep 30
 
-wait_for_pods_ready "minio tenant" "clusterscanner" 3 10 120
-
 cp -a collector tmp
 sed -i.bak "s~###VERSION###~${VERSION}~g" ./tmp/collector/application/deployment.yaml
 cd tmp/collector
@@ -98,8 +96,8 @@ cd ../..
 sleep 10
 echo "adding port-forward"
 kubectl -n clusterscanner port-forward svc/argo-server 2746:2746 &
-kubectl -n clusterscanner port-forward svc/minio-hl 9000:9000 &
-
+pod=$(kubectl get pods -n clusterscanner  | grep minio | awk '{print $1}')
+kubectl port-forward pod/$pod 9000 9090 -n clusterscanner &
 sleep 2
 
 if ! which mc > /dev/null 2>&1; then
@@ -111,7 +109,7 @@ if ! which mc > /dev/null 2>&1; then
   export PATH=$PATH:./tmp/
 fi
 
-mc alias set local http://127.0.0.1:9000 testtesttest testtesttest || true
+mc alias set local http://127.0.0.1:9000 minioadmin minioadmin  || true
 mc mb local/local || true
 
 
