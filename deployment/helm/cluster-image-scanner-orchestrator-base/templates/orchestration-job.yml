@@ -249,7 +249,7 @@ spec:
               echo "Slack channel not set"
               return;
             fi
-            echo "In createNotificationMail, image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
+            echo "In createNotificationSlack, image: ${image}, appName ${appName}, team: ${team}, namespace: ${namespace}, environment: ${environment}, ddLink: ${ddLink}, scanType: ${scanType}, title: ${title}, info: ${infoText}, status: ${status}"
 
             slackChannels=$(echo "${slackChannels}
             ${slack}" | sort  | uniq)
@@ -273,7 +273,6 @@ spec:
             echo "${SLACK_TEMPLATE_ONE_BLOCK_TARGET}:"
             cat ${SLACK_TEMPLATE_ONE_BLOCK_TARGET}
           }
-
 
           createNotificationMail() {
             local image="${1}"
@@ -453,16 +452,16 @@ spec:
                 done <<< "${notifications}"
               done
             done
-            for email in ${emails}; do
-              inputAsFileSystem "${email}"
-              sendNotificationsMail "/tmp/email/${notificationTargetForFs}" "${email}"
-            done
-            echo "slackChannels $slackChannels"
-            for slack in ${slackChannels}; do
-              echo "slack $slack"
-              inputAsFileSystem "${slack}"
-              sendNotificationsSlack "/tmp/slack/${notificationTargetForFs}" "${slack}"
-            done
+          done
+          for email in ${emails}; do
+            inputAsFileSystem "${email}"
+            sendNotificationsMail "/tmp/email/${notificationTargetForFs}" "${email}"
+          done
+          echo "slackChannels $slackChannels"
+          for slack in ${slackChannels}; do
+            echo "slack $slack"
+            inputAsFileSystem "${slack}"
+            sendNotificationsSlack "/tmp/slack/${notificationTargetForFs}" "${slack}"
           done
           echo "${errors}"
 
