@@ -39,7 +39,7 @@ spec:
             memory: 64Mi
         securityContext:
           {{- toYaml .Values.testjob.securityContext | nindent 10 }}
-        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:3"
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/defectdojo-client:4"
         imagePullPolicy: Always # TODO IfNotPresent
         command: [ "java", "-cp", "@/app/jib-classpath-file", "org.sdase.uploadValidation.MainValidation" ]
         volumeMounts:
