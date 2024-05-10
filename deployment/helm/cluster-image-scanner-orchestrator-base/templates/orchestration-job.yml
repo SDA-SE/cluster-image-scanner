@@ -209,7 +209,6 @@ spec:
               name: "email-parameter"
         command: [/bin/bash]
         source: |
-          set -e
           shopt -s globstar nullglob
 
           if [ "${RESULT_PATH}" == "" ]; then
