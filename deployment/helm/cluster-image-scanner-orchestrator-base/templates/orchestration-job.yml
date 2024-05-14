@@ -90,6 +90,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.fetchImageList.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
+          {{- toYaml .Values.orchestrationJob.fetchImageList.securityContext | nindent 10 }}
         volumeMounts:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"

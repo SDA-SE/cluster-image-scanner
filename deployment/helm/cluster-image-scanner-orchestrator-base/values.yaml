@@ -116,6 +116,8 @@ orchestrationJob:
       requests:
         cpu: '1'
         memory: 512Mi
+    securityContext:
+      readOnlyRootFilesystem: false
   subflow:
     resources:
       limits:
