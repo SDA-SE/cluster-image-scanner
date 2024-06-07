@@ -86,11 +86,9 @@ gitSshAuth() {
     cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
   elif [ -e /clusterscanner/github/github_private_key.pem ]; then # same path is used for github private key
     cat /clusterscanner/github/github_private_key.pem > "${TARGET_SSH_KEY_PATH}"
-    echo "Copied github private key to ${TARGET_SSH_KEY_PATH}"
-    ls -al ${TARGET_SSH_KEY_PATH}
+    echo "Copied github base64 encoded private key to ${TARGET_SSH_KEY_PATH}"
     echo "First 10 chars of ${TARGET_SSH_KEY_PATH}:"
     head -c 10 "$TARGET_SSH_KEY_PATH"
-    echo "\n"
   fi
   if [ $(wc -c < "${TARGET_SSH_KEY_PATH}") -eq 0 ]; then
     echo "ERROR: Var TARGET_SSH_KEY_PATH $TARGET_SSH_KEY_PATH or CONTENT is not set, exit"
@@ -123,9 +121,9 @@ gitSshAuth() {
     _ssh_repository_host_port=22
   fi
 
-  echo "${GIT_SSH_REPOSITORY_HOST}"
-  echo "${_ssh_repository_host_port}"
-  echo "${_ssh_repository_host_no_port}"
+  echo "GIT_SSH_REPOSITORY_HOST: ${GIT_SSH_REPOSITORY_HOST}"
+  echo "GIT_SSH_REPOSITORY_HOST_PORT: ${_ssh_repository_host_port}"
+  echo "GIT_SSH_REPOSITORY_HOST_NO_PORT: ${_ssh_repository_host_no_port}"
 
   ssh-keyscan -t rsa -p "${_ssh_repository_host_port}" -H "${_ssh_repository_host_no_port}" >> "${SSH_TARGET_PATH}/known_hosts"
   chmod 400 "${TARGET_SSH_KEY_PATH}"
