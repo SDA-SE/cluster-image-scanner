@@ -142,6 +142,8 @@ orchestrationJob:
       requests:
         cpu: '0.2'
         memory: 256Mi
+    securityContext:
+      readOnlyRootFilesystem: false
   generateResponseStatistics:
     resources:
       limits:
