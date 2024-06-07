@@ -160,6 +160,8 @@ orchestrationJob:
       requests:
         cpu: '0.2'
         memory: 256Mi
+    securityContext:
+      readOnlyRootFilesystem: false
   cleanupDTrack:
     resources:
       limits:

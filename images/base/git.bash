@@ -146,7 +146,13 @@ gitAuth() {
 
 gitFetch() {
   rm -Rf /tmp/clusterscanner-remote || true
-  #echo "CLONE_URL: ${CLONE_URL}"
+  mkdir -p /home/code/ssh
+  cat /clusterscanner/github/github_private_key.pem | tr -d '\n' | base64 --decode > /home/code/ssh/id_rsa
+  chmod 600 /home/code/ssh/id_rsa
+  ls -l /home/code/ssh/id_rsa
+  export GIT_SSH_COMMAND="ssh -i /home/code/ssh/id_rsa"
+
+  echo "CLONE_URL: ${CLONE_URL}"
   git clone "${CLONE_URL}" /tmp/clusterscanner-remote
   echo "fetched to /tmp/clusterscanner-remote"
 }
