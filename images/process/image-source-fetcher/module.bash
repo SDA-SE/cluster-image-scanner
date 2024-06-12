@@ -8,6 +8,7 @@ sp_authorize || echo "Couldn't authorize, assuming the image-source-repo is acce
 
 mkdir -p /clusterscanner/out/merged
 
+# TODO implement https://github.com/SDA-SE/cluster-image-scanner-aws-api?tab=readme-ov-file#request-images-list-of-a-single-cluster to overcome 6mb AWS lamba limit
 if [ "${S3_API_LOCATION}" != "" ]; then
   curl --http1.1 --location "${S3_API_LOCATION}" \
       --header "x-api-key: ${S3_API_KEY}" \
