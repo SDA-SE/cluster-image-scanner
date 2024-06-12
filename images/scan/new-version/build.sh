@@ -28,7 +28,7 @@ cleanup() {
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
-base_image="quay.io/sdase/cluster-image-scanner-base:2"
+base_image="quay.io/sdase/cluster-image-scanner-base:3"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
@@ -46,7 +46,7 @@ JSON=$(add_json_field severity "Medium" "$JSON")
 if [ -z "$JSON" ]; then
   echo "error generating JSON file"
   exit 1
-else 
+else
   echo "$JSON" > "$JSONFILE"
 fi
 

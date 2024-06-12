@@ -24,10 +24,10 @@ cleanup() {
   test -n "${ctr}" && buildah rm "${ctr}" || true
 }
 
-base_image="registry.access.redhat.com/ubi8/ubi-init" # minimal doesn't have useradd
+base_image="registry.access.redhat.com/ubi9/ubi-init" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
 
-tools_image="quay.io/sdase/cluster-image-scanner-base:2"
+tools_image="quay.io/sdase/cluster-image-scanner-base:3"
 tools_ctr="$(buildah from --pull --quiet ${tools_image})"
 tools_mnt="$(buildah mount "${tools_ctr}")"
 
