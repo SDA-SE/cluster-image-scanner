@@ -41,7 +41,7 @@ dnf_opts=(
   "--installroot=/mnt"
   "--assumeyes"
   "--setopt=install_weak_deps=false"
-  "--releasever=8"
+  "--releasever=9"
   "--setopt=tsflags=nocontexts,nodocs"
   "--quiet"
 )
