@@ -46,7 +46,7 @@ dnf_opts=(
   "--quiet"
 )
 rm -Rf "${mnt}/etc/yum.repos.d" || true
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" mailx dos2unix
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" sendmail dos2unix
 rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
 
 curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack --output "${mnt}/bin/slack"
