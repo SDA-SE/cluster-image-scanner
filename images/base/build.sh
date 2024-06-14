@@ -33,7 +33,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
 
-skopeo_image="registry.access.redhat.com/ubi9/go-toolset:latest"
+skopeo_image="registry.access.redhat.com/ubi8/go-toolset:latest"
 ctr_skopeo="$( buildah from --pull --quiet "${skopeo_image}")"
 mnt_skopeo="$( buildah mount "${ctr_skopeo}")"
 
