@@ -45,8 +45,12 @@ dnf_opts=(
   "--setopt=tsflags=nocontexts,nodocs"
   "--quiet"
 )
-rm -Rf "${mnt}/etc/yum.repos.d" || true
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" s-nail dos2unix # s-nail enhances mailx
+#rm -Rf "${mnt}/etc/yum.repos.d" || true
+curl -o "${mnt}/epel.rpm" -s -L https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- cp -a /etc/yum.repos.d/ /mnt/etc/
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf "${dnf_opts[@]}" install /mnt/epel.rpm
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf "${dnf_opts[@]}" update
+buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" sendmail s-nail dos2unix # s-nail enhances mailx
 rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
 
 curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack --output "${mnt}/bin/slack"
