@@ -32,7 +32,7 @@ build_dir="${dir}/build"
 base_image="registry.access.redhat.com/ubi8/ubi" # minimal doesn't have useradd
 ctr_tools="$(buildah from --pull --quiet ${base_image})"
 
-base_image="quay.io/sdase/cluster-image-scanner-base:2"
+base_image="quay.io/sdase/cluster-image-scanner-base:3"
 ctr="$(buildah from --pull --quiet $base_image)"
 mnt="$(buildah mount "${ctr}")"
 
