@@ -48,7 +48,7 @@ spec:
         - name: newVersionImageFilter
           value: "quay.io/sdase/|dexidp/dex|quay.io/oauth2-proxy/oauth2-proxy|oliver006/redis_exporter|quay.io/prometheuscommunity/postgres-exporter"
         - name: allResultsGitTarget
-          value: "github.com/SDA-SE/cluster-image-scanner-all-results-test"
+          value: "github.com/SDA-SE/cluster-image-scanner-all-results"
         - name: imageRegistryBase
           value: "quay.io/sdase"
         - name: clusterImageScannerImageTag
