@@ -3,11 +3,15 @@ set -e
 git config user.email "" || true
 git config user.name "ClusterImageScanner" || true
 
+#e.g. GIT_REPOSITORY="ssh://git@github.com/ORG/cis-upload-tmp.git"
+
 if [ $(echo "${GIT_REPOSITORY}" | grep -c "ssh://") -eq 1 ]; then
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY} | sed 's#.*@##g')
   export GIT_REPOSITORY_PATH=$(echo ${GIT_REPOSITORY_PATH#*/})
   export GIT_REPOSITORY_PATH="/${GIT_REPOSITORY_PATH}"
+  # /ORG/cis-upload-tmp.git
   export GIT_SSH_REPOSITORY_HOST=$(echo ${GIT_REPOSITORY} | sed 's#.*@##g' | sed 's#/.*##g')
+  # github.com
 fi
 
 createJWT() {
@@ -82,9 +86,12 @@ gitSshAuth() {
     cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
   elif [ -e /clusterscanner/github/github_private_key.pem ]; then # same path is used for github private key
     cat /clusterscanner/github/github_private_key.pem > "${TARGET_SSH_KEY_PATH}"
+    echo "Copied github base64 encoded private key"
+    echo "First 10 chars of ${TARGET_SSH_KEY_PATH}:"
+    head -c 10 "$TARGET_SSH_KEY_PATH"
   fi
-  if [ $(wc -l "${TARGET_SSH_KEY_PATH}" | awk '{print $1}') -eq 0 ]; then
-    echo "ERROR: Var TARGET_SSH_KEY_PATH is not set, exit"
+  if [ $(wc -c < "${TARGET_SSH_KEY_PATH}") -eq 0 ]; then
+    echo "ERROR: Var TARGET_SSH_KEY_PATH $TARGET_SSH_KEY_PATH or CONTENT is not set, exit"
     exit 1
   fi
   if [ -z "${GIT_REPOSITORY_PATH}" ]; then
@@ -110,6 +117,14 @@ gitSshAuth() {
   # shellcheck disable=SC2001
   _ssh_repository_host_port=$(echo "${GIT_SSH_REPOSITORY_HOST}" | sed 's#.*:##g')
 
+  if [ "${_ssh_repository_host_port}" == "${_ssh_repository_host_no_port}" ]; then
+    _ssh_repository_host_port=22
+  fi
+
+  #echo "GIT_SSH_REPOSITORY_HOST: ${GIT_SSH_REPOSITORY_HOST}"
+  #echo "GIT_SSH_REPOSITORY_HOST_PORT: ${_ssh_repository_host_port}"
+  #echo "GIT_SSH_REPOSITORY_HOST_NO_PORT: ${_ssh_repository_host_no_port}"
+
   ssh-keyscan -t rsa -p "${_ssh_repository_host_port}" -H "${_ssh_repository_host_no_port}" >> "${SSH_TARGET_PATH}/known_hosts"
   chmod 400 "${TARGET_SSH_KEY_PATH}"
 }
@@ -130,7 +145,12 @@ gitAuth() {
 
 gitFetch() {
   rm -Rf /tmp/clusterscanner-remote || true
-  #echo "CLONE_URL: ${CLONE_URL}"
+  mkdir -p /home/code/ssh
+  cat /clusterscanner/github/github_private_key.pem | tr -d '\n' | base64 --decode > /home/code/ssh/id_rsa
+  chmod 600 /home/code/ssh/id_rsa
+  export GIT_SSH_COMMAND="ssh -i /home/code/ssh/id_rsa"
+
+  echo "CLONE_URL: ${CLONE_URL}"
   git clone "${CLONE_URL}" /tmp/clusterscanner-remote
   echo "fetched to /tmp/clusterscanner-remote"
 }

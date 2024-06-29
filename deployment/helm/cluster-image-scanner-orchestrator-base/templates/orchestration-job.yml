@@ -90,6 +90,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.fetchImageList.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
+          {{- toYaml .Values.orchestrationJob.fetchImageList.securityContext | nindent 10 }}
         volumeMounts:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
             mountPath: "/clusterscanner/github/github_private_key.pem"
@@ -479,6 +480,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.generateLifetimeStatistics.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
+          {{- toYaml .Values.orchestrationJob.generateLifetimeStatistics.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-imagecollector:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         volumeMounts:
           - name: tmp
@@ -528,6 +530,7 @@ spec:
             echo "No repo to upload stats"
             exit 0
           fi
+          
 
           gitAuth
           echo "gitFetch"
@@ -655,6 +658,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.gitUploadResponseStatistics.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
+          {{- toYaml .Values.orchestrationJob.gitUploadResponseStatistics.securityContext | nindent 10 }}
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-imagecollector:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         volumeMounts:
           - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
