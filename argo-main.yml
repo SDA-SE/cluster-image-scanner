@@ -39,7 +39,7 @@ spec:
       - name: newVersionImageFilter
         value: "quay.io/sdase/|swaggerapi/petstore"
       - name: allResultsGitTarget
-        value: # "ssh://git@github.com/SDA-SE/cluster-image-scanner-test-results"
+        value: ""# "ssh://git@github.com/SDA-SE/cluster-image-scanner-test-results"
       - name: imageRegistryBase
         value: "quay.io/sdase"
       - name: clusterImageScannerImageTag
