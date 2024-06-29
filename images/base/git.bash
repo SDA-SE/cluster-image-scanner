@@ -86,7 +86,7 @@ gitSshAuth() {
     cat /.ssh/id_rsa/ssh-privatekey > "${TARGET_SSH_KEY_PATH}"
   elif [ -e /clusterscanner/github/github_private_key.pem ]; then # same path is used for github private key
     cat /clusterscanner/github/github_private_key.pem > "${TARGET_SSH_KEY_PATH}"
-    echo "Copied github base64 encoded private key to ${TARGET_SSH_KEY_PATH}"
+    echo "Copied github base64 encoded private key"
     echo "First 10 chars of ${TARGET_SSH_KEY_PATH}:"
     head -c 10 "$TARGET_SSH_KEY_PATH"
   fi
@@ -121,9 +121,9 @@ gitSshAuth() {
     _ssh_repository_host_port=22
   fi
 
-  echo "GIT_SSH_REPOSITORY_HOST: ${GIT_SSH_REPOSITORY_HOST}"
-  echo "GIT_SSH_REPOSITORY_HOST_PORT: ${_ssh_repository_host_port}"
-  echo "GIT_SSH_REPOSITORY_HOST_NO_PORT: ${_ssh_repository_host_no_port}"
+  #echo "GIT_SSH_REPOSITORY_HOST: ${GIT_SSH_REPOSITORY_HOST}"
+  #echo "GIT_SSH_REPOSITORY_HOST_PORT: ${_ssh_repository_host_port}"
+  #echo "GIT_SSH_REPOSITORY_HOST_NO_PORT: ${_ssh_repository_host_no_port}"
 
   ssh-keyscan -t rsa -p "${_ssh_repository_host_port}" -H "${_ssh_repository_host_no_port}" >> "${SSH_TARGET_PATH}/known_hosts"
   chmod 400 "${TARGET_SSH_KEY_PATH}"
@@ -148,7 +148,6 @@ gitFetch() {
   mkdir -p /home/code/ssh
   cat /clusterscanner/github/github_private_key.pem | tr -d '\n' | base64 --decode > /home/code/ssh/id_rsa
   chmod 600 /home/code/ssh/id_rsa
-  ls -l /home/code/ssh/id_rsa
   export GIT_SSH_COMMAND="ssh -i /home/code/ssh/id_rsa"
 
   echo "CLONE_URL: ${CLONE_URL}"
