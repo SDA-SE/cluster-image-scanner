@@ -2,6 +2,9 @@
 Teams using the cluster scanner to get notified.
 
 # Image Collector Configuration
+You can use labels and annotations to configure the Image Collector. Labels and annotations in Kubernetes serve different purposes:
+- Labels: These are key-value pairs used to identify, organize, and select resources. Labels are often used for grouping or filtering resources.
+- Annotations: These are also key-value pairs, but they are intended to store arbitrary metadata that is not used to identify or select resources. Annotations are typically used to attach non-identifying information to resources.
 ## Via Labels
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
 As a team, **labels** can be set in the following way to enable/disable scanning:
