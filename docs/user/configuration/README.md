@@ -2,7 +2,7 @@
 Teams using the cluster scanner to get notified.
 
 # Image Collector Configuration
-## Via Annotations
+## Via Labels
 To get notified about potential issues, the [ClusterScanner Image Collector](../../deployment/clusterscanner-image-collector.md) needs to be setup on the cluster.
 As a team, **labels** can be set in the following way to enable/disable scanning:
 
@@ -10,7 +10,6 @@ As a team, **labels** can be set in the following way to enable/disable scanning
 # Notification configuration (namespace/object)
 contact.sdase.org/email: "clusterscannertest@sda.se" # email of the team
 contact.sdase.org/team: "the-fellowship-of-the-ring" # team
-contact.sdase.org/slack: "#fellowship-security" # in case not set on namespace/pod: derived from as <team>-security
 
 # In case some parts of the ISO 27001 requirement _A.8_ to establish an asset inventory are intended to get: Use `sdase.org/description` to describe the services in all namespaces. It will enforce an extra file `service-description.json` in the target repository of the CusterScannerImage Collector.
 sdase.org/description: "My service description"
@@ -26,8 +25,8 @@ clusterscanner.sdase.org/namespace_filter: "^ring-release$\|^ring-development$" 
 clusterscanner.sdase.org/negated_namespace_filter: "\\-pr\\-" # one \ is needed for grep, double escpe for Kubernetes
 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
-scm.sdase.org/source_url="https://github.com/ring-calling-service" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
-scm.sdase.org/release="1.0.0" # String, see also labels, defaults to the image tag
+scm.sdase.org/source_url: "https://github.com/ring-calling-service" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
+scm.sdase.org/release: "1.0.0" # String, see also labels, defaults to the image tag
   
 # Adjust scans on object or namespace
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
@@ -44,11 +43,6 @@ clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the 
 ```
 
 ## Via Annotations
-Additionally, the following **annotations** can be used at the namespace/pod:
-
-```
-contact.sdase.org/slack: "#fellowship-security" 
-```
 
 Additionally, the following **annotations** can be used at the namespace/pod:
 
