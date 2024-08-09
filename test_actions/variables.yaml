@@ -16,6 +16,7 @@ api:
   pathSeparator: ""
 
 imageSourceList:
+  #image-lifetime: "ssh://git@github.com/orga/cis-upload-tmp.git"
 
 orchestrationJob:
   imagePullPolicy: Always
