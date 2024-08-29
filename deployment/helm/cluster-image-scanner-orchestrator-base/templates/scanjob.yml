@@ -798,6 +798,11 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        {{ - if .Values.scanjob.caBundle }}
+        - name: "additional-cas"
+          configMap:
+            name: "scanjob-env-parameter"
+        {{ - end }}
         - name: tmp
           emptyDir: { }
         - name: registry-creds
@@ -814,6 +819,12 @@ spec:
         volumeMounts:
           - name: tmp
             mountPath: /tmp
+          {{ - if .Values.scanjob.caBundle }}
+          - name: additional-cas
+            mountPath: /etc/ssl/certs/ca-bundle.crt
+            subPath: ADDITIONAL_CAS
+            defaultMode: 0444
+          {{ - end }}
           - name: scandata
             mountPath: /clusterscanner/data
             subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/generic/baseimage-lifetime"
