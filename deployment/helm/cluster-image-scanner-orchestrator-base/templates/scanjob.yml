@@ -140,14 +140,14 @@ spec:
             claimName: cluster-image-scanner-images
         - name: registry-creds
           secret:
-            secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
+            secretName: "{{ workflow.parameters.REGISTRY_SECRET }}"
         - name: tmp
           emptyDir: { }
-{{- if .Values.scanjob.caBundle }}
-        - name: "additional-cas"
+        {{- if .Values.scanjob.caBundle }}
+        - name: additional-cas
           configMap:
-            name: "scanjob-env-parameter"
-{{- end }}
+            name: scanjob-env-parameter
+        {{- end }}
       script:
         resources:
           {{- toYaml .Values.scanjob.imagefetcher.resources | nindent 10 }}
@@ -167,12 +167,12 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
-{{- if .Values.scanjob.caBundle }}
+          {{- if .Values.scanjob.caBundle }}
           - name: additional-cas
             mountPath: /etc/ssl/certs/ca-bundle.crt
             subPath: ADDITIONAL_CAS
             defaultMode: 0444
-{{- end }}
+          {{- end }}
         env:
           - name: IMAGE
             value: "{{ "{{" }} workflow.parameters.image{{ "}}" }}"
@@ -270,7 +270,7 @@ spec:
 
           echo "Checking for existing config manifest of ${IMAGE_BY_HASH}"
           # catch tagged images (which can happen if we don't know the image hash to pull by). When we have a tagged image, the image is assumed to be mutable - therefore the config.json of the image is checked, to make sure they are identical before skipping the pull process.
-          timeout 30 skopeo inspect ${SKOPEO_INSPECT_PARAMETER} --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
+          timeout 30 skopeo inspect --cert-dir /etc/ssl/certs --tls-verify=true ${SKOPEO_INSPECT_PARAMETER} --config "docker://${IMAGE_BY_HASH}" | jq -cMS 'def recursively(f): . as $in | if type == "object" then reduce keys_unsorted[] as $key ( {}; . + { ($key):  ($in[$key] | recursively(f)) } ) elif type == "array" then map( recursively(f) ) | f else . end; . | recursively(sort)' > "${config_dir}/config.json"
           ls -la "${config_dir}/config.json"
 
           check_and_handle_image_exists() {
@@ -331,10 +331,12 @@ spec:
           touch ${lock_file_path}
           echo "Lockfile ${lock_file_path} created"
           export lockfile_created="true"
+          
+          echo "copying image"
 
-          skopeo copy ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}/"
+          skopeo copy --dest-tls-verify=true --src-tls-verify=true  --src-cert-dir /etc/ssl/certs ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "dir:${image_copy_dir}/"
           rm -Rf ${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar || true
-          skopeo copy ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "docker-archive:${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar"
+          skopeo copy --dest-tls-verify=true --src-tls-verify=true  --src-cert-dir /etc/ssl/certs ${SKOPEO_COPY_PARAMETER} "docker://${IMAGE_BY_HASH}" "docker-archive:${IMAGE_TAR_FOLDER_PATH}/docker-archive-image.tar"
           layers=$(jq -r '.layers' "${image_copy_dir}/manifest.json")
           if [ "${layers}" != "null" ] && [ "${layers}" != "" ]; then
             extractionCommand=".layers | .[].digest"
@@ -764,6 +766,11 @@ spec:
             secretName: "{{ "{{" }} workflow.parameters.REGISTRY_SECRET{{ "}}" }}"
         - name: tmp
           emptyDir: { }
+        {{- if .Values.scanjob.caBundle }}
+        - name: "additional-cas"
+          configMap:
+            name: "scanjob-env-parameter"
+        {{- end }}
       container:
         resources:
           {{- toYaml .Values.scanjob.scanLifetime.resources | nindent 10 }}
@@ -782,6 +789,12 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
+          {{- if .Values.scanjob.caBundle }}
+          - name: additional-cas
+            mountPath: /etc/ssl/certs/ca-bundle.crt
+            subPath: ADDITIONAL_CAS
+            defaultMode: 0444
+          {{- end }}
         env:
           - name: IMAGE_BY_HASH
             value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
@@ -798,6 +811,11 @@ spec:
         - name: scandata
           persistentVolumeClaim:
             claimName: cluster-image-scanner-scandata
+        {{- if .Values.scanjob.caBundle }}
+        - name: "additional-cas"
+          configMap:
+            name: "scanjob-env-parameter"
+        {{- end }}
         - name: tmp
           emptyDir: { }
         - name: registry-creds
@@ -821,6 +839,12 @@ spec:
             mountPath: /run/containers/auth.json
             subPath: auth.json
             defaultMode: 0444
+          {{- if .Values.scanjob.caBundle }}
+          - name: additional-cas
+            mountPath: /etc/ssl/certs/ca-bundle.crt
+            subPath: ADDITIONAL_CAS
+            defaultMode: 0444
+          {{- end }}
         env:
           - name: IMAGE_BY_HASH
             value: "{{ "{{" }} workflow.parameters.image_id{{ "}}" }}"
