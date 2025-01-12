@@ -19,10 +19,38 @@ runs:
     - name: create and push an image
       shell: bash
       run: |
-        source ./test_actions/library.bash
+        # source ./test_actions/library.bash # annoying. The script contains lots of functions, so I directly using the relevant part
+        BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        export BRANCH
+        #export BRANCH="master"
+        export MAJOR="3"
+        export MINOR="0"
+        export PATCH="${GITHUB_RUN_NUMBER}"
+        export VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        if [ "${BRANCH}" != "master" ] && [ "${BRANCH}" != "head" ]; then
+          export MAJOR=$(echo ${BRANCH} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+          export PATCH=""
+          if [ "${GITHUB_RUN_NUMBER}" != "" ]; then
+            echo "Detected GITHUB_RUN_NUMBER"
+            export MINOR="${GITHUB_RUN_NUMBER}"
+            if [ "${GITHUB_HEAD_REF}" != "" ]; then
+              echo "Detected GITHUB_HEAD_REF"
+              export MAJOR=$(echo ${GITHUB_HEAD_REF} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g')
+            fi
+          else
+            export MINOR=""
+          fi
+          export VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        fi
+        VERSION=$(echo ${VERSION} | sed 's#\.$##')
+        VERSION=$(echo ${VERSION} | sed 's#\.$##') # to heal two .
+        echo "VERSION: ${VERSION}"
+
         cd ${{ inputs.image-path }}
         
         find . -type f -name "*.bash" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
         find . -type f -name "*.sh" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:2#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
+        find . -type f -name "*.bash" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:3#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
+        find . -type f -name "*.sh" -print0 | xargs -0 sed -i "s#quay.io/sdase/cluster-image-scanner-base:3#quay.io/sdase/cluster-image-scanner-base:${VERSION}#g"
         chmod +x ./build.sh
         sudo ./build.sh "quay.io" "sdase" "${{ inputs.image-name }}" "${VERSION}" "${{ inputs.registry-user }}" "${{ inputs.registry-token }}" true
