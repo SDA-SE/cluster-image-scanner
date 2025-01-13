@@ -33,11 +33,11 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir="${dir}/build"
 
 
-skopeo_image="registry.access.redhat.com/ubi8/go-toolset:latest"
+skopeo_image="registry.access.redhat.com/ubi9/go-toolset:latest"
 ctr_skopeo="$( buildah from --pull --quiet "${skopeo_image}")"
 mnt_skopeo="$( buildah mount "${ctr_skopeo}")"
 
-base_image="registry.access.redhat.com/ubi8-init" # minimal doesn't have useradd
+base_image="registry.access.redhat.com/ubi9-init" # minimal doesn't have useradd
 ctr_tools="$( buildah from --pull --quiet "${base_image}")"
 mnt_tools="$( buildah mount "${ctr_tools}")"
 
@@ -52,7 +52,7 @@ dnf_opts=(
   "--installroot=/mnt"
   "--assumeyes"
   "--setopt=install_weak_deps=false"
-  "--releasever=8"
+  "--releasever=9"
   "--setopt=tsflags=nocontexts,nodocs"
   "--quiet"
 

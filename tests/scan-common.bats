@@ -98,7 +98,7 @@ empty_template=$(get_template)
 }
 
 @test "add_json_field() should return 1 when a non-existing field is targeted" {
-    run -1 add_json_field non_existing_field "test" "$(<tmp/clean_simple.json)"
+    run -1 add_json_field non_existing_field "test" "$clean_simple_json"
 }
 
 @test "add_json_field() should return 1 when called with less than 3 or more than 4 parameters" {

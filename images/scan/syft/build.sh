@@ -35,7 +35,7 @@ base_image="anchore/syft:v0.102.0"
 ctr="$( buildah from --pull --quiet "${base_image}")"
 mnt="$( buildah mount "${ctr}" )"
 
-base_image_base="quay.io/sdase/cluster-image-scanner-base:2"
+base_image_base="quay.io/sdase/cluster-image-scanner-base:3"
 ctr_base="$( buildah from --pull --quiet $base_image_base )"
 mnt_base="$( buildah mount "${ctr_base}" )"
 
