@@ -43,7 +43,7 @@ dnf_opts=(
   "--setopt=install_weak_deps=false"
   "--releasever=9"
   "--setopt=tsflags=nocontexts,nodocs"
-  "--quiet"
+  #"--quiet"
 )
 #rm -Rf "${mnt}/etc/yum.repos.d" || true
 # Replace mailx with s-nail which is available in UBI 9
@@ -53,7 +53,7 @@ buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf
 #buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf "${dnf_opts[@]}" install /mnt/epel.rpm
 #buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf "${dnf_opts[@]}" update
 #buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- /usr/bin/dnf install "${dnf_opts[@]}" mailx dos2unix
-buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- ln -s "${mnt}/usr/bin/msmtp" /usr/sbin/sendmail
+#buildah run --volume "${mnt}":/mnt "${ctr_tools}" -- ln -s "${mnt}/usr/bin/msmtp" /usr/sbin/sendmail
 rm -rf "${mnt}/var/{cache,log}/*" "${mnt}/tmp/*"
 
 curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack --output "${mnt}/bin/slack"
