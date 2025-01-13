@@ -173,7 +173,7 @@ spec:
           {{- toYaml .Values.orchestrationJob.notifyTeams.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.orchestrationJob.securityContext | nindent 10 }}
-        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-notifier:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}" # has mailx
+        image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-notifier:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}" # Version < 3 has mailx, 3 has s-nail
         volumeMounts:
           - name: scandata
             mountPath: /clusterscanner/data
