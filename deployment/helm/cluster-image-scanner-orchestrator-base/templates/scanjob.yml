@@ -385,12 +385,10 @@ spec:
         image: "{{ "{{" }} workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-scan-syft:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag{{ "}}" }}"
         command: ["/clusterscanner/entrypoint.bash"]
         args: [
-          "packages",
+          "scan",
           "docker-archive:/clusterscanner/images/docker-archive-image.tar",
           "--output",
-          "cyclonedx-json",
-          "--file",
-          "/clusterscanner/data/bom.json"
+          "cyclonedx-json=/clusterscanner/data/bom.json"
         ]
         env:
           - name: IS_SCAN
