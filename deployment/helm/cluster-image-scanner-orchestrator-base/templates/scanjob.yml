@@ -4,6 +4,23 @@ metadata:
   name: scan-image-job-template
   namespace: {{ .Release.Namespace }}
 spec:
+  metrics:
+    prometheus:
+    - name: workflow_failed_steps
+      gauge:
+        value: "{{ workflow.failures }}"
+      help: "Count of failed steps in workflow"
+      labels:
+      - key: workflow_name
+        value: "{{ workflow.name }}"
+      - key: workflow_namespace
+        value: "{{ workflow.namespace }}"
+      - key: workflow_template
+        value: "{{ workflow.labels['workflows.argoproj.io/workflow-template'] }}"
+    - name: workflow_duration_seconds
+      gauge:
+        value: "{{ workflow.duration }}"
+      help: "Workflow execution duration in seconds"
   onExit: exit-handler
   activeDeadlineSeconds: {{ .Values.scanjob.activeDeadlineSeconds }}
   artifactRepositoryRef:
