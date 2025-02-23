@@ -344,3 +344,6 @@ smtp:
   smtpMailParameter: ""
   smtpEnforceMailTo: ""
 
+serviceMonitor:
+  enabled: true
+  interval: "30s"
