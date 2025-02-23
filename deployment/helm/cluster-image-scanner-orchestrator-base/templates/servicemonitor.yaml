@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-workflow-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+    release: prometheus-operator
+spec:
+  namespaceSelector:
+    matchNames:
+      - argowf  # namespace where Argo Workflow controller is installed
+  selector:
+    matchLabels:
+      app: argo-argo-workflows-workflow-controller  # matches the Argo Workflow controller service
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval | default "30s" }}
+  jobLabel: workflow-metrics
