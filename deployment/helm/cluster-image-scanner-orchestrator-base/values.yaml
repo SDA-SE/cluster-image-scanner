@@ -345,6 +345,5 @@ smtp:
   smtpEnforceMailTo: ""
 
 serviceMonitor:
-  deploy: false
-  enabled: true
+  enabled: false
   interval: "30s"
