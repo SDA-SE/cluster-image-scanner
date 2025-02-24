@@ -1,3 +1,4 @@
+{{- if .Values.serviceMonitor.deploy }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -18,3 +19,4 @@ spec:
       path: /metrics
       interval: {{ .Values.serviceMonitor.interval | default "30s" }}
   jobLabel: workflow-metrics
+{{- end }}
