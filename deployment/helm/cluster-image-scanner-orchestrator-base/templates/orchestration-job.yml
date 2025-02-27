@@ -76,6 +76,19 @@ spec:
             template: cleanup-dependency-track
 
     - name: fetch-image-list
+      metrics:
+        prometheus:
+          - name: fetch_image_list_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the fetch-image-list"
+            counter:
+              value: "1"
       outputs:
         artifacts:
           - name: image-lists
@@ -177,6 +190,19 @@ spec:
             value: "true" # TODO false
 
     - name: notify-teams
+      metrics:
+        prometheus:
+          - name: notify_teams_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the notify-teams"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -481,6 +507,19 @@ spec:
           echo "${errors}"
 
     - name: generate-lifetime-statistics
+      metrics:
+        prometheus:
+          - name: generate_lifetime_statistics_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the generate-lifetime-statistics"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -631,6 +670,19 @@ spec:
 
 
     - name: generate-response-statistics
+      metrics:
+        prometheus:
+          - name: generate_response_statistics_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the generate-response-statistics"
+            counter:
+              value: "1"
       outputs:
         artifacts:
           - name: team-statistics
@@ -658,6 +710,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.defectDojoConfigMapName {{ "}}" }}"
 
     - name: git-upload-response-statistics
+      metrics:
+        prometheus:
+          - name: git_upload_response_statistics_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the git-upload-response-statistics"
+            counter:
+              value: "1"
       volumes:
         - name: "{{ "{{" }} workflow.parameters.gitSecretName {{ "}}" }}"
           secret:
@@ -730,6 +795,19 @@ spec:
 
 
     - name: cleanup-dependency-track
+      metrics:
+        prometheus:
+          - name: cleanup_dt_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{status}}"
+            help: "Count of executions in the cleanup-dependency-track"
+            counter:
+              value: "1"
       volumes:
         - name: tmp
           emptyDir: { }
