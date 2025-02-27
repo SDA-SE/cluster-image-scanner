@@ -15,8 +15,6 @@ spec:
         value: "{{ workflow.name }}"
       - key: workflow_namespace
         value: "{{ workflow.namespace }}"
-      - key: workflow_template
-        value: "{{ workflow.labels['workflows.argoproj.io/workflow-template'] }}"
     - name: workflow_duration_seconds
       gauge:
         value: "{{ workflow.duration }}"
