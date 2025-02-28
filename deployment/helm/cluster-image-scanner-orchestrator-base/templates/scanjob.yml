@@ -4,6 +4,21 @@ metadata:
   name: scan-image-job-template
   namespace: {{ .Release.Namespace }}
 spec:
+  metrics:
+    prometheus:
+    - name: workflow_failed_steps
+      gauge:
+        value: "{{ workflow.failures }}"
+      help: "Count of failed steps in workflow"
+      labels:
+      - key: workflow_name
+        value: "{{ workflow.name }}"
+      - key: workflow_namespace
+        value: "{{ workflow.namespace }}"
+    - name: workflow_duration_seconds
+      gauge:
+        value: "{{ workflow.duration }}"
+      help: "Workflow execution duration in seconds"
   onExit: exit-handler
   activeDeadlineSeconds: {{ .Values.scanjob.activeDeadlineSeconds }}
   artifactRepositoryRef:
@@ -134,6 +149,19 @@ spec:
                   optional: true
 
     - name: imagefetcher
+      metrics:
+        prometheus:
+          - name: imagefetcher_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the imagefetcher and status"
+            counter:
+              value: "1"
       volumes:
         - name: images
           persistentVolumeClaim:
@@ -367,6 +395,19 @@ spec:
 
 
     - name: sbom-generation
+      metrics:
+        prometheus:
+          - name: sbom-generation_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the sbom-generation and status"
+            counter:
+              value: "1"
       volumes:
         - name: images
           persistentVolumeClaim:
@@ -411,6 +452,19 @@ spec:
             subPath: "results/{{ "{{" }} workflow.parameters.image_id {{ "}}" }}/sbom"
 
     - name: dtrack
+      metrics:
+        prometheus:
+          - name: dtrack_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the dtrack and status"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -591,6 +645,19 @@ spec:
           fi
 
     - name: dtrack-notify-thresholds
+      metrics:
+        prometheus:
+          - name: dtrack-notify-thresholds_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the dtrack-notify-thresholds and status"
+            counter:
+              value: "1"
       volumes:
         - name: tmp
           emptyDir: { }
@@ -650,6 +717,19 @@ spec:
           echo "${CONTENT}"
 
     - name: dtrack-dd-upload
+      metrics:
+        prometheus:
+          - name: dtrack-dd-upload_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the dtrack-dd-upload and status"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -717,6 +797,19 @@ spec:
             value: "{{ "{{" }} inputs.parameters.dependency-track-notification-alerts{{ "}}" }}"
 
     - name: distroless
+      metrics:
+        prometheus:
+          - name: distroless_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the distroless and status"
+            counter:
+              value: "1"
       volumes:
         - name: images
           persistentVolumeClaim:
@@ -755,6 +848,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: lifetime
+      metrics:
+        prometheus:
+          - name: lifetime_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the lifetime and status"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -794,6 +900,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: base-lifetime
+      metrics:
+        prometheus:
+          - name: base-lifetime_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the base-lifetime and status"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -848,6 +967,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: runasroot
+      metrics:
+        prometheus:
+          - name: runasroot_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the runasroot and status"
+            counter:
+              value: "1"
       volumes:
         - name: registry-creds
           secret:
@@ -885,6 +1017,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: new-version
+      metrics:
+        prometheus:
+          - name: new-version_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the new-version and status"
+            counter:
+              value: "1"
       volumes:
         - name: registry-creds
           secret:
@@ -926,6 +1071,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: malware
+      metrics:
+        prometheus:
+          - name: malware_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the malware and status"
+            counter:
+              value: "1"
       volumes:
         - name: images
           persistentVolumeClaim:
@@ -973,6 +1131,19 @@ spec:
               name: "{{ "{{" }} workflow.parameters.scanjobEnvParameter{{ "}}" }}"
 
     - name: col-gen-finds
+      metrics:
+        prometheus:
+          - name: col-gen-finds_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the col-gen-finds and status"
+            counter:
+              value: "1"
       volumes:
         - name: scandata
           persistentVolumeClaim:
@@ -1110,6 +1281,19 @@ spec:
 
 
     - name: gen-dd-upload
+      metrics:
+        prometheus:
+          - name: gen-dd-upload_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the gen-dd-upload and status"
+            counter:
+              value: "1"
       inputs:
         artifacts:
           - name: results-generic-findings
@@ -1169,6 +1353,19 @@ spec:
             mountPath: /tmp
 
     - name: aggregate
+      metrics:
+        prometheus:
+          - name: aggregate_status
+            labels:
+              - key: workflow_name
+                value: "{{workflow.name}}"
+              - key: workflow_namespace
+                value: "{{workflow.namespace}}"
+              - key: status
+                value: "{{ status }}"
+            help: "Count of executions of the aggregate and status"
+            counter:
+              value: "1"
       inputs:
         artifacts:
           - name: results-dd-generic-test-link
