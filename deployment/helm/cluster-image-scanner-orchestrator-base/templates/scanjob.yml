@@ -17,7 +17,7 @@ spec:
         value: "{{ "{{ workflow.namespace }}" }}"
     - name: workflow_duration_seconds
       gauge:
-        value: "{{ workflow.duration }}"
+        value: "{{ "{{ workflow.duration }}" }}"
       help: "Workflow execution duration in seconds"
   onExit: exit-handler
   activeDeadlineSeconds: {{ .Values.scanjob.activeDeadlineSeconds }}
