@@ -29,7 +29,7 @@ function testNewImageAndReport {
   if [ -z "$JSON" ]; then
     echo "JSON generation with base data failed"
     exit 1
-  else 
+  else
     echo "$JSON" > "$JSONFILE"
   fi
 
@@ -86,4 +86,3 @@ echo "result file:"
 cat "$JSONFILE"
 
 exit  0
-

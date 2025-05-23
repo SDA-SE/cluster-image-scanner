@@ -8,13 +8,13 @@ spec:
     prometheus:
     - name: workflow_failed_steps
       gauge:
-        value: {{"{{workflow.failures}}"}} 
+        value: {{"{{workflow.failures}}"}}
       help: "Count of failed steps in workflow"
       labels:
       - key: workflow_name
-        value: {{"{{workflow.name}}"}} 
+        value: {{"{{workflow.name}}"}}
       - key: workflow_namespace
-        value: {{"{{workflow.namespace}}"}} 
+        value: {{"{{workflow.namespace}}"}}
     - name: workflow_duration_seconds
       gauge:
         value: {{"{{workflow.duration}}"}}
@@ -154,11 +154,11 @@ spec:
           - name: imagefetcher_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
-                value: {{"{{status}}"}} 
+                value: {{"{{status}}"}}
             help: "Count of executions of the imagefetcher and status"
             counter:
               value: "1"
@@ -400,9 +400,9 @@ spec:
           - name: sbom-generation_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the sbom-generation and status"
@@ -455,9 +455,9 @@ spec:
           - name: dtrack_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the dtrack and status"
@@ -648,9 +648,9 @@ spec:
           - name: dtrack-notify-thresholds_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the dtrack-notify-thresholds and status"
@@ -720,9 +720,9 @@ spec:
           - name: dtrack-dd-upload_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the dtrack-dd-upload and status"
@@ -800,9 +800,9 @@ spec:
           - name: distroless_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the distroless and status"
@@ -851,9 +851,9 @@ spec:
           - name: lifetime_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the lifetime and status"
@@ -903,9 +903,9 @@ spec:
           - name: base-lifetime_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the base-lifetime and status"
@@ -970,9 +970,9 @@ spec:
           - name: runasroot_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the runasroot and status"
@@ -1020,9 +1020,9 @@ spec:
           - name: new-version_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the new-version and status"
@@ -1074,9 +1074,9 @@ spec:
           - name: malware_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the malware and status"
@@ -1134,9 +1134,9 @@ spec:
           - name: col-gen-finds_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the col-gen-finds and status"
@@ -1284,9 +1284,9 @@ spec:
           - name: gen-dd-upload_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the gen-dd-upload and status"
@@ -1356,9 +1356,9 @@ spec:
           - name: aggregate_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}} 
+                value: {{"{{workflow.name}}"}}
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}} 
+                value: {{"{{workflow.namespace}}"}}
               - key: status
                 value: {{"{{status}}"}}
             help: "Count of executions of the aggregate and status"

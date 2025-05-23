@@ -15,7 +15,7 @@ data:
             {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"},
             {"namespace_filter": "kube-", "description": "kube-system is the namespace for objects created by the Kubernetes system, containing services which are needed to run Kubernetes"},
             {"namespace_filter": "minio", "description": "minio to store workflow artifacts"}
-    
+
           ],
           "configurations": {
             "skip": "true",
@@ -32,9 +32,3 @@ data:
         }
       ]
     }
-
-
-
-
-
-

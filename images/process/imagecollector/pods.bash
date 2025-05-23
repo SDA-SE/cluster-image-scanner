@@ -402,4 +402,3 @@ getPods() {
     jq 'unique | sort_by(.image, .namespace)' "${IMAGE_JSON_FILE}" > "${IMAGE_JSON_FILE}.tmp"
     mv "${IMAGE_JSON_FILE}.tmp" "${IMAGE_JSON_FILE}"
 }
-

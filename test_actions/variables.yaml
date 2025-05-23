@@ -32,4 +32,3 @@ isLocal: true
 smtp:
   smtpMailParameter: "" # e.g. -v for debugging
   smtpEnforceMailTo: ""
-

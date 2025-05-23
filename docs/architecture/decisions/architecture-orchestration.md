@@ -35,10 +35,10 @@ Cons:
 ![image](images/orchestrate_containers.png)
 
 ### Approach B: Kafka Job Queue
-This Approach is about building a Job-Generator that will be started by a CronJob that would evaluate what work have to be done on what image, by a general 
-configuration file and aspecific CSV-file extracted from a specific git-repository. After evaluation of what jobs have to be done, it will provide the 
+This Approach is about building a Job-Generator that will be started by a CronJob that would evaluate what work have to be done on what image, by a general
+configuration file and aspecific CSV-file extracted from a specific git-repository. After evaluation of what jobs have to be done, it will provide the
 images to the PV and put a work-message to a specific Kafka queue.
-All scanners will be permanently deployed by deployment with an attached Horizontal Pod Autoscaler that monitors the CPU-utilization and scales the 
+All scanners will be permanently deployed by deployment with an attached Horizontal Pod Autoscaler that monitors the CPU-utilization and scales the
 amount of parallel scanners accordingly to the utilization between a minimum and a maximum of parallel workers.
 There will be a job queue for every known scanner-type and the auto-scaled scanners will take one job from the queue, process the job and put the result
 back onto another queue to be processed further.

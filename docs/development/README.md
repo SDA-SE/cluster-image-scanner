@@ -2,7 +2,7 @@
 ## Project Structure
 For each component (different scanner, orchestrator, ...) one repository is created.
 They follow the naming convention _clusterscanner-\<component\>[-\<name\>]_.
-For example: 
+For example:
 * clusterscanner-orchestrator
 * clusterscanner-scan-malware
 

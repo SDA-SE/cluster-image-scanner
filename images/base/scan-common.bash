@@ -104,11 +104,11 @@ function add_json_field {
   local -r json=${3:?"${0}(): ERROR: Missing input"}
   local    parent="${4:-nil}"
 
-  if [ -z "${json}" ]; then 
+  if [ -z "${json}" ]; then
     >&2 echo "${0}(): ERROR: missing input JSON"
     return 1
   fi
-  
+
   if ! jq <<< "$json" &>/dev/null; then
     >&2 echo "${0}(): ERROR: input is not valid JSON"
     return 1
@@ -116,10 +116,10 @@ function add_json_field {
 
   if [ "${parent}" != "nil" ]; then
     parent=".${parent}"
-  else 
+  else
     parent=''
   fi
-  
+
   selector=".findings[]${parent}.${field}"
 
   if ! jq -e "$selector" <<< "$json" >> /dev/null; then
@@ -162,7 +162,7 @@ function safe_write_to_file {
   tmpfile=$(mktemp)
 
   if ! echo "$json" > "$tmpfile"; then
-    >&2 echo "${0}(): ERROR: cannot write to $tmpfile" 
+    >&2 echo "${0}(): ERROR: cannot write to $tmpfile"
   fi
   mv "$tmpfile" "$file"
   rm "$tmpfile"
@@ -173,15 +173,15 @@ function safe_write_to_file {
 ##
 #  Will convert a size unit that can be passed to clamscan to its value in bytes
 #  valid units can be K, and M for kilobytes and megabytes, respectively.
-# 
-#  returns a byte value for input like 40M or 400K, or the input unchanged if 
-#  the unit is not M or K. 
+#
+#  returns a byte value for input like 40M or 400K, or the input unchanged if
+#  the unit is not M or K.
 ##
 function size2bytes {
   local size="$1"
   local unit="${size: -1}"
   local num="${size%?}"
-  
+
   case "$unit" in
     M)
       echo "$((num * 1024 * 1024))"
@@ -197,7 +197,7 @@ function size2bytes {
 
 ##
 #  Will return a size in kilobytes for any input in bytes.
-#  Kilobyte sizes are ceil'd to resemble block size on a disk 
+#  Kilobyte sizes are ceil'd to resemble block size on a disk
 ##
 function b2kb {
   echo $((($1+1024-1)/1024))

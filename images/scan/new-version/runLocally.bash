@@ -8,4 +8,3 @@ export IMAGE=quay.io/sdase/cluster-image-scanner-test-image:2.0.22
 export IMAGE_SCAN_POSITIVE_FILTER="quay.io/sdase/|dexidp/dex"
 
 docker run -v $(pwd)/module.bash:/clusterscanner/module.bash --env "IMAGE=${IMAGE}" -ti quay.io/sdase/cluster-image-scanner-scan-new-version:2
-

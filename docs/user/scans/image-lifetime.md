@@ -2,7 +2,7 @@
 The image lifetime scan has the implication that the respective container image should only run for a certain period of time (e.g. 5 days) in the cluster, otherwise libraries contained in the image might be outdated.
 
 ## Relevance
-The lifetime scan is used as an indicator for missing patch management. So that no image runs too long without updated components being included in the images. 
+The lifetime scan is used as an indicator for missing patch management. So that no image runs too long without updated components being included in the images.
 By using an update to date base image, it minimizes the potential vulnerabilities, since a newly build image is up to date with the latest software components.
 
 Container images consists of:

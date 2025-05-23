@@ -77,4 +77,3 @@ spec:
 
   workflowTemplateRef:
     name: scan-image-job-template
-

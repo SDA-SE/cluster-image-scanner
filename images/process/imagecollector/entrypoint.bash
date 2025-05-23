@@ -41,5 +41,3 @@ git rm imagesAndCluster.json || true
 
 git commit -m "update lastscan" lastScan  || true
 git push -f origin master || true
-
-

@@ -8,7 +8,7 @@ Two strcutures are evaluated:
 ## Grouped by organizations' product:
 ### Structure
 * Product, <cluster> | <kubernetes.io/name> e.g. two-towers
-  * Engagement, <ScanType> | <image without tag>, e.g. Dependency Track | quay.io/sdase/cluster-image-scanner-base 
+  * Engagement, <ScanType> | <image without tag>, e.g. Dependency Track | quay.io/sdase/cluster-image-scanner-base
     * Test,  <date> | <imageTag> | (<ScanType>),   	2022-12-04 21:21:49 | 2cbc6c9.47 (Dependency Track Import)
 
 ### Pro

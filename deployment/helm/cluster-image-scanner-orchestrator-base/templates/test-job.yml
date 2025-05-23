@@ -52,4 +52,3 @@ spec:
               name: "scanjob-env-parameter"
           - secretRef:
               name: "{{ "{{" }} workflow.parameters.defectDojoConfigMapName {{ "}}" }}"
-

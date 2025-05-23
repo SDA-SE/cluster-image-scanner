@@ -32,4 +32,3 @@ spec:
         image: "{{ "{{" }}workflow.parameters.imageRegistryBase {{ "}}" }}/cluster-image-scanner-base:{{ "{{" }} workflow.parameters.clusterImageScannerImageTag {{ "}}" }}"
         imagePullPolicy: IfNotPresent
         source: |
-          

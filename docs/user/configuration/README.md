@@ -30,7 +30,7 @@ clusterscanner.sdase.org/negated_namespace_filter: "\\-pr\\-" # one \ is needed 
 scm.sdase.org/source_branch: "feature/foobar" # String, correspondinig source code management branch name
 scm.sdase.org/source_url: "https://github.com/ring-calling-service" # String, source repository (mostly with a _Dockerfile_/_build.sh_)
 scm.sdase.org/release: "1.0.0" # String, see also labels, defaults to the image tag
-  
+
 # Adjust scans on object or namespace
 clusterscanner.sdase.org/is-scan-baseimage-lifetime: "true" # Boolean
 clusterscanner.sdase.org/is-scan-lifetime: "true" # Boolean
@@ -50,7 +50,7 @@ clusterscanner.sdase.org/max-lifetime: "14" # Number, max lifetime days for the 
 Additionally, the following **annotations** can be used at the namespace/pod:
 
 ```
-contact.sdase.org/slack: "#fellowship-security" 
+contact.sdase.org/slack: "#fellowship-security"
 app.kubernetes.io/name: "ring-calling-service" # defaults to image
 app.kubernetes.io/version: "3.42.0" # defaults to image tag
 ```
@@ -60,7 +60,7 @@ This is a recommended configuration including ISO 27001 asset catalog compliance
 
 ### Annotations
 ```
-contact.sdase.org/slack: "#fellowship-security" 
+contact.sdase.org/slack: "#fellowship-security"
 sdase.org/description: "My service description"
 scm.sdase.org/source_url="https://github.com/ring-calling-service"
 ```

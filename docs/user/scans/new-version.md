@@ -13,7 +13,7 @@ Usage the new image version.
 
 ### Acceptance
 Temporary acceptance, for example because the new version will be deployed in within the next spring, is an option.
-Do not accept this with for a too long time (or even forever). 
+Do not accept this with for a too long time (or even forever).
 
 ### False Positive
 If the result is a false positive, in addition to mark it as such in DefectDojo, please create an [Issue](https://github.com/SDA-SE/cluster-image-scanner/issues/new).

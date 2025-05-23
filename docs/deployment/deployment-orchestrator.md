@@ -17,7 +17,7 @@ Others:
 
 ### Manual deployment
 
-Add the helm repository: 
+Add the helm repository:
 ```shell
 helm repo add clusterscanner https://raw.githubusercontent.com/SDA-SE/cluster-image-scanner/gh-pages
 ```
@@ -26,7 +26,7 @@ helm install cluster-image-scanner-orchestrator-base clusterscanner-dev/cluster-
 ```
 No values need to be set for the base chart, but you might want to set some for tweaking purposes.
 
-For the main chart, create a new values file and set some basic mandatory values: 
+For the main chart, create a new values file and set some basic mandatory values:
 
 ```yaml
 api:
@@ -57,7 +57,7 @@ slack:
   cliToken: ""
 ```
 
-Then, install the chart with the given values: 
+Then, install the chart with the given values:
 
 ```shell
 helm install -f values.yaml cluster-image-scanner-orchestrator clusterscanner-dev/cluster-image-scanner-orchestrator
@@ -65,7 +65,7 @@ helm install -f values.yaml cluster-image-scanner-orchestrator clusterscanner-de
 
 ### Deployment via terraform
 
-You can use the helm charts mentioned above via terraform: 
+You can use the helm charts mentioned above via terraform:
 
 ```terraform
 resource "helm_release" "clusterscanner_orchestrator_base" {
@@ -75,9 +75,9 @@ resource "helm_release" "clusterscanner_orchestrator_base" {
   namespace   = var.namespace
   version     = "0.1.0"
   max_history = 5
-  # This is necessary because the chart creates an unmounted pvc. 
+  # This is necessary because the chart creates an unmounted pvc.
   # Without this, helm would wait for the pvc to be mounted, which will never happen
-  wait        = false 
+  wait        = false
   values = [
     # Put your values here
     yamlencode({})

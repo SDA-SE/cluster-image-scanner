@@ -44,7 +44,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-``` 
+```
 
 This worked and added the PV to our cluster. It is important to mention that the requested storage size has no effect to the provided volume. It currently not possible to restrict the NFS-PV with Kubernetes.
 
@@ -118,7 +118,7 @@ The following tests were applied to the containers
     kubectl exec -it main-pod -- bash -c "cat /nfs/write/test.file"
     > should succeed
 
-### Success :white_check_mark: 
+### Success :white_check_mark:
 
 All tests run as expected and therefore we can use this approach to transfer data between images while following the principle of least privileges.
 

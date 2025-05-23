@@ -13,10 +13,10 @@ The following figure provides an overview:
 The following steps are conducted.
 1. The Image Collector, as the name suggests, collects the different images from a container environment like a kubernetes cluster. The Collector creates a JSON file and including information like the cluster, the responsible team, and image.
 2. The Orchestrator (implemented via ArgoWorkflows) starts the workflow periodically (e.g. nightly)
-3. The images from the Collector can be pulled by the Image Fetcher 
+3. The images from the Collector can be pulled by the Image Fetcher
 4. These files are kept in a separate directory and from there they are passed to the scanner
 5. Multiple scanner are used, e.g. Dependency Track, Lifetime, Malware and further more.
-6. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results 
+6. The vulnerability management system (in our case [OWASP DefectDojo](https://github.com/DefectDojo/django-DefectDojo)) then collects the results
 7. Non responded to findings are made available to the developers via a communication channel (Slack/Email).
 
 ## Documentation Table of Contents
@@ -68,4 +68,4 @@ The purpose of the ClusterImageScanner is not to replace the penetration testers
 The ClusterImageScanner is to be used only for testing purpose of your running applications/containers. You need a written agreement of the organization of the _environment under scan_ to scan components with the ClusterScanner.
 
 # Author Information
-This project is developed by [Signal Iduna](https://www.signal-iduna.de) and [SDA SE](https://sda.se/). 
+This project is developed by [Signal Iduna](https://www.signal-iduna.de) and [SDA SE](https://sda.se/).

@@ -1,4 +1,4 @@
-# Scan Distroless 
+# Scan Distroless
 The distroless scan aims to ensure that the container image contains only the necessary parts. All other programs like shells, packet manager etc. have been removed.
 
 ## Relevance
@@ -18,4 +18,3 @@ As the risk owner of the application, you can accept the risks coming by the usa
 
 ### False Positive
 In case a shell is needed for the application and distroless is used, the finding can be marked as false positive.
-
