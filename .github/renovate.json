@@ -1,13 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
-  "labels": ["dependencies", "github-actions"],
+  "labels": [
+    "dependencies",
+    "github-actions"
+  ],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "timezone": "UTC",
-  "schedule": ["before 6am on monday"],
+  "schedule": [
+    "before 6am on monday"
+  ],
   "github-actions": {
     "enabled": true,
     "pinDigests": false,
@@ -30,17 +35,23 @@
   "packageRules": [
     {
       "description": "Group all GitHub Actions updates together",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions",
       "automerge": false,
       "commitMessageTopic": "GitHub Actions",
       "commitMessageExtra": "",
       "branchTopic": "github-actions-updates",
-      "schedule": ["before 6am on monday"]
+      "schedule": [
+        "before 6am on monday"
+      ]
     },
     {
       "description": "Auto-merge patch updates for trusted GitHub Actions",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "matchPackageNames": [
         "actions/checkout",
         "actions/setup-node",
@@ -49,44 +60,60 @@
         "actions/upload-artifact",
         "actions/download-artifact"
       ],
-      "matchUpdateTypes": ["patch"],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "automergeType": "pr"
     },
     {
       "description": "Convert GitHub Actions from hash to semantic versions",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "pinDigests": false,
       "separateMajorMinor": true,
       "separateMultipleMajor": true
     },
     {
       "description": "Handle major version updates for GitHub Actions separately",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["major"],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "groupName": "GitHub Actions (Major)",
       "automerge": false,
-      "labels": ["dependencies", "github-actions", "major-update"]
+      "labels": [
+        "dependencies",
+        "github-actions",
+        "major-update"
+      ]
     }
   ],
-  "ignoreDeps": [
-
-  ],
+  "ignoreDeps": [],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security", "dependencies"]
+    "labels": [
+      "security",
+      "dependencies"
+    ]
   },
   "osvVulnerabilityAlerts": true,
   "customManagers": [
     {
       "description": "Update GitHub Actions in composite actions",
       "customType": "regex",
-      "fileMatch": ["\\.yml$", "\\.yaml$"],
+      "managerFilePatterns": [
+        "/\\.yml$/",
+        "/\\.yaml$/"
+      ],
       "matchStrings": [
         "uses:\\s+(?<depName>[^@\\s]+)@(?<currentValue>[^\\s]+)"
       ],
       "datasourceTemplate": "github-tags",
-      "lookupNameTemplate": "{{depName}}"
+      "packageNameTemplate": "{{depName}}"
     }
   ],
   "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}",
