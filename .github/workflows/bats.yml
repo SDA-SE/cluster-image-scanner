@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
 
       - name: Install Bats and ClamAV
         run: sudo apt-get install -y clamav npm && sudo npm install -g bats
