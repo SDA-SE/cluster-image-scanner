@@ -66,9 +66,7 @@
       "matchUpdateTypes": ["major"],
       "groupName": "GitHub Actions (Major)",
       "automerge": false,
-      "labels": ["dependencies", "github-actions", "major-update"],
-      "reviewers": ["@your-team"],
-      "assignees": ["@your-username"]
+      "labels": ["dependencies", "github-actions", "major-update"]
     }
   ],
   "ignoreDeps": [
