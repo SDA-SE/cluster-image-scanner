@@ -8,16 +8,16 @@ spec:
     prometheus:
     - name: workflow_failed_steps
       gauge:
-        value: {{"{{workflow.failures}}"}}
+        value: "{{ "{{" }}workflow.failures{{ "}}" }}"
       help: "Count of failed steps in workflow"
       labels:
       - key: workflow_name
-        value: {{"{{workflow.name}}"}}
+        value: "{{ "{{" }}workflow.name{{ "}}" }}"
       - key: workflow_namespace
-        value: {{"{{workflow.namespace}}"}}
+        value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
     - name: workflow_duration_seconds
       gauge:
-        value: {{"{{workflow.duration}}"}}
+        value: "{{ "{{" }}workflow.duration{{ "}}" }}"
       help: "Workflow execution duration in seconds"
   onExit: exit-handler
   activeDeadlineSeconds: {{ .Values.orchestrationJob.activeDeadlineSeconds }}
@@ -81,11 +81,11 @@ spec:
           - name: fetch_image_list_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the fetch-image-list"
             counter:
               value: "1"
@@ -195,11 +195,11 @@ spec:
           - name: notify_teams_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the notify-teams"
             counter:
               value: "1"
@@ -512,11 +512,11 @@ spec:
           - name: generate_lifetime_statistics_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the generate-lifetime-statistics"
             counter:
               value: "1"
@@ -675,11 +675,11 @@ spec:
           - name: generate_response_statistics_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the generate-response-statistics"
             counter:
               value: "1"
@@ -715,11 +715,11 @@ spec:
           - name: git_upload_response_statistics_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the git-upload-response-statistics"
             counter:
               value: "1"
@@ -800,11 +800,11 @@ spec:
           - name: cleanup_dt_status
             labels:
               - key: workflow_name
-                value: {{"{{workflow.name}}"}}
+                value: "{{ "{{" }}workflow.name{{ "}}" }}"
               - key: workflow_namespace
-                value: {{"{{workflow.namespace}}"}}
+                value: "{{ "{{" }}workflow.namespace{{ "}}" }}"
               - key: status
-                value: {{"{{status}}"}}
+                value: "{{ "{{" }}status{{ "}}" }}"
             help: "Count of executions in the cleanup-dependency-track"
             counter:
               value: "1"
