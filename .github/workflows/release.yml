@@ -1,6 +1,7 @@
 name: Release Charts
 
 on:
+  workflow_dispatch: # for manual release
   push:
     branches:
       - master
