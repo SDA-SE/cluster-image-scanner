@@ -291,7 +291,8 @@ spec:
           unpack_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           config_dir=$(mktemp -d --tmpdir="${tmp_dir}")
           skopeo_tmp_dir=$(mktemp -d --tmpdir="${tmp_dir}")
-          SKOPEO_COPY_PARAMETER="--tmpdir ${skopeo_tmp_dir} ${SKOPEO_COPY_PARAMETER}"
+          SKOPEO_COPY_PARAMETER="--dest-cert-dir /etc/ssl/certs --src-cert-dir /etc/ssl/certs --tmpdir ${skopeo_tmp_dir} ${SKOPEO_COPY_PARAMETER}"
+          SKOPEO_INSPECT_PARAMETER="--cert-dir /etc/ssl/certs"
           mkdir -p "${image_copy_dir}" "${config_dir}" "${unpack_dir}" "${skopeo_tmp_dir}"
           echo "Directory /run/containers"
           ls -lah /run/containers
