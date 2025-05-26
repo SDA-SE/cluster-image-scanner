@@ -397,7 +397,7 @@ spec:
     - name: sbom-generation
       metrics:
         prometheus:
-          - name: sbom-generation_status
+          - name: sbom_generation_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
