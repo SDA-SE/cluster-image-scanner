@@ -645,7 +645,7 @@ spec:
     - name: dtrack-notify-thresholds
       metrics:
         prometheus:
-          - name: dtrack-notify-thresholds_status
+          - name: dtrack_notify_thresholds_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
@@ -717,7 +717,7 @@ spec:
     - name: dtrack-dd-upload
       metrics:
         prometheus:
-          - name: dtrack-dd-upload_status
+          - name: dtrack_dd_upload_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
@@ -900,7 +900,7 @@ spec:
     - name: base-lifetime
       metrics:
         prometheus:
-          - name: base-lifetime_status
+          - name: base_lifetime_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
@@ -1017,7 +1017,7 @@ spec:
     - name: new-version
       metrics:
         prometheus:
-          - name: new-version_status
+          - name: new_version_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
@@ -1131,7 +1131,7 @@ spec:
     - name: col-gen-finds
       metrics:
         prometheus:
-          - name: col-gen-finds_status
+          - name: col_gen_finds_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
@@ -1281,7 +1281,7 @@ spec:
     - name: gen-dd-upload
       metrics:
         prometheus:
-          - name: gen-dd-upload_status
+          - name: gen_dd_upload_status
             labels:
               - key: workflow_name
                 value: {{"{{workflow.name}}"}}
