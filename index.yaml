@@ -3,6 +3,16 @@ entries:
   cluster-image-scanner-orchestrator:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-05-27T10:13:43.37099291Z"
+    description: A chart that deploys the image metadata orchestrator.
+    digest: 86c5642d30352a0530480a7c8cfc52167d32ab20dbf675b7a9fc8cde498d0257
+    name: cluster-image-scanner-orchestrator
+    type: application
+    urls:
+    - https://github.com/SDA-SE/cluster-image-scanner/releases/download/cluster-image-scanner-orchestrator-0.1.5/cluster-image-scanner-orchestrator-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-05-26T17:47:47.941024162Z"
     description: A chart that deploys the image metadata orchestrator.
     digest: 81a6b3392b5d2a918d85e0164df4add85366147d084a2d5bc6f3fd2d2232a564
@@ -130,4 +140,4 @@ entries:
     urls:
     - https://github.com/SDA-SE/cluster-image-scanner/releases/download/image-metadata-orchestrator-base-0.1.0/image-metadata-orchestrator-base-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-26T17:47:48.054194384Z"
+generated: "2025-05-27T10:13:43.371027785Z"
