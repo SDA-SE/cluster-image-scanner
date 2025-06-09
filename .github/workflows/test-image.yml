@@ -19,7 +19,7 @@ jobs:
 #      (needs.build_image_base.result == 'skipped' && needs.changes.outputs.notifier == 'true')) &&
 #      ! (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork))
     steps:
-      - uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+      - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - uses: ./.github/actions/build_image
         with:
           image-path: images/process/test-image
